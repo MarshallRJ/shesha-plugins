@@ -21,7 +21,7 @@ namespace {ModuleNamespace}.Domain.Migrations
             Create.Table("{Prefix}_{WorkflowName}Workflows")
                 .WithIdAsGuid()
                 .WithFullAuditColumns()
-                .WithForeignKeyColumn("ModelId", "{ModelTableName}");
+                .WithForeignKeyColumn("ModelId", "{ModelTableName}").Nullable();
 
             Create.Table("{Prefix}_{WorkflowName}WorkflowDefinitions")
                 .WithIdAsGuid();
@@ -53,7 +53,19 @@ namespace {ModuleNamespace}.Domain.Migrations
 - Definition table only needs `.WithIdAsGuid()`
 - Both tables MUST have FKs to the `workflow` schema
 - FK naming: `fk_{Prefix}_{Name}Workflows_wf_inst` and `fk_{Prefix}_{Name}WorkflowDefinitions_config_item`
-- Module prefixes: `SaGov_`, `Leave_`, `Pmds_`, `Hcm_`
+- Module prefixes: `SaGov_`, `Leave_`, `Pmds_`, `Hcm_`, `LB_`
+
+**With multiple FK columns** (when the workflow instance references more than one entity — e.g. PartOf + Model):
+
+```csharp
+Create.Table("{Prefix}_{WorkflowName}Workflows")
+    .WithIdAsGuid()
+    .WithFullAuditColumns()
+    .WithForeignKeyColumn("PartOfId", "{OwnerTableName}").Nullable()
+    .WithForeignKeyColumn("ModelId", "{ModelTableName}").Nullable();
+```
+
+Chain additional `.WithForeignKeyColumn(...)` calls for each FK. Mark all nullable unless the relationship is mandatory at creation time.
 
 ## (b) Instance with extra columns
 
@@ -181,6 +193,26 @@ namespace {ModuleNamespace}.Domain.Migrations
     }
 }
 ```
+
+**With conditional column existence check** (safe to re-run; guards against duplicate additions when migrations may have been applied manually or out of order):
+
+```csharp
+[Migration({YYYYMMDDHHmmss})]
+public class M{YYYYMMDDHHmmss} : OneWayMigration
+{
+    public override void Up()
+    {
+        if (!Schema.Table("{Prefix}_{WorkflowName}Workflows").Column("{FirstColumnId}").Exists())
+        {
+            Alter.Table("{Prefix}_{WorkflowName}Workflows")
+                .AddForeignKeyColumn("{FirstColumnId}", "{FirstRefTable}").Nullable()
+                .AddForeignKeyColumn("{SecondColumnId}", "{SecondRefTable}").Nullable();
+        }
+    }
+}
+```
+
+Check only the **first** column being added — if it already exists the entire block is skipped. Use this pattern when adding multiple FK columns in a single follow-up migration.
 
 ## Column type mapping
 

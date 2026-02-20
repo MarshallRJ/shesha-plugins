@@ -55,13 +55,23 @@ Generate workflow artifacts for a Shesha/.NET/ABP/NHibernate application based o
 
 | Artifact | Base Class |
 |----------|-----------|
-| Workflow Instance | `WorkflowInstanceWithTypedDefinition<TDefinition>` |
+| Workflow Instance | `WorkflowInstanceWithTypedDefinition<TDefinition>` (`Shesha.Workflow.Domain`) |
 | Workflow Definition | `WorkflowDefinition` |
 | Workflow Manager | `DomainService` |
 | Service Task | `AsyncServiceTask<TWorkflow>` + `ITransientDependency` |
 | Generic Base Task | `AsyncServiceTask<TWorkflow> where TWorkflow : WorkflowInstance` |
-| Extension Methods | `static class` extending `WorkflowInstance` |
+| Gateway condition ext. | `static class` on `WorkflowInstance` → returns `bool` |
+| Action ext. methods | `static class` on typed `{WorkflowName}Workflow` → returns `Task` |
 | DB Migration | `Migration` or `OneWayMigration` |
+
+### Key dependencies
+
+| Interface | Namespace | Use |
+|-----------|-----------|-----|
+| `IWfRunArguments` | `Shesha.Workflow.Services` | Service task `ExecuteAsync` parameter |
+| `IWorkflowInstanceRepository` | `Shesha.Workflow.Helpers` | Manager manual instance creation |
+| `IProcessDomainService` | `Shesha.Workflow.DomainServices` | Complete user tasks |
+| `ILogger<T>` | `Microsoft.Extensions.Logging` | Structured logging in service tasks |
 
 ### Key attributes
 
@@ -73,6 +83,19 @@ Generate workflow artifacts for a Shesha/.NET/ABP/NHibernate application based o
 | `[DiscriminatorValue("slug")]` | Definition |
 | `[Display(Name, Description)]` | Definition, Service Task |
 | `[Migration(YYYYMMDDHHmmss)]` | Migration class |
+
+### Service task method signature
+
+```csharp
+// CORRECT — returns Task<bool>; workflow passed directly
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
+{
+    // ... logic ...
+    await _workflowRepository.UpdateAsync(workflow);
+    return true;
+}
+// IWfRunArguments from Shesha.Workflow.Services
+```
 
 ### Common patterns
 
@@ -90,6 +113,12 @@ workflow.Model.Status = ({RefListStatusEnum}?)workflow.SubStatus;
 **Resolve dependency in extension methods:**
 ```csharp
 var repo = IocManager.Instance.Resolve<IRepository<{Entity}, Guid>>();
+```
+
+**Check definition config in a service task:**
+```csharp
+if (workflow.Definition?.{ConfigFlag} != true)
+    return true; // feature disabled — skip silently
 ```
 
 **Complete a user task programmatically:**
@@ -110,6 +139,6 @@ await _processDomainService.CompleteUserTaskAsync(args);
 | Instance | `{Prefix}_{WorkflowName}Workflows` | `workflow.workflow_instances` |
 | Definition | `{Prefix}_{WorkflowName}WorkflowDefinitions` | `workflow.workflow_definitions` |
 
-Module prefixes: `SaGov_`, `Leave_`, `Pmds_`, `Hcm_`
+Module prefixes: `SaGov_`, `Leave_`, `Pmds_`, `Hcm_`, `LB_`
 
 Now generate the requested workflow artifact(s) based on: $ARGUMENTS

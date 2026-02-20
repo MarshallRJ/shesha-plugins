@@ -9,7 +9,9 @@ A single automated step in a workflow. The engine instantiates and executes it w
 ```csharp
 using Abp.Dependency;
 using Abp.Domain.Repositories;
-using Shesha.Workflow.Tasks;
+using Microsoft.Extensions.Logging;
+using Shesha.Workflow.Domain;
+using Shesha.Workflow.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
@@ -21,67 +23,75 @@ namespace {ModuleNamespace}.Application.Workflows.{WorkflowNamePlural}
     public class {TaskName}ServiceTask : AsyncServiceTask<{WorkflowName}Workflow>, ITransientDependency
     {
         private readonly IRepository<{WorkflowName}Workflow, Guid> _workflowRepository;
+        private readonly ILogger<{TaskName}ServiceTask> _logger;
 
         public {TaskName}ServiceTask(
-            IRepository<{WorkflowName}Workflow, Guid> workflowRepository)
+            IRepository<{WorkflowName}Workflow, Guid> workflowRepository,
+            ILogger<{TaskName}ServiceTask> logger)
         {
             _workflowRepository = workflowRepository;
+            _logger = logger;
         }
 
-        public override async Task RunAsync(ServiceTaskExecutionContext<{WorkflowName}Workflow> context)
+        public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
         {
-            var workflow = context.WorkflowInstance;
-
             // Task logic here
 
             await _workflowRepository.UpdateAsync(workflow);
+            return true;
         }
     }
 }
 ```
 
+**Key rules:**
+- Override `ExecuteAsync`, NOT `RunAsync` — return `Task<bool>` (`true` = success)
+- `IWfRunArguments` comes from `Shesha.Workflow.Services`
+- The workflow instance is passed directly — no `context.WorkflowInstance` indirection
+- Inject `ILogger<T>` for structured logging
+
 ### Common task patterns
 
 **(a) Update Model Status:**
 ```csharp
-public override async Task RunAsync(ServiceTaskExecutionContext<{WorkflowName}Workflow> context)
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
 {
-    var workflow = context.WorkflowInstance;
     RefreshWorkflow(workflow);
     workflow.Model.Status = ({RefListStatusEnum}?)workflow.SubStatus;
     await _workflowRepository.UpdateAsync(workflow);
+    return true;
 }
 ```
 
 **(b) Update Subject:**
 ```csharp
-public override async Task RunAsync(ServiceTaskExecutionContext<{WorkflowName}Workflow> context)
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
 {
-    var workflow = context.WorkflowInstance;
     RefreshWorkflow(workflow);
     if (workflow.Subject == null)
         workflow.Subject = await _workflowManager.CreateSubjectAsync(workflow.Id);
     await _workflowRepository.UpdateAsync(workflow);
+    return true;
 }
 ```
 
 **(c) Business Logic Delegation:**
 ```csharp
-public override async Task RunAsync(ServiceTaskExecutionContext<{WorkflowName}Workflow> context)
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
 {
-    var model = context.WorkflowInstance.Model
+    var model = workflow.Model
         ?? throw new InvalidOperationException("Workflow model is null");
     await _businessManager.ProcessAsync(model.Id);
+    return true;
 }
 ```
 
 **(d) Cross-Workflow Action:**
 ```csharp
-public override async Task RunAsync(ServiceTaskExecutionContext<{CancellationWorkflow}> context)
+public override async Task<bool> ExecuteAsync({CancellationWorkflow}Workflow workflow, IWfRunArguments wfRunArguments)
 {
-    var cancellationWorkflow = context.WorkflowInstance;
     var originalWorkflow = await _originalWorkflowRepository.GetAll()
-        .Where(w => w.Model.Id == cancellationWorkflow.Model.Parent.Id
+        .Where(w => w.Model.Id == workflow.Model.Parent.Id
                   && w.Model.RequestType == RefListRequestType.Application)
         .FirstOrDefaultAsync()
         ?? throw new ArgumentNullException("Original workflow not found");
@@ -89,26 +99,45 @@ public override async Task RunAsync(ServiceTaskExecutionContext<{CancellationWor
     await _manager.CancelAsync(originalWorkflow.Id);
     await _workflowManager.UpdateStatusesAsync(
         originalWorkflow.Id, RefListStatus.Cancelled, RefListStatus.Cancelled);
+    return true;
 }
 ```
 
-**(e) Conditional Logic:**
+**(e) With structured logging and error handling:**
 ```csharp
-public override async Task RunAsync(ServiceTaskExecutionContext<{CancellationWorkflow}> context)
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
 {
-    var workflow = context.WorkflowInstance;
-    var originalWorkflow = await FindOriginalWorkflowAsync(workflow);
+    try
+    {
+        _logger.LogInformation("Processing {ApplicationNumber}", workflow.Model?.ApplicationNumber ?? "Unknown");
 
-    if (originalWorkflow.Status == RefListWorkflowStatus.Completed)
-    {
-        originalWorkflow.Status = RefListWorkflowStatus.Cancelled;
-        await _workflowRepository.UpdateAsync(originalWorkflow);
-        await _unitOfWorkManager.Current.SaveChangesAsync();
+        // business logic
+
+        await _workflowRepository.UpdateAsync(workflow);
+        _logger.LogInformation("Completed successfully for {ApplicationNumber}", workflow.Model?.ApplicationNumber);
+        return true;
     }
-    else if (originalWorkflow.Status == RefListWorkflowStatus.InProgress)
+    catch (Exception ex)
     {
-        await _manager.SuspendAsync(originalWorkflow.Id);
+        _logger.LogError(ex, "Error processing {ApplicationNumber}", workflow.Model?.ApplicationNumber);
+        throw;
     }
+}
+```
+
+**(f) Check definition config before acting:**
+```csharp
+public override async Task<bool> ExecuteAsync({WorkflowName}Workflow workflow, IWfRunArguments wfRunArguments)
+{
+    if (workflow.Definition?.{ConfigFlag} != true)
+    {
+        _logger.LogInformation("{ConfigFlag} is disabled — skipping");
+        return true;
+    }
+
+    // conditional logic
+    await _workflowRepository.UpdateAsync(workflow);
+    return true;
 }
 ```
 
@@ -124,7 +153,7 @@ Abstract base for tasks sharing logic across multiple workflow types (Template M
 using Abp.Dependency;
 using Abp.Domain.Repositories;
 using Shesha.Workflow.Domain;
-using Shesha.Workflow.Tasks;
+using Shesha.Workflow.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -146,15 +175,15 @@ namespace {ModuleNamespace}.Application.Workflows.Common
 
         protected abstract {ModelEntity} GetModel(TWorkflow workflow);
 
-        public override async Task RunAsync(ServiceTaskExecutionContext<TWorkflow> context)
+        public override async Task<bool> ExecuteAsync(TWorkflow workflow, IWfRunArguments wfRunArguments)
         {
-            var model = GetModel(context.WorkflowInstance)
+            var model = GetModel(workflow)
                 ?? throw new InvalidOperationException(
-                    $"Model is null on workflow {context.WorkflowInstance.Id}");
+                    $"Model is null on workflow {workflow.Id}");
 
             // Shared business logic here
 
-            await Task.CompletedTask;
+            return true;
         }
     }
 }
@@ -192,7 +221,11 @@ namespace {ModuleNamespace}.Application.Workflows.{WorkflowNamePlural}
 
 **File:** `{WorkflowName}WorkflowExtensions.cs` in `Workflows/{WorkflowNamePlural}/`
 
-Static extension methods on `WorkflowInstance` used as gateway conditions in the workflow designer.
+Two patterns — choose based on use case.
+
+### (A) Gateway conditions — extend `WorkflowInstance`
+
+Used by the workflow engine for routing decisions. Must extend the base `WorkflowInstance` type.
 
 ```csharp
 using Abp.Dependency;
@@ -220,40 +253,80 @@ namespace {ModuleNamespace}.Application.Workflows.{WorkflowNamePlural}
             var relatedRepo = IocManager.Instance
                 .Resolve<IRepository<{RelatedEntity}, Guid>>();
 
-            var items = relatedRepo.GetAll()
+            return relatedRepo.GetAll()
                 .Where(x => x.PartOf != null && x.PartOf.Id == typedWorkflow.Model.Id)
-                .ToList();
+                .Any(x => /* condition logic */);
+        }
 
-            return items.Any(x => /* condition logic */);
+        // Checking definition configuration:
+        public static bool {ConfigFlag}(this WorkflowInstance workflow)
+        {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
+
+            var workflowRepo = IocManager.Instance
+                .Resolve<IRepository<{WorkflowName}Workflow, Guid>>();
+            var typedWorkflow = workflowRepo.FirstOrDefault(workflow.Id)
+                ?? throw new InvalidOperationException($"Workflow {workflow.Id} not found");
+
+            var definitionRepo = IocManager.Instance
+                .Resolve<IRepository<{WorkflowName}WorkflowDefinition, Guid>>();
+            var definition = definitionRepo.FirstOrDefault(typedWorkflow.WorkflowDefinition.Id);
+
+            return definition?.{ConfigFlag} ?? false;
         }
     }
 }
 ```
 
-**Checking definition configuration:**
+### (B) Action methods and state queries — extend typed workflow
+
+For programmatic use from service tasks, managers, or application services. Extends the specific workflow type directly.
 
 ```csharp
-public static bool {ConfigFlag}(this WorkflowInstance workflow)
+using Abp.Dependency;
+using Abp.Domain.Repositories;
+using System;
+using System.Threading.Tasks;
+
+namespace {ModuleNamespace}.Application.Workflows.{WorkflowNamePlural}
 {
-    if (workflow == null)
-        throw new ArgumentNullException(nameof(workflow));
+    public static class {WorkflowName}WorkflowExtensions
+    {
+        // State-mutating action (async)
+        public static async Task {ActionName}Async(this {WorkflowName}Workflow workflow, string reason = null)
+        {
+            var repo = IocManager.Instance.Resolve<IRepository<{WorkflowName}Workflow, Guid>>();
+            workflow.{StateProperty} = "{NewValue}";
+            workflow.{DateProperty} = DateTime.Now;
+            if (!string.IsNullOrEmpty(reason))
+                workflow.Notes = $"{workflow.Notes}\n\n{DateTime.Now:yyyy-MM-dd HH:mm}: {reason}".Trim();
+            await repo.UpdateAsync(workflow);
+        }
 
-    var workflowRepo = IocManager.Instance
-        .Resolve<IRepository<{WorkflowName}Workflow, Guid>>();
-    var typedWorkflow = workflowRepo.FirstOrDefault(workflow.Id)
-        ?? throw new InvalidOperationException($"Workflow {workflow.Id} not found");
+        // Derived state check (bool — can also be used as gateway condition on typed workflow)
+        public static bool {IsCondition}(this {WorkflowName}Workflow workflow)
+        {
+            if (!workflow.{DateProperty}.HasValue)
+                return false;
 
-    var definitionRepo = IocManager.Instance
-        .Resolve<IRepository<{WorkflowName}WorkflowDefinition, Guid>>();
-    var definition = definitionRepo.FirstOrDefault(typedWorkflow.WorkflowDefinition.Id);
+            var thresholdDays = workflow.Definition?.{ThresholdConfig} ?? {DefaultDays};
+            return DateTime.Now > workflow.{DateProperty}.Value.AddDays(thresholdDays);
+        }
 
-    return definition?.{ConfigFlag} ?? false;
+        // Computed value
+        public static int? {ComputedValue}(this {WorkflowName}Workflow workflow)
+        {
+            if (!workflow.{DateProperty}.HasValue)
+                return null;
+            return (workflow.{DateProperty}.Value - DateTime.Now).Days;
+        }
+    }
 }
 ```
 
 **Key rules:**
-- Extends `WorkflowInstance` (base type, not specific type) — required by the workflow engine
-- Uses `IocManager.Instance.Resolve<T>()` since extension methods cannot use constructor DI
-- Returns `bool` for gateway conditions
-- Must be defensive: null-check workflow/model, return false on missing data
-- Name as a question: `HasDisagreementInRatings`, `OriginalRequestWasSynchronized`
+- Gateway conditions (Pattern A): extend `WorkflowInstance`, return `bool`, use `IocManager.Instance.Resolve<T>()`, defensive null-checks returning `false`
+- Action methods (Pattern B): extend the typed workflow, return `Task`, use `IocManager.Instance.Resolve<T>()` for repos
+- Name boolean methods as questions: `IsConsentExpired`, `ShouldSendExpiryNotification`
+- Name action methods as verbs: `GrantConsentAsync`, `DeclineConsentAsync`, `CompleteVerificationAsync`
