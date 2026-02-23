@@ -16,6 +16,7 @@ This skill performs a coordinated upgrade of Shesha dependencies across your ent
 3. **Upgrade frontend** packages in `/adminportal` folder (using Shesha.Enterprise version)
 4. **Upgrade backend** packages in `/backend` folder (using Shesha.Core version)
 5. **Verify and report** all changes made
+6. **Build backend** and investigate any build errors
 
 ### Key Rules
 
@@ -84,30 +85,45 @@ Example: 37, 36, 35, etc. (or BoxStack-37, BoxStack-36, etc.)
 
 **Location:** `/adminportal` folder
 
-1. **Find all package.json files:**
-   - Main: `adminportal/package.json`
-   - Subprojects: `adminportal/packages/*/package.json` (if exists)
+1. **Find ALL package.json files using Glob tool:**
+   - **CRITICAL:** Use Glob to search for all package.json files, don't assume locations
+   - Search patterns to use:
+     - `adminportal/package.json` (main)
+     - `adminportal/packages/*/package.json` (monorepo subprojects)
+     - `adminportal/packages/*/*/package.json` (nested subprojects)
+   - **List all found files** before starting updates to ensure nothing is missed
+   - Common locations:
+     - Main: `adminportal/package.json`
+     - Subprojects: `adminportal/packages/app1/package.json`, `adminportal/packages/app2/package.json`, etc.
 
-2. **Update `@shesha-io/reactjs`:**
+2. **For EACH package.json file found, perform the following updates:**
+
+3. **Update `@shesha-io/reactjs`:**
    - Set to the Shesha.Enterprise version from CSV (Step 2)
    - Example: For BoxStack-37 with Shesha.Enterprise-5.0.14: `"@shesha-io/reactjs": "5.0.14"`
    - **Note:** `@shesha-io/reactjs` is the main frontend package (NOT `@shesha-io/enterprise`)
 
-3. **Update other `@shesha-io/*` packages in both `dependencies` AND `devDependencies`:**
+4. **Update other `@shesha-io/*` packages in both `dependencies` AND `devDependencies`:**
    - Find all dependencies starting with `@shesha-io/` in both sections
    - Update to the same Shesha.Enterprise version or compatible versions
    - **IMPORTANT:** Check BOTH `dependencies` and `devDependencies` sections
    - Check npm registry or use `npm view @shesha-io/{package} peerDependencies` if needed
 
-4. **Determine package manager:**
+5. **Verify all files were updated:**
+   - After updates, list all package.json files that were modified
+   - Ensure count matches the number found in step 1
+   - If any files were skipped, update them explicitly
+
+6. **Determine package manager:**
+   - Check in main `adminportal` directory
    - If `package-lock.json` exists → npm
    - If `yarn.lock` exists → yarn
    - If `pnpm-lock.yaml` exists → pnpm
 
-5. **Run update command** (after asking user for permission):
-   - npm: `npm install`
-   - yarn: `yarn install`
-   - pnpm: `pnpm install`
+7. **Run update command** (after asking user for permission):
+   - npm: `cd adminportal && npm install`
+   - yarn: `cd adminportal && yarn install`
+   - pnpm: `cd adminportal && pnpm install`
 
 **Packages to update (typical list):**
 - `@shesha-io/reactjs` (main frontend framework - use Shesha.Enterprise version)
@@ -115,7 +131,10 @@ Example: 37, 36, 35, etc. (or BoxStack-37, BoxStack-36, etc.)
 - `@shesha-io/pd-core`
 - Any other `@shesha-io/*` packages found in `dependencies` or `devDependencies` (update to compatible versions)
 
-**Note:** Always check BOTH `dependencies` and `devDependencies` sections for `@shesha-io/*` packages
+**Critical Notes:**
+- **Must update ALL package.json files**, including those in `adminportal/packages/` subdirectories
+- Always check BOTH `dependencies` and `devDependencies` sections for `@shesha-io/*` packages
+- Use Glob tool to discover all package.json files - don't rely on assumptions about structure
 
 ### Step 4: Upgrade Backend Dependencies
 
@@ -180,14 +199,17 @@ Example: 37, 36, 35, etc. (or BoxStack-37, BoxStack-36, etc.)
 After making changes:
 
 1. **List all files modified:**
-   - Frontend package.json files updated
-   - Backend directory.build.props updated
+   - **Frontend:** List ALL package.json files updated with their paths
+     - Example: Updated 3 files: `adminportal/package.json`, `adminportal/packages/app1/package.json`, `adminportal/packages/app2/package.json`
+   - **Backend:** List directory.build.props path
+   - **CRITICAL:** Verify the count matches the number found in Step 3
 
 2. **Show version changes:**
    - Before → After for each package
-   - **Frontend changes:**
+   - **Frontend changes (per file):**
      - `@shesha-io/reactjs: 5.0.13 → 5.0.14` (Shesha.Enterprise version)
      - Other `@shesha-io/*` packages updated in both `dependencies` and `devDependencies`
+     - Show file path for each set of changes
    - **Backend changes:**
      - `SheshaVersion: 0.43.24 → 0.43.25` (Shesha.Core version)
      - `Boxfusion.DevExpressReporting: 2.6.13 → 2.6.14` (if present)
@@ -198,7 +220,10 @@ After making changes:
 3. **Summary format:**
    ```
    Upgraded to BoxStack-37:
-   - Frontend: Shesha.Enterprise 5.0.14
+   - Frontend: Updated 3 package.json files to Shesha.Enterprise 5.0.14
+     - adminportal/package.json
+     - adminportal/packages/app1/package.json
+     - adminportal/packages/app2/package.json
    - Backend: Shesha.Core 0.43.25
    - Additional modules:
      - Boxfusion.DevExpressReporting 2.6.14
@@ -207,9 +232,65 @@ After making changes:
 
 4. **Recommend next steps:**
    - Run `npm install` (if not already run)
-   - Run `dotnet restore` in backend
-   - Test the application
+   - Continue to Step 6 to build and verify backend
+
+### Step 6: Build and Verify Backend
+
+After updating backend dependencies, build the solution to catch any breaking changes or compatibility issues.
+
+**Location:** `/backend` folder
+
+1. **Restore NuGet packages:**
+   ```bash
+   cd backend
+   dotnet restore
+   ```
+
+2. **Build the entire solution:**
+   ```bash
+   dotnet build
+   ```
+   - This will compile all projects in the solution
+   - Build output will show any compilation errors or warnings
+
+3. **Investigate build errors (if any occur):**
+
+   **Common error types after version upgrade:**
+
+   a. **Missing or obsolete APIs:**
+      - Error: "does not contain a definition for..."
+      - Error: "is obsolete"
+      - **Action:** Read the error message carefully
+      - Check Shesha/BoxStack release notes for breaking changes
+      - Update code to use new API patterns
+
+   b. **Namespace changes:**
+      - Error: "type or namespace name could not be found"
+      - **Action:** Add missing `using` statements or update namespace references
+
+   c. **Package version conflicts:**
+      - Warning: "Package X depends on Y >= Z"
+      - **Action:** Update related packages in `directory.build.props` to compatible versions
+
+   d. **Migration or configuration issues:**
+      - Errors in migration files or startup configuration
+      - **Action:** Review migration code and update to match new framework patterns
+
+4. **For each build error found:**
+   - Read the full error message and file path
+   - Use Read tool to examine the affected file
+   - Identify if it's a breaking change from the version upgrade
+   - Fix the issue or report it to the user with recommendations
+
+5. **Report build results:**
+   - If build succeeds: "✓ Backend build successful - no errors found"
+   - If build fails: List all errors with file paths and recommendations for fixes
+   - Show any warnings that might indicate potential issues
+
+6. **Final recommendations:**
+   - Test the application thoroughly
    - Review breaking changes in BoxStack/Shesha release notes
+   - Check if any database migrations need to be applied
 
 ## Quick Reference
 
@@ -218,13 +299,19 @@ After making changes:
 | File | Purpose | Pattern |
 |------|---------|---------|
 | `adminportal/package.json` | Main frontend dependencies and devDependencies | `@shesha-io/*` packages in both `dependencies` and `devDependencies` sections |
-| `adminportal/packages/*/package.json` | Monorepo subprojects | `@shesha-io/*` packages in both `dependencies` and `devDependencies` |
+| `adminportal/packages/*/package.json` | Monorepo subprojects (first level) | `@shesha-io/*` packages in both `dependencies` and `devDependencies` |
+| `adminportal/packages/*/*/package.json` | Nested subprojects (if exists) | `@shesha-io/*` packages in both `dependencies` and `devDependencies` |
 
-### Backend Files to Update
+**Important:** Use Glob tool with pattern `adminportal/**/package.json` to find ALL package.json files recursively.
+
+### Backend Files to Update and Verify
 
 | File | Purpose | Pattern |
 |------|---------|---------|
 | `backend/directory.build.props` | Centralized NuGet versions | `Shesha.*` with `$(SheshaVersion)`, `Boxfusion.*` with explicit versions |
+| `backend/*.sln` | Solution file for building | Used by `dotnet build` command |
+
+**Post-Update:** Backend solution must be built to verify compatibility and catch breaking changes.
 
 ### Version Property Patterns
 
@@ -281,9 +368,12 @@ Before proceeding:
 After upgrading:
 - [ ] Run `npm install` / `yarn install` in adminportal
 - [ ] Run `dotnet restore` in backend
-- [ ] Check for compilation errors
+- [ ] Run `dotnet build` in backend
+- [ ] Investigate and fix any compilation errors
+- [ ] Review breaking changes and update code as needed
 - [ ] Run tests if available
 - [ ] Verify `@shesha-io/reactjs` is properly installed
+- [ ] Verify backend builds successfully without errors
 
 ## Error Handling
 
@@ -305,6 +395,12 @@ After upgrading:
 **If package.json not found:**
 - Verify `/adminportal` path exists
 - Check if frontend is in different location
+- Use Glob tool to search for all package.json files: `**/package.json`
+
+**If subproject package.json files are missed:**
+- Use Glob tool with pattern: `adminportal/**/package.json` to find all files recursively
+- Verify each found file contains `@shesha-io/*` dependencies before updating
+- List all files that will be updated before making changes
 
 **If directory.build.props not found:**
 - Verify `/backend` path exists
@@ -315,6 +411,18 @@ After upgrading:
 - Check peer dependencies
 - Verify version compatibility
 - Suggest using exact versions instead of ranges
+
+**If backend build fails after upgrade:**
+- Carefully read all error messages and warnings
+- Identify which files have errors (use file paths from error messages)
+- Use Read tool to examine affected files
+- Common fixes:
+  - Update obsolete API calls to new patterns
+  - Add missing using statements
+  - Update configuration code to match new framework version
+  - Fix migration files if necessary
+- Check BoxStack/Shesha release notes for documented breaking changes
+- Report unresolved errors to user with context and recommendations
 
 ## Example Usage
 
@@ -328,18 +436,30 @@ After upgrading:
    - `Shesha.Enterprise-5.0.14`
    - `boxfusion.devexpressreporting-2.6.14`
    - `Boxfusion.PublicPortal-0.8.16`
-4. Update `adminportal/package.json`: `@shesha-io/reactjs: "5.0.14"`
-5. Update other `@shesha-io/*` packages to compatible versions
+4. Use Glob to find all frontend package.json files:
+   - `adminportal/package.json`
+   - `adminportal/packages/app1/package.json`
+   - `adminportal/packages/app2/package.json`
+   - (and any other subprojects)
+5. Update ALL found package.json files:
+   - `@shesha-io/reactjs: "5.0.14"`
+   - Other `@shesha-io/*` packages to compatible versions
+   - Update both `dependencies` and `devDependencies` sections
 6. Update `backend/directory.build.props`:
    - `<SheshaVersion>0.43.25</SheshaVersion>`
    - `Boxfusion.DevExpressReporting`: `2.6.14`
    - `Boxfusion.PublicPortal`: `0.8.16`
 7. Report changes:
-   - Frontend: Updated to Shesha.Enterprise 5.0.14
+   - Frontend: Updated 3 package.json files to Shesha.Enterprise 5.0.14
    - Backend: Updated to Shesha.Core 0.43.25
    - Boxfusion.DevExpressReporting: 2.6.14
    - Boxfusion.PublicPortal: 0.8.16
    - BoxStack version: 37
+8. Build backend:
+   - Run `dotnet restore` in `/backend`
+   - Run `dotnet build` in `/backend`
+   - If build errors occur, investigate and fix or report to user
+   - Report: "✓ Backend build successful" or list errors found
 
 ## Important Notes
 
@@ -353,7 +473,19 @@ After upgrading:
 - **Backend** uses:
   - Shesha.Core version for `SheshaVersion` property (applies to all Shesha.* packages)
   - Explicit versions for Boxfusion.* packages (from BoxStack dependencies)
+- **CRITICAL: Finding all frontend files**
+  - **ALWAYS use Glob tool** to find all package.json files: `adminportal/**/package.json`
+  - **DO NOT assume** there's only one package.json file
+  - Monorepo projects often have multiple subprojects in `adminportal/packages/` directory
+  - **Must update ALL package.json files** that contain `@shesha-io/*` dependencies
+  - **Verify count** of files found matches files updated
 - **Always update ALL dependencies** specified in the BoxStack release to ensure compatibility
+- **Update both `dependencies` and `devDependencies`** in all package.json files
+- **MUST build backend after upgrade** to catch breaking changes and compatibility issues
+  - Run `dotnet restore` to restore NuGet packages
+  - Run `dotnet build` to compile the solution
+  - Investigate and fix any build errors before completing the upgrade
+  - Breaking changes are common in framework upgrades and must be addressed
 - Verify all versions exist on npm and NuGet before upgrading
 - Package name mapping:
   - CSV: `boxfusion.devexpressreporting` → NuGet: `Boxfusion.DevExpressReporting`
