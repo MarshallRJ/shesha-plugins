@@ -38,7 +38,7 @@ For reference lists that are not expected to change **ever**, for example, 'Days
 
 <example>
 ``` csharp
-[ReferenceList("MyOrg.MyProject", "Gender")]
+[ReferenceList("Gender")]
 public enum RefListGender: long
 {
     [Description("This is for a dude")]
@@ -152,7 +152,7 @@ To implement a Multi-value reference list:
 <example>
 
 ``` csharp
-[ReferenceList("MyOrg.MyProject", "DaysOfTheWeek")]
+[ReferenceList("DaysOfTheWeek")]
 [Flags]  // For multi-value ref list enums ensure the [Flags] attribute is added
 public enum RefListDaysOfTheWeek
 {
