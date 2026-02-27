@@ -42,7 +42,7 @@ namespace {ModuleNamespace}.Domain.{EntityNamePlural}
         // and managed through StoredFileController endpoints (Upload, FilesList, etc.)
 
         // Navigation (collection)
-        [InverseProperty("PartOfId")]
+        [InverseProperty(nameof({ChildEntity}.{ParentReferenceProperty}) + "Id")]
         public virtual IList<{ChildEntity}> Items { get; set; }
 
         [ReadonlyProperty]
