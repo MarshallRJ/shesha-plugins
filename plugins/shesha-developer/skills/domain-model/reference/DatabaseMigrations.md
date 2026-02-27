@@ -81,6 +81,13 @@ Example: If AssemblyInfo.cs contains `[assembly: TablePrefix("LB_")]`, then:
 - Reference list property → Column name = [PropertyName]Lkp
 - TimeSpan property → Column name = [PropertyName]Ticks (Type: bigint)
 - Property added to inherited entity → Column name = [ModuleDBPrefix]_[PropertyName]
+- FK property added to inherited entity → Column name = [ModuleDBPrefix]_[PropertyName]Id
+- FK property in [JoinedProperty] table → Column name = [ModuleDBPrefix]_[PropertyName]Id (ALL columns in joined tables MUST be prefixed)
+
+**IMPORTANT: FK columns on inherited/joined tables:**
+When adding FK columns to an inherited entity's table (via `Alter.Table`) or to a `[JoinedProperty]` table (used by `ConfigurationItemBase` subclasses), the FK column name MUST include the module prefix. NHibernate expects ALL custom columns on these tables to use the prefix.
+- ✅ Correct: `.AddForeignKeyColumn("LB_RelatedEntityId", "Target_Table")`
+- ❌ Wrong: `.AddForeignKeyColumn("RelatedEntityId", "Target_Table")`
 
 **Module DB Prefix:**
 All tables/columns for a module must use its prefix (e.g., LB_, Core_, Frwk_)

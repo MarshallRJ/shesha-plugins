@@ -44,8 +44,10 @@ namespace {Namespace}.Migrations
                 .PrimaryColumn("Id");
 
             // Optional: FK columns to other tables
+            // IMPORTANT: FK columns in [JoinedProperty] tables MUST also use the {Prefix}_ prefix
+            // NHibernate expects ALL columns in joined tables to be prefixed with the table prefix
             Alter.Table("{Prefix}_{ConfigName}s")
-                .AddForeignKeyColumn("{RelatedEntity}Id", "{RelatedTable}").Nullable();
+                .AddForeignKeyColumn("{Prefix}_{RelatedEntity}Id", "{RelatedTable}").Nullable();
         }
 
         public override void Down()
@@ -69,9 +71,9 @@ public class M{YYYYMMDDHHmmss} : Migration
         Alter.Table("{Prefix}_{ConfigName}s")
             .AddColumn("{Prefix}_{NewPropName}").AsBoolean().WithDefaultValue(false);
 
-        // For FK columns, use the extension method:
+        // For FK columns - MUST use {Prefix}_ prefix in [JoinedProperty] tables:
         Alter.Table("{Prefix}_{ConfigName}s")
-            .AddForeignKeyColumn("{RelatedEntity}Id", "{RelatedTable}").Nullable();
+            .AddForeignKeyColumn("{Prefix}_{RelatedEntity}Id", "{RelatedTable}").Nullable();
     }
 
     public override void Down()
@@ -93,7 +95,7 @@ public class M{YYYYMMDDHHmmss} : Migration
 | `DateTime?` | `{Prefix}_{Name}` | `.AsDateTime().Nullable()` |
 | `TimeSpan?` | `{Prefix}_{Name}Ticks` | `.AsInt64().Nullable()` |
 | `RefList*` (enum) | `{Prefix}_{Name}Lkp` | `.AsInt64().Nullable()` |
-| `Entity` (FK) | `{Name}Id` | `.AddForeignKeyColumn("{Name}Id", "{Table}")` |
+| `Entity` (FK) | `{Prefix}_{Name}Id` | `.AddForeignKeyColumn("{Prefix}_{Name}Id", "{Table}")` |
 | `JsonEntity` | `{Prefix}_{Name}` | `.AsStringMax().Nullable()` |
 
 ## Real-World Example
