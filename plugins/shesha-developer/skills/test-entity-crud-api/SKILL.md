@@ -53,16 +53,33 @@ Add `-StartServer` if `--start-server` was passed. Before running the test scrip
 #### Server Startup Procedure (when `-StartServer` is used)
 
 1. **Auto-detect the Web.Host project:** Find `backend/**/*.Web.Host.csproj`
-2. **Build the solution:**
+2. **Ensure a `Project` launch profile exists** so the server binds to the correct port:
+   - Locate `Properties/launchSettings.json` in the Web.Host project directory.
+   - If the file does not exist, create `Properties/launchSettings.json` with a `Project` profile:
+     ```json
+     {
+       "profiles": {
+         "Project": {
+           "commandName": "Project",
+           "launchBrowser": false,
+           "applicationUrl": "http://localhost:21021"
+         }
+       }
+     }
+     ```
+   - If the file exists but has no `Project` profile, add one under `profiles` with the same shape.
+   - If a `Project` profile already exists, leave it as-is.
+   - Extract the port from the `applicationUrl` value (e.g. `21021`) and use it as the `BaseUrl` for the test scripts (`http://localhost:{port}`).
+3. **Build the solution:**
    ```powershell
    dotnet build "<path-to-sln>" -c Debug
    ```
-3. **Start the server in the background with output visible** so startup errors and logs can be diagnosed:
+4. **Start the server in the background with output visible** so startup errors and logs can be diagnosed:
    ```powershell
-   $ServerProcess = Start-Process -FilePath "dotnet" -ArgumentList "run","--project","<path-to-Web.Host.csproj>","--no-build","--no-launch-profile" -PassThru -NoNewWindow
+   $ServerProcess = Start-Process -FilePath "dotnet" -ArgumentList "run","--project","<path-to-Web.Host.csproj>","--no-build","--launch-profile","Project" -PassThru -NoNewWindow
    ```
-   Using `-NoNewWindow` keeps the server's stdout/stderr in the current console so you can see startup errors, migration failures, binding issues, etc. The `-PassThru` flag returns the process object for later cleanup.
-4. **Wait for the server to become ready** by polling the base URL (up to 60 seconds):
+   Using `-NoNewWindow` keeps the server's stdout/stderr in the current console so you can see startup errors, migration failures, binding issues, etc. The `-PassThru` flag returns the process object for later cleanup. The `--launch-profile Project` ensures the server starts on the port defined in `launchSettings.json`.
+5. **Wait for the server to become ready** by polling the base URL (up to 60 seconds):
    ```powershell
    $Ready = $false
    for ($i = 0; $i -lt 30; $i++) {
@@ -71,7 +88,7 @@ Add `-StartServer` if `--start-server` was passed. Before running the test scrip
    }
    if (-not $Ready) { Write-Host "ERROR: Server did not start within 60 seconds. Check the output above for errors." -ForegroundColor Red; exit 1 }
    ```
-5. **After tests complete**, stop the server:
+6. **After tests complete**, stop the server:
    ```powershell
    if ($ServerProcess -and -not $ServerProcess.HasExited) { Stop-Process -Id $ServerProcess.Id -Force }
    ```
