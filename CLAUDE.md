@@ -37,7 +37,7 @@ At minimum, read `plugins/shesha-developer/skills/skill-creator/SKILL.md` before
 - **No extraneous files**: No README.md, CHANGELOG.md, or INSTALLATION_GUIDE.md inside skill folders
 - **All entity properties must be `virtual`** (NHibernate requirement)
 - **Forward slashes only** in file paths within skill docs (no Windows backslashes)
-- **Plugin version** in `plugins/shesha-developer/.claude-plugin/plugin.json` — bump on meaningful changes
+- **Plugin version**: Bump the `version` field in `plugins/shesha-developer/.claude-plugin/plugin.json` (semver patch) **every time changes are pushed** to the remote. Do this as part of the commit being pushed.
 
 ## Commit Message Style
 
