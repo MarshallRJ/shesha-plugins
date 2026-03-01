@@ -1,6 +1,6 @@
 ---
 name: shesha-configuration-items
-description: Creates and updates custom configuration items in Shesha framework .NET applications. Scaffolds domain entities extending ConfigurationItemBase, FluentMigrator joined-table migrations, managers, import/export distribution classes, and IoC registration. Use when the user asks to create, scaffold, implement, or update configuration items, configuration types, or configurable settings in a Shesha project. Also use when implementing features from a PRD or specification that require new configuration item types with admin UI, versioning, or import/export support.
+description: Creates and updates custom configuration items in Shesha framework .NET applications. Scaffolds domain entities extending ConfigurationItemBase, FluentMigrator joined-table migrations, managers, and import/export distribution classes in the Domain layer, plus IoC registration in the Application layer. Use when the user asks to create, scaffold, implement, or update configuration items, configuration types, or configurable settings in a Shesha project. Also use when implementing features from a PRD or specification that require new configuration item types with admin UI, versioning, or import/export support.
 ---
 
 # Shesha Configuration Item Implementation
