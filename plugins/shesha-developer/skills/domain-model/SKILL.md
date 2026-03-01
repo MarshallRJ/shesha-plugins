@@ -1,6 +1,6 @@
 ---
 name: domain-model
-description: Creates and modifies domain entities, reference lists, and database migrations in Shesha framework .NET applications. IMPORTANT — This skill MUST be invoked BEFORE any manual exploration or planning when the task involves creating, modifying, or implementing domain entities, entity properties, relationships, reference lists, or database migrations. Use when the user asks to create, scaffold, implement, or update the domain layer, domain model, entities, reference lists, or migrations in a Shesha project. Also use when implementing features from a PRD, specification, or API design that require new or modified entities or database schema changes.
+description: Creates and modifies domain entities, reference lists, and database migrations in Shesha framework .NET applications. IMPORTANT — This skill MUST be invoked BEFORE any manual exploration or planning when the task involves creating, modifying, or implementing domain entities, entity properties, relationships, reference lists, or database migrations. Use when the user asks to create, scaffold, implement, or update the domain layer, domain model, entities, reference lists, or migrations in a Shesha project. Also use when the user asks to create, add, update, or modify a database migration, FluentMigrator migration, schema change, or table alteration — even without mentioning entities. Also use when implementing features from a PRD, specification, or API design that require new or modified entities or database schema changes.
 ---
 
 # Shesha Domain Model Manager
@@ -12,6 +12,7 @@ description: Creates and modifies domain entities, reference lists, and database
 - Implementing or modifying entity relationships and aggregates
 - Adding **generic entity references** (`GenericEntityReference`) for polymorphic associations
 - Creating database migrations for new or modified entities
+- **Creating or updating standalone database migrations** (FluentMigrator migrations, schema changes, table alterations, column additions/removals) — even when no entity change is involved
 - Implementing or updating reference lists (code-based and data-based)
 - Renaming or refactoring domain model properties
 
