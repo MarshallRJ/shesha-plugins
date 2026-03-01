@@ -4,22 +4,46 @@ Three classes enable configuration item portability across environments.
 
 ## §1 Distribution DTO
 
-Serializable representation of the configuration item. Only includes serializable primitives — no entity references.
+Serializable representation of the configuration item. Lives in the `Distribution/` folder alongside the exporter and importer (no `Dto/` subdirectory). Only includes serializable primitives — no entity references.
 
 ```csharp
 using Shesha.ConfigurationItems.Distribution;
+using System;
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution.Dto
+namespace {Namespace}.Application.{ConfigName}s.Distribution
 {
     public class Distributed{ConfigName} : DistributedConfigurableItemBase
     {
         // Mirror each custom property from the entity.
         // Use primitive types only (no entity references).
-        // FK references should be serialized as Guid? if needed.
 
-        // public int {IntProp} { get; set; }
-        // public bool {BoolProp} { get; set; }
+        // --- Scalar properties ---
+        // public int? {IntProp} { get; set; }
+        // public bool? {BoolProp} { get; set; }
         // public string {StringProp} { get; set; }
+
+        // --- References to OTHER ConfigurationItemBase entities ---
+        // IMPORTANT: Use Name + Module string pairs, NOT Guid IDs.
+        // This is the established Shesha framework convention so that
+        // exported packages are portable across environments where IDs differ.
+        //
+        // public string {Related}Name { get; set; }
+        // public string {Related}Module { get; set; }
+
+        // --- References to regular (non-config) entities ---
+        // Use Guid? for FK references to ordinary entities.
+        // public Guid? {RegularEntityId} { get; set; }
+
+        // --- StoredFile properties ---
+        // Serialize files as base64 so they are included in the export package.
+        // For each StoredFile property on the entity, add three string properties:
+        //
+        // /// <summary>File name of the {description}</summary>
+        // public string {PropName}FileName { get; set; }
+        // /// <summary>MIME type of the {description}</summary>
+        // public string {PropName}FileType { get; set; }
+        // /// <summary>Base64-encoded content of the {description}</summary>
+        // public string {PropName}Base64 { get; set; }
     }
 }
 ```
@@ -52,8 +76,8 @@ using Abp.Domain.Repositories;
 using Newtonsoft.Json;
 using Shesha.ConfigurationItems.Distribution;
 using Shesha.Domain;
+using Shesha.Services;
 using {EntityNamespace};
-using {Namespace}.Application.{ConfigName}s.Distribution.Dto;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -63,10 +87,15 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
     public class {ConfigName}Export : I{ConfigName}Export, ITransientDependency
     {
         private readonly IRepository<{ConfigName}, Guid> _repository;
+        // Inject IStoredFileService only if the entity has StoredFile properties
+        private readonly IStoredFileService _storedFileService;
 
-        public {ConfigName}Export(IRepository<{ConfigName}, Guid> repository)
+        public {ConfigName}Export(
+            IRepository<{ConfigName}, Guid> repository,
+            IStoredFileService storedFileService)
         {
             _repository = repository;
+            _storedFileService = storedFileService;
         }
 
         public string ItemType => {ConfigName}.ItemTypeName;
@@ -77,7 +106,7 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
             return await ExportItemAsync(item);
         }
 
-        public Task<DistributedConfigurableItemBase> ExportItemAsync(
+        public async Task<DistributedConfigurableItemBase> ExportItemAsync(
             ConfigurationItemBase item)
         {
             if (item is not {ConfigName} config)
@@ -101,11 +130,32 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
                 ParentVersionId = config.ParentVersion?.Id,
                 Suppress = config.Suppress,
 
-                // Custom properties
+                // Custom scalar properties
                 // {CustomProp} = config.{CustomProp},
+
+                // References to other ConfigurationItemBase entities:
+                // Export as Name + Module strings (NOT Guid IDs).
+                // {Related}Name = config.{Related}?.Name,
+                // {Related}Module = config.{Related}?.Module?.Name,
             };
 
-            return Task.FromResult<DistributedConfigurableItemBase>(result);
+            // --- StoredFile properties ---
+            // For each StoredFile property, read the file content and encode as base64.
+            // if (config.{FileProp} != null)
+            // {
+            //     result.{FileProp}FileName = config.{FileProp}.FileName;
+            //     result.{FileProp}FileType = config.{FileProp}.FileType;
+            //
+            //     using var stream = await _storedFileService.GetStreamAsync(config.{FileProp});
+            //     if (stream != null)
+            //     {
+            //         using var memoryStream = new MemoryStream();
+            //         await stream.CopyToAsync(memoryStream);
+            //         result.{FileProp}Base64 = Convert.ToBase64String(memoryStream.ToArray());
+            //     }
+            // }
+
+            return result;
         }
 
         public async Task WriteToJsonAsync(
@@ -118,6 +168,8 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
     }
 }
 ```
+
+**Note:** When the entity has StoredFile properties, the `ExportItemAsync(ConfigurationItemBase)` method must be `async` (not returning `Task.FromResult`) because reading the file stream is an async operation.
 
 ## §3 Importer
 
@@ -146,9 +198,9 @@ using Newtonsoft.Json;
 using Shesha.ConfigurationItems.Distribution;
 using Shesha.Domain;
 using Shesha.Domain.ConfigurationItems;
+using Shesha.Services;
 using Shesha.Services.ConfigurationItems;
 using {EntityNamespace};
-using {Namespace}.Application.{ConfigName}s.Distribution.Dto;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -159,14 +211,22 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
         I{ConfigName}Import, ITransientDependency
     {
         private readonly IRepository<{ConfigName}, Guid> _repository;
+        // Inject IStoredFileService only if the entity has StoredFile properties
+        private readonly IStoredFileService _storedFileService;
+        // Inject repositories for referenced ConfigurationItemBase entities
+        // private readonly IRepository<{RelatedConfigItem}, Guid> _{relatedRepo};
 
         public {ConfigName}Import(
             IRepository<Module, Guid> moduleRepo,
             IRepository<FrontEndApp, Guid> frontEndAppRepo,
-            IRepository<{ConfigName}, Guid> repository
+            IRepository<{ConfigName}, Guid> repository,
+            IStoredFileService storedFileService
+            // IRepository<{RelatedConfigItem}, Guid> relatedRepo
         ) : base(moduleRepo, frontEndAppRepo)
         {
             _repository = repository;
+            _storedFileService = storedFileService;
+            // _{relatedRepo} = relatedRepo;
         }
 
         public string ItemType => {ConfigName}.ItemTypeName;
@@ -227,8 +287,35 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
             target.VersionStatus = source.VersionStatus;
             target.Suppress = source.Suppress;
 
-            // Custom properties
+            // Custom scalar properties
             // target.{CustomProp} = source.{CustomProp};
+
+            // References to other ConfigurationItemBase entities:
+            // Resolve from Name + Module strings back to entities.
+            // target.{Related} = !string.IsNullOrWhiteSpace(source.{Related}Name)
+            //     ? await _{relatedRepo}.FirstOrDefaultAsync(x =>
+            //         x.Name == source.{Related}Name
+            //         && (x.Module == null && source.{Related}Module == null
+            //             || x.Module != null && x.Module.Name == source.{Related}Module)
+            //         && x.IsLast)
+            //     : null;
+
+            // --- StoredFile properties ---
+            // Recreate the file from base64 content.
+            // if (!string.IsNullOrWhiteSpace(source.{FileProp}Base64))
+            // {
+            //     var fileBytes = Convert.FromBase64String(source.{FileProp}Base64);
+            //     using var stream = new MemoryStream(fileBytes);
+            //     var storedFile = await _storedFileService.SaveFileAsync(
+            //         stream,
+            //         source.{FileProp}FileName,
+            //         file => file.FileType = source.{FileProp}FileType);
+            //     target.{FileProp} = storedFile;
+            // }
+            // else
+            // {
+            //     target.{FileProp} = null;
+            // }
         }
 
         public async Task<DistributedConfigurableItemBase> ReadFromJsonAsync(
@@ -254,6 +341,36 @@ namespace {Namespace}.Application.{ConfigName}s.Distribution
 - **`Normalize()`** — call on new items only; sets Origin to self-reference.
 - **`context.ImportStatusAs`** — allows the import caller to override the version status.
 - **`GetModuleAsync` / `GetFrontEndAppAsync`** — inherited from `ConfigurationItemImportBase`; resolves or creates modules/apps as needed.
+
+### Cross-Config-Item References (IMPORTANT)
+
+When a configuration item has a property that references **another ConfigurationItemBase entity** (e.g., a `SettingConfiguration` referencing an editor `FormConfiguration`, or an `EntityProperty` referencing a `ReferenceList`):
+
+| Layer | What to do |
+|-------|------------|
+| **Distribution DTO** | Represent the reference as **two string properties**: `{Related}Name` and `{Related}Module`. Do NOT use `Guid?`. |
+| **Exporter** | Map from the entity navigation property: `{Related}Name = entity.{Related}?.Name`, `{Related}Module = entity.{Related}?.Module?.Name`. |
+| **Importer** | Resolve back to the entity using `Name + Module + IsLast` query (same pattern as the main item lookup). |
+
+**Why?** GUIDs are environment-specific — they differ between dev, staging, and production databases. Name + Module pairs are stable identifiers that make exported `.shaconfig` packages portable across environments.
+
+**Framework examples** that follow this convention:
+- `SettingExport` → exports `EditorFormName` / `EditorFormModule` (not FormConfiguration ID)
+- `EntityConfigExport` → exports `ReferenceListName` / `ReferenceListModule` on entity properties (not ReferenceList ID)
+
+**Exception — internal versioning GUIDs**: The base class properties `OriginId`, `BaseItem`, and `ParentVersionId` are exported as GUIDs because they track version lineage within the same item, not cross-references to different item types.
+
+### StoredFile Properties (IMPORTANT)
+
+When a configuration item has a `StoredFile` property (e.g., a document template, an uploaded image), the file content **must** be serialized into the export package so it can be recreated on import.
+
+| Layer | What to do |
+|-------|------------|
+| **Distribution DTO** | Add three string properties per file: `{PropName}FileName`, `{PropName}FileType`, `{PropName}Base64`. |
+| **Exporter** | Inject `IStoredFileService`. Read the file stream via `GetStreamAsync()`, copy to a `MemoryStream`, encode as `Convert.ToBase64String()`. |
+| **Importer** | Inject `IStoredFileService`. Decode base64 to `byte[]`, wrap in `MemoryStream`, call `SaveFileAsync()` to create a new `StoredFile`, assign to the entity property. Set to `null` if base64 is empty. |
+
+**Why?** StoredFile records are environment-specific database rows with file content stored in the configured blob provider. Without base64 serialization, imported configuration items would have broken file references.
 
 ## Exported Package Structure
 

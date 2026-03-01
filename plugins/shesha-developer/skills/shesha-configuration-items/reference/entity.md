@@ -20,6 +20,12 @@ namespace {Namespace}.Domain.{ConfigName}s
         public const string ItemTypeName = "{item-type-name}";
         public override string ItemType => ItemTypeName;
 
+        public {ConfigName}()
+        {
+            VersionStatus = ConfigurationItemVersionStatus.Live;    // Default to live version or else won't be available for export.
+        }
+
+
         // --- Custom properties ---
 
         // Boolean property
