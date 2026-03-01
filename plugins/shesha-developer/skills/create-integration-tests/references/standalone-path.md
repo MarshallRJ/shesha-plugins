@@ -47,6 +47,7 @@ You must scaffold all test infrastructure locally in the test project. This incl
     <PackageReference Include="Shesha.Application" Version="$(SheshaVersion)" />
     <PackageReference Include="Shesha.Core" Version="$(SheshaVersion)" />
     <PackageReference Include="Shesha.Framework" Version="$(SheshaVersion)" />
+    <PackageReference Include="Shesha.NHibernate" Version="$(SheshaVersion)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\{Product}.Domain\{Product}.Domain.csproj" />
@@ -258,6 +259,8 @@ using Abp.Dependency;
 using Castle.Windsor.MsDependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Shesha.Identity;
+using Shesha.Notifications;
+using Shesha.Notifications.SMS;
 
 namespace {Product}.Tests.DependencyInjection
 {
@@ -267,6 +270,12 @@ namespace {Product}.Tests.DependencyInjection
         {
             var services = new ServiceCollection();
             IdentityRegistrar.Register(services);
+
+            // Register notification channel senders (same as Web.Host Startup)
+            // Required if code under test sends notifications (e.g. approval workflows)
+            services.AddTransient<INotificationChannelSender, EmailChannelSender>();
+            services.AddTransient<INotificationChannelSender, SmsChannelSender>();
+
             WindsorRegistrationHelper.CreateServiceProvider(iocManager.IocContainer, services);
         }
     }
@@ -580,6 +589,7 @@ using Shesha.Configuration.Startup;
 using Shesha.FluentMigrator;
 using Shesha.Modules;
 using Shesha.NHibernate;
+using Shesha.Workflow;
 using {Product}.Application;
 using {Product}.Common.Tests.Fixtures;
 using {Product}.Domain;
@@ -598,7 +608,8 @@ namespace {Product}.Common.Tests
         typeof(AbpAspNetCoreModule),
         typeof(SheshaApplicationModule),
         typeof(SheshaNHibernateModule),
-        typeof(SheshaFrameworkModule)
+        typeof(SheshaFrameworkModule),
+        typeof(SheshaWorkflowModule)
     )]
     public class {Product}CommonDomainTestModule : SheshaModule
     {

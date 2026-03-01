@@ -70,6 +70,7 @@ using Castle.Facilities.Logging;
 using Shesha.Modules;
 using Shesha.NHibernate;
 using Shesha.Testing;
+using Shesha.Workflow;
 using {Product}.Application;
 using {Product}.Domain;
 using System.Reflection;
@@ -84,7 +85,8 @@ namespace {Product}.Common.Tests
         typeof(AbpAspNetCoreModule),
         typeof(SheshaApplicationModule),
         typeof(SheshaNHibernateModule),
-        typeof(SheshaFrameworkModule)
+        typeof(SheshaFrameworkModule),
+        typeof(SheshaWorkflowModule)
     )]
     public class {Product}CommonDomainTestModule : SheshaModule
     {

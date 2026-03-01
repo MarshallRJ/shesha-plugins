@@ -133,9 +133,12 @@ public class {Entity}_Tests : SheshaNhTestBase
     typeof(AbpAspNetCoreModule),
     typeof(SheshaApplicationModule),
     typeof(SheshaNHibernateModule),
-    typeof(SheshaFrameworkModule)
+    typeof(SheshaFrameworkModule),
+    typeof(SheshaWorkflowModule)         // Required if any entities reference workflow types
 )]
 ```
+
+**Important:** Include `SheshaWorkflowModule` if domain entities reference any types from `Shesha.Workflow` (e.g. workflow-related entities, approval processes). Without it, NHibernate mapping fails with: `The given key 'Shesha.Workflow, Version=...' was not present in the dictionary`.
 
 ### appsettings.Test.json
 ```json
@@ -164,6 +167,18 @@ Both `Default` and `TestDB` keys must be present and identical.
 ```
 
 Plus project references to the Application and Domain projects.
+
+### Notification Channel Senders
+
+If the code under test sends notifications (e.g. approval workflows, notification services), you must register concrete `INotificationChannelSender` implementations in `ServiceCollectionRegistrar`. Without this, tests fail with: `NotificationSender waiting for INotificationChannelSender`.
+
+```csharp
+// Add to ServiceCollectionRegistrar.Register() before WindsorRegistrationHelper call
+services.AddTransient<INotificationChannelSender, EmailChannelSender>();
+services.AddTransient<INotificationChannelSender, SmsChannelSender>();
+```
+
+Use concrete implementations (not mocks) for integration tests — the goal is to verify the full code path works end-to-end.
 
 ## Workflow
 
