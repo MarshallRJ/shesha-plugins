@@ -7,22 +7,67 @@ description: Creates and scaffolds integration test projects for Shesha framewor
 
 Scaffolds integration test infrastructure and creates integration tests for Shesha framework applications.
 
-## Step 0: Check for Existing Infrastructure
+## Step 0: Inventory Source and Test Projects
 
-Before scaffolding, check if a test project already exists:
+Before scaffolding, build a map of all source projects and their corresponding test projects.
+
+### 0a. Discover all source projects
 
 ```
-# Look for existing test project
+# List all source projects (Domain, Application, etc.)
+find backend/src/ -name "*.csproj" -type f
+```
+
+Identify the projects that contain testable code — typically Domain and Application projects (e.g., `{Product}.{Module}.Application`, `{Product}.{Module}.Domain`).
+
+### 0b. Discover existing test projects
+
+```
+# Look for existing test projects
 find backend/test/ -name "*Tests.csproj" -type f
-# Look for existing test module
+# Look for existing test modules
 grep -rn "SheshaModule" backend/test/ --include="*.cs" -l
-# Look for existing test base class
+# Look for existing test base classes
 grep -rn "SheshaNhTestBase" backend/test/ --include="*.cs" -l
 ```
 
-**If test infrastructure already exists**: skip to [Test Generation](#test-generation) (step 9 in Workflow). Read the existing test module and base class to understand the project's patterns, then create new test classes following those patterns.
+### 0c. Map source projects to test projects
 
-**If NO test infrastructure exists**: proceed with scaffolding below.
+For each source project, check whether a corresponding `*.Tests` project already exists under `backend/test/`. The convention is `{SourceProjectName}.Tests` — for example:
+
+| Source project | Expected test project |
+|---|---|
+| `{Product}.Common.Domain` | `{Product}.Common.Domain.Tests` |
+| `{Product}.Common.Application` | `{Product}.Common.Application.Tests` |
+| `{Product}.Foo.Domain` | `{Product}.Foo.Domain.Tests` |
+
+Classify each source project as:
+- **Covered** — a matching `*.Tests` project exists
+- **Uncovered** — no matching test project exists
+
+**If ALL relevant source projects are covered**: skip to [Test Generation](#test-generation) (Phase 2 in Workflow).
+
+**If some source projects are uncovered**: proceed to [Test Project Strategy](#test-project-strategy) before scaffolding.
+
+## Test Project Strategy
+
+**Ideally, each source project that contains testable code should have its own dedicated test project.** This keeps test dependencies focused and mirrors the solution's modular structure.
+
+When uncovered source projects are found, **ask the user before creating new test projects**. Present the mapping and let them choose:
+
+> The following source projects do not have a corresponding test project:
+> - `{Product}.Foo.Domain` (no `{Product}.Foo.Domain.Tests` found)
+> - `{Product}.Common.Application` (no `{Product}.Common.Application.Tests` found)
+>
+> Options:
+> 1. **Create dedicated test projects** for each uncovered source project (recommended — mirrors solution structure)
+> 2. **Add tests to an existing test project** (e.g., `{Product}.Common.Domain.Tests`) — simpler but mixes concerns
+>
+> Which approach would you prefer?
+
+If the user chooses option 2, add the necessary project references to the existing test project's `.csproj` and ensure its test module `DependsOn` includes the modules from the newly covered source projects. Tests still follow the [mirrored folder placement](#test-file-placement) convention within whichever test project they land in.
+
+If the user chooses option 1, scaffold each new test project using the steps below. New test projects can share infrastructure (fixtures, base classes) from an existing test project by adding a project reference to it, or scaffold their own — prefer sharing when a `{Product}.Common.Tests` or `{Product}.Common.Domain.Tests` project already provides `SheshaNhTestBase` and fixtures.
 
 ## Step 1: Shesha.Testing Available?
 
@@ -60,16 +105,49 @@ backend/test/{Product}.Common.Domain.Tests/
 ├── DependencyInjection/
 │   └── ServiceCollectionRegistrar.cs    ← Identity bridge (standalone only)
 ├── (Standalone only infrastructure files)
-└── *_Tests.cs                           ← Actual test classes
+└── {MirroredFolders}/                   ← Mirrors source project structure
+    └── {Entity}_Tests.cs
 ```
+
+### Test File Placement
+
+**Test classes must be placed in a folder structure that mirrors the source project being tested.** This keeps tests organized and easy to locate.
+
+To determine the correct folder, look at the namespace/folder of the class under test in the source project (e.g., `backend/src/{Product}.Common.Domain/`), then replicate that relative folder path inside the test project.
+
+**Example:** If the source project has:
+```
+backend/src/{Product}.Common.Domain/
+├── Enrollment/
+│   ├── Applicant.cs
+│   └── Application.cs
+├── Assessments/
+│   └── TestCase.cs
+└── Scheduling/
+    └── Appointment.cs
+```
+
+Then the test project should mirror it:
+```
+backend/test/{Product}.Common.Domain.Tests/
+├── Enrollment/
+│   ├── Applicant_Tests.cs
+│   └── Application_Tests.cs
+├── Assessments/
+│   └── TestCase_Tests.cs
+└── Scheduling/
+    └── Appointment_Tests.cs
+```
+
+The namespace of each test class should reflect this folder path (e.g., `{Product}.Common.Domain.Tests.Enrollment`).
 
 ## Core Conventions
 
 ### Naming
-- Test project: `{Product}.Common.Domain.Tests`
-- Test module: `{Product}CommonDomainTestModule`
-- Namespace: `{Product}.Common.Tests` (infrastructure), `{Product}.Common.Domain.Tests` (test classes)
-- Test DB name: `{ProductShort}-IntegrationTest`
+- Test project: `{SourceProjectName}.Tests` — mirrors the source project name (e.g., `{Product}.Common.Domain.Tests`, `{Product}.Foo.Application.Tests`)
+- Test module: `{SourceProjectName}TestModule` with dots removed (e.g., `{Product}CommonDomainTestModule`)
+- Namespace: `{SourceProjectName}.Tests` (infrastructure), `{SourceProjectName}.Tests.{SubFolder}` (test classes — matches mirrored folder path)
+- Test DB name: `{ProductShort}-IntegrationTest` (shared across all test projects — they use the same database)
 
 ### Test Class Pattern
 ```csharp
@@ -182,30 +260,33 @@ Use concrete implementations (not mocks) for integration tests — the goal is t
 
 ## Workflow
 
-### Phase 1: Infrastructure (skip if test project already exists)
+### Phase 1: Infrastructure
 
-1. Check for existing test infrastructure (Step 0 above)
-2. Detect Shesha.Testing availability (Step 1 above)
-3. Read [references/framework-path.md](references/framework-path.md) or [references/standalone-path.md](references/standalone-path.md)
-4. Create the test project directory and csproj
-5. Create appsettings.Test.json and log4net.config (copy from [assets/log4net.config](assets/log4net.config))
-6. Create the test module class
-7. Create fixture and collection classes
-8. Create infrastructure files (standalone path only)
-9. Add the test project to the solution
-10. Build to verify infrastructure compiles
+1. **Inventory** — discover all source projects and existing test projects (Step 0 above)
+2. **Map coverage** — identify which source projects are covered and which are uncovered
+3. **Ask the user** — if uncovered source projects exist, present the mapping and ask whether to create dedicated test projects or add tests to an existing project (see [Test Project Strategy](#test-project-strategy)). **Do not create new test projects without user confirmation.**
+4. **Detect Shesha.Testing availability** (Step 1 above)
+5. Read [references/framework-path.md](references/framework-path.md) or [references/standalone-path.md](references/standalone-path.md)
+6. **For each test project to scaffold** (may be one or many depending on user's choice):
+   - Create the test project directory and csproj (with project references to the source project it covers)
+   - Create appsettings.Test.json and log4net.config (copy from [assets/log4net.config](assets/log4net.config))
+   - Create the test module class (DependsOn must include modules from the source project being tested)
+   - Create fixture and collection classes (or reference them from an existing test project that already has them)
+   - Create infrastructure files (standalone path only)
+   - Add the test project to the solution
+7. **Build to verify** — `dotnet build` all test projects to confirm infrastructure compiles
 
 ### Phase 2: Test Generation (ALWAYS execute this phase)
 
-This phase runs whether infrastructure was just scaffolded or already existed.
+This phase runs whether infrastructure was just scaffolded or already existed. Repeat for each test project.
 
-11. **Discover testable targets** — read [references/test-generation.md](references/test-generation.md) for discovery commands and patterns
-12. **Scan domain entities** — glob `backend/src/*Domain*/**/*.cs`, grep for entity base classes
-13. **Scan application services** — glob `backend/src/*Application*/**/*AppService.cs`
-14. **Check existing coverage** — grep for `*_Tests.cs` in the test project, skip entities/services already tested
-15. **Create entity CRUD test classes** — one `{Entity}_Tests.cs` per untested entity with at least a `GetAll` test
-16. **Create service test classes** — one `{Service}_Tests.cs` per untested service with custom methods
-17. **Build and verify** — `dotnet build` the test project to confirm all tests compile
+8. **Discover testable targets** — read [references/test-generation.md](references/test-generation.md) for discovery commands and patterns
+9. **Scan domain entities** — glob `backend/src/*Domain*/**/*.cs`, grep for entity base classes
+10. **Scan application services** — glob `backend/src/*Application*/**/*AppService.cs`
+11. **Check existing coverage** — grep for `*_Tests.cs` across all test projects, skip entities/services already tested
+12. **Create entity CRUD test classes** — one `{Entity}_Tests.cs` per untested entity with at least a `GetAll` test. Place in the test project that corresponds to the entity's source project, in a folder that mirrors the entity's location (see [Test File Placement](#test-file-placement))
+13. **Create service test classes** — one `{Service}_Tests.cs` per untested service with custom methods. Place in the matching test project with mirrored folder structure
+14. **Build and verify** — `dotnet build` all test projects to confirm all tests compile
 
 ## Test Generation
 

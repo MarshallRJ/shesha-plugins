@@ -38,6 +38,12 @@ find backend/test/ -name "*_Tests.cs" -type f
 
 For each domain entity, generate a test class with at minimum a `GetAll_Should_Return_{Entities}` test.
 
+### File Placement
+
+**Place each test class in a folder that mirrors the location of the main being tested in the source project.** Determine the relative folder path of the tested class within the source Domain project, then create the same folder path in the test project.
+
+For example, if `Applicant.cs` lives at `backend/src/{Product}.Common.Domain/Enrollment/Applicant.cs`, the test should be at `backend/test/{Product}.Common.Domain.Tests/Enrollment/Applicant_Tests.cs` with namespace `{Product}.Common.Domain.Tests.Enrollment`.
+
 ### Simple Entity (no required foreign keys)
 
 ```csharp
@@ -52,7 +58,7 @@ using {Product}.Domain.{EntityNamespace};
 using Shouldly;
 using Xunit;
 
-namespace {Product}.Common.Domain.Tests
+namespace {Product}.{TestProjectName}.{SubFolder}
 {
     [Collection(LocalSqlServerCollection.Name)]
     public class {Entity}_Tests : SheshaNhTestBase
@@ -261,6 +267,8 @@ private async Task CleanupChain(Guid rootId)
 ## Test Naming Convention
 
 - Test class: `{Entity}_Tests` or `{ServiceName}_Tests`
+- Test file location: mirror the source project folder structure (e.g., `Enrollment/Applicant_Tests.cs`)
+- Namespace: `{TestProjectName}.{SubFolder}` — matches the mirrored folder path
 - Test methods: `{MethodOrAction}_Should_{ExpectedBehavior}`
 - Examples:
   - `GetAll_Should_Return_TestCases`
