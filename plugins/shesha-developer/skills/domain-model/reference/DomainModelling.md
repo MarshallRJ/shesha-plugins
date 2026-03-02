@@ -250,6 +250,48 @@ public class NotificationMessageAttachment : FullAuditedEntity<Guid>
 }
 ```
 
+#### StoredFile and StoredFileVersion Entity Properties
+
+When querying files in domain services or writing migrations, you may need to reference properties on `StoredFile` and `StoredFileVersion`. The key properties are listed below.
+
+**`StoredFile` properties:**
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Owner` | `GenericEntityReference` | The entity this file is attached to (OwnerType + OwnerId) |
+| `FileName` | `string` | Original file name including extension |
+| `FileType` | `string` | MIME type of the file |
+| `Category` | `string` | Optional category for grouping attachments on the same owner |
+| `Description` | `string` | Optional description |
+| `SortOrder` | `int` | Sort order within the owner's attachment list |
+| `ParentFile` | `StoredFile` | Reference to a parent file (for hierarchical file structures) |
+| `Folder` | `string` | Logical folder path for organization |
+| `IsVersionControlled` | `bool` | If `true`, uploading creates new versions instead of overwriting |
+| `Temporary` | `bool` | If `true`, the file is not yet bound to a persisted entity (see Temporary Files below) |
+| `TenantId` | `int?` | Tenant ID for multi-tenant isolation |
+
+**`StoredFileVersion` properties:**
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `File` | `StoredFile` | The parent `StoredFile` this version belongs to |
+| `VersionNo` | `int` | Sequential version number |
+| `FileSize` | `long` | Size of the file content in bytes |
+| `FileName` | `string` | File name for this specific version (may differ between versions) |
+| `FileType` | `string` | MIME type for this version |
+| `Description` | `string` | Optional version description |
+| `IsLast` | `bool` | `true` if this is the most recent version |
+| `IsSigned` | `bool` | `true` if this version has been digitally signed |
+
+#### Temporary Files and Delayed Binding
+
+When a user uploads files on a **create form** (before the entity has been saved and has an ID), the framework handles this automatically via the `Temporary` flag:
+
+1. **Upload phase**: Files uploaded before the entity is saved are created with `Temporary = true` and a temporary owner reference.
+2. **Entity save**: When the entity is persisted and receives its ID, the framework automatically binds the temporary files to the new entity — setting the correct `OwnerId`, `OwnerType`, and clearing the `Temporary` flag.
+
+This is a very common workflow (e.g. uploading attachments on a "New Application" form). **Do NOT** build custom solutions to handle pre-save file uploads — the framework's temporary file mechanism handles it out of the box.
+
 #### What NOT to Do
 
 - **Do NOT** create custom entities to store file metadata (file name, file size, file type, upload date, etc.) — `StoredFile` and `StoredFileVersion` already track all of this.

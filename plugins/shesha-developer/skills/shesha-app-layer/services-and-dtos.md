@@ -273,6 +273,24 @@ public class InvoiceAppService : SheshaAppServiceBase
 | `UpdateVersionContentAsync(StoredFileVersion, Stream)` | Update version content |
 | `RenameFileAsync(StoredFile, fileName)` | Rename a file |
 | `MarkDownloadedAsync(StoredFileVersion)` | Track download |
+| `UpdateFileAsync(StoredFile, Stream, fileName)` | Update existing file content (overwrites current version) |
+| `GetLastVersionAsync(StoredFile)` | Get the latest `StoredFileVersion` for download |
+| `GetFileVersionsAsync(StoredFile)` | List all versions of a file (version history) |
+| `HasAttachmentsOfCategoryAsync(owner, category)` | Check if any files exist in a category for the owner |
+| `GetAttachmentsCategoriesAsync(owner)` | List all distinct categories for an entity's attachments |
+| `CopyToOwnerAsync(StoredFile, newOwner)` | Copy a single file to a different owner entity |
+| `FileExistsAsync(Guid)` | Check if a file exists by ID |
+
+### File Versioning Behavior
+
+The versioning behavior depends on the `IsVersionControlled` flag on the `StoredFile`:
+
+- **Version-controlled files** (`IsVersionControlled = true`): Each upload via `UploadNewVersion` creates a new `StoredFileVersion`. All previous versions are preserved and accessible via `GetFileVersionsAsync`. The `IsLast` flag on `StoredFileVersion` marks the most recent version.
+- **Non-version-controlled files** (default): Uploading new content overwrites the existing single version — no history is kept.
+
+**How to enable version control:**
+- **At design time**: Set `IsVersionControlled = true` on the `[StoredFile]` attribute on the entity property.
+- **At runtime**: Set the `IsVersionControlled` property on a `StoredFile` instance to `true`, then use `UploadNewVersion` for subsequent uploads.
 
 ### What NOT to Do in Application Services
 
