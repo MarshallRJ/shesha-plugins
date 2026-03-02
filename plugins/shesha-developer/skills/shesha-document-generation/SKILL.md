@@ -1,11 +1,11 @@
 ---
 name: shesha-document-generation
-description: Generates Shesha document generation artifacts for producing PDFs from Word templates via Aspose mail merge. Creates PDF DTOs, item classes, AutoMapper profiles, application services, controllers, Word template guidance, and sample Word document templates with proper merge fields. Use when the user asks to create, scaffold, or implement PDF document generation, mail merge, Word-to-PDF conversion, document processing, or Word document templates in a Shesha project.
+description: Generates Shesha document generation artifacts for producing PDFs or Word documents from Word templates via Aspose mail merge. Creates DTOs, item classes, AutoMapper profiles, application services, controllers, Word template guidance, and sample Word document templates with proper merge fields. Use when the user asks to create, scaffold, or implement document generation, mail merge, Word-to-PDF conversion, Word document generation, document processing, or Word document templates in a Shesha project.
 ---
 
 # Shesha Document Generation
 
-Generate document generation artifacts for a Shesha/.NET application that uses `Shesha.Enterprise.DocumentProcessing` to produce PDFs from Word templates via Aspose mail merge, based on $ARGUMENTS.
+Generate document generation artifacts for a Shesha/.NET application that uses `Shesha.Enterprise.DocumentProcessing` to produce PDFs or Word documents from Word templates via Aspose mail merge, based on $ARGUMENTS.
 
 ## Instructions
 
@@ -15,10 +15,15 @@ Generate document generation artifacts for a Shesha/.NET application that uses `
   2. **Embedded resource** — template bundled in the assembly as an embedded resource, uses `AsposeBuilderBase.GetTemplate()`
   3. **Direct Aspose with dictionary** — manual template lookup, field names as string keys, most control
   4. **Save to StoredFile** — same as (1) or (2) but also persists the generated PDF to a `StoredFile` on the entity
+- Ask the user which **output format** to use if not specified:
+  1. **PDF** (default) — generates a PDF via `document.Save(stream, SaveFormat.Pdf)`
+  2. **Word (.docx)** — returns the populated Word document via `document.Save(stream, SaveFormat.Docx)`, preserving editability
+  3. **Both** — generates separate endpoints for PDF and Word download
 - Ask the user which **exposure** approach to use if not specified:
   1. **Application Service** (default) — inherits `SheshaAppServiceBase`, auto-registered as API endpoint
   2. **Controller** — inherits `ControllerBase`, manual `[Route]`/`[HttpGet]` attributes
   3. **Dictionary-based controller** — inherits `ControllerBase`, uses `Dictionary<string, object>` instead of a typed DTO
+- When the output format is **Word only**, use `DocumentDto` instead of `PdfDto` in class names and `Documents` instead of `PdfDocuments` in folder names. When **PDF** or **Both**, keep `PdfDto`/`PdfDocuments`.
 - All entity properties on DTOs should be `string` (pre-formatted) unless they are `byte[]` (signatures/images) or `DataTable`/`DataSet` (regions).
 - DTO property names must match Word template merge field names exactly.
 - Use `{Placeholder}` tokens throughout generated code so the user can replace them with project-specific values.
@@ -47,10 +52,11 @@ When generating sample `.docx` templates:
 | 4 | Application Service | Application | [document-service.md](document-service.md) SS1 |
 | 5 | Controller | Application | [document-service.md](document-service.md) SS2 |
 | 6 | Dictionary-based Controller | Application | [document-service.md](document-service.md) SS3 |
-| 7 | Embedded Resource variant | Application | [document-service.md](document-service.md) SS4 |
-| 8 | Module/NuGet setup | Domain/Application | [setup-and-templates.md](setup-and-templates.md) SS1 |
-| 9 | Word template design guide | N/A | [setup-and-templates.md](setup-and-templates.md) SS2 |
-| 10 | Sample Word template (.docx) | N/A | [word-template-generator.md](word-template-generator.md) |
+| 7 | Word Document Output (no PDF) | Application | [document-service.md](document-service.md) SS5 |
+| 8 | Embedded Resource variant | Application | [document-service.md](document-service.md) SS4 |
+| 9 | Module/NuGet setup | Domain/Application | [setup-and-templates.md](setup-and-templates.md) SS1 |
+| 10 | Word template design guide | N/A | [setup-and-templates.md](setup-and-templates.md) SS2 |
+| 11 | Sample Word template (.docx) | N/A | [word-template-generator.md](word-template-generator.md) |
 
 ## Folder Structure
 
@@ -169,6 +175,19 @@ await documentStream.CopyToAsync(memoryStream);
 var bytes = memoryStream.ToArray();
 return File(bytes, "application/pdf", fileName);
 ```
+
+**Return Word document as download (no PDF conversion):**
+```csharp
+// Use Aspose directly — DocumentProcessManager.GenerateAsync() always returns PDF
+var document = new Document(templateStream); // load from FileTemplateConfiguration or embedded resource
+document.MailMerge.Execute(fieldNames, fieldValues);
+using var memoryStream = new MemoryStream();
+document.Save(memoryStream, SaveFormat.Docx);
+var bytes = memoryStream.ToArray();
+var fileName = $"{DocumentName}_{DateTime.Now:yyyyMMdd}.docx";
+return File(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+```
+See [document-service.md](document-service.md) SS5 for the full application service and controller templates.
 
 **Save PDF to entity StoredFile property:**
 ```csharp

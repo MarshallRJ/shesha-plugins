@@ -400,6 +400,189 @@ namespace {Namespace}.PdfDocuments
 
 ---
 
+## SS5 — Word Document Output (No PDF Conversion)
+
+Use this approach when you need to return a populated Word document (.docx) instead of converting to PDF. This preserves editability — useful when users need to make final adjustments before printing or when PDF conversion is not required.
+
+Since `DocumentProcessManager.GenerateAsync()` always returns PDF, this approach uses Aspose directly to perform the mail merge and save as `.docx`.
+
+### Template (Application Service)
+
+```csharp
+using Abp.Domain.Repositories;
+using Abp.UI;
+using Aspose.Words;
+using Aspose.Words.MailMerging;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using NHibernate.Linq;
+using {Namespace}.PdfDocuments.{DocumentName}.Dtos;
+using Shesha.Enterprise.DocumentProcessing.Domain;
+using Shesha.Services;
+using System;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace {Namespace}.PdfDocuments.{DocumentName}
+{
+    /// <summary>
+    /// Application service for generating {DocumentName} documents
+    /// </summary>
+    public class {DocumentName}AppService : SheshaAppServiceBase
+    {
+        private const string TEMPLATE_NAME = "{TemplateName}";
+
+        private readonly IRepository<{EntityType}, Guid> _entityRepository;
+        private readonly IMapper _objectMapper;
+        private readonly IRepository<FileTemplateConfiguration, Guid> _templateRepository;
+        private readonly IStoredFileService _storedFileService;
+        private readonly IRepository<StoredFile, Guid> _storedFileRepo;
+
+        public {DocumentName}AppService(
+            IRepository<{EntityType}, Guid> entityRepository,
+            IMapper objectMapper,
+            IRepository<FileTemplateConfiguration, Guid> templateRepository,
+            IStoredFileService storedFileService,
+            IRepository<StoredFile, Guid> storedFileRepo)
+        {
+            _entityRepository = entityRepository;
+            _objectMapper = objectMapper;
+            _templateRepository = templateRepository;
+            _storedFileService = storedFileService;
+            _storedFileRepo = storedFileRepo;
+        }
+
+        /// <summary>
+        /// Generates and downloads a {DocumentName} Word document
+        /// </summary>
+        [HttpGet]
+        public async Task<FileStreamResult> GenerateAndDownloadDocxAsync(Guid {entityParam}Id)
+        {
+            if ({entityParam}Id == Guid.Empty)
+                throw new UserFriendlyException("Invalid {EntityName} ID.");
+
+            // 1. Load entity
+            var entity = await _entityRepository.GetAsync({entityParam}Id);
+
+            // 2. Build DTO
+            var dto = _objectMapper.Map<{DocumentName}PdfDto>(entity);
+
+            // 3. Populate fields that require manual logic
+            // dto.{ComputedField} = await Compute{Field}Async(entity);
+
+            // 4. Populate repeating regions (if any)
+            // var items = await Get{RegionName}ItemsAsync(entity);
+            // dto.{RegionName} = DocumentProcessManager.GetDataTable(items, "{RegionName}");
+
+            // 5. Resolve template and perform mail merge
+            var document = await LoadTemplateAsync();
+            ExecuteMailMerge(document, dto);
+
+            // 6. Save as Word document
+            using var memoryStream = new MemoryStream();
+            document.Save(memoryStream, SaveFormat.Docx);
+            memoryStream.Position = 0;
+
+            var fileName = GenerateFileName(entity, ".docx");
+            return new FileStreamResult(new MemoryStream(memoryStream.ToArray()),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            {
+                FileDownloadName = fileName
+            };
+        }
+
+        private async Task<Document> LoadTemplateAsync()
+        {
+            var config = await _templateRepository.FirstOrDefaultAsync(r => r.Name == TEMPLATE_NAME);
+            if (config?.DocumentTemplate == null)
+                throw new UserFriendlyException($"Template '{TEMPLATE_NAME}' not found.");
+
+            var templateFile = await _storedFileRepo.GetAsync(config.DocumentTemplate.Id);
+            using var templateStream = await _storedFileService.GetStreamAsync(templateFile.LastVersion());
+            return new Document(templateStream);
+        }
+
+        private static void ExecuteMailMerge(Document document, object dto)
+        {
+            var properties = dto.GetType().GetProperties();
+            var fieldNames = properties
+                .Where(p => p.PropertyType != typeof(DataTable) && p.PropertyType != typeof(DataSet))
+                .Select(p => p.Name).ToArray();
+            var fieldValues = properties
+                .Where(p => p.PropertyType != typeof(DataTable) && p.PropertyType != typeof(DataSet))
+                .Select(p => p.GetValue(dto)).ToArray();
+
+            document.MailMerge.CleanupOptions =
+                MailMergeCleanupOptions.RemoveEmptyParagraphs |
+                MailMergeCleanupOptions.RemoveUnusedFields |
+                MailMergeCleanupOptions.RemoveUnusedRegions;
+
+            // Simple field merge
+            document.MailMerge.Execute(fieldNames, fieldValues);
+
+            // Region merges for DataTable properties
+            foreach (var prop in properties.Where(p => p.PropertyType == typeof(DataTable)))
+            {
+                var table = prop.GetValue(dto) as DataTable;
+                if (table != null)
+                    document.MailMerge.ExecuteWithRegions(table);
+            }
+
+            // DataSet merges for nested regions
+            foreach (var prop in properties.Where(p => p.PropertyType == typeof(DataSet)))
+            {
+                var dataSet = prop.GetValue(dto) as DataSet;
+                if (dataSet != null)
+                    document.MailMerge.ExecuteWithRegions(dataSet);
+            }
+        }
+
+        private static string GenerateFileName({EntityType} entity, string extension)
+        {
+            var identifier = entity.{IdentifierProperty}?.ToString() ?? "Unknown";
+            var fileName = $"{DocumentName}_{identifier}_{DateTime.Now:yyyyMMdd}{extension}";
+            return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
+        }
+    }
+}
+```
+
+### Controller variant
+
+For controllers, use the same `LoadTemplateAsync` and `ExecuteMailMerge` pattern but return `IActionResult`:
+
+```csharp
+[HttpGet("GenerateAndDownloadDocx")]
+public async Task<IActionResult> GenerateAndDownloadDocxAsync(Guid {entityParam}Id)
+{
+    // ... load entity and build DTO (same as PDF variant) ...
+
+    var document = await LoadTemplateAsync();
+    ExecuteMailMerge(document, dto);
+
+    using var memoryStream = new MemoryStream();
+    document.Save(memoryStream, SaveFormat.Docx);
+    var bytes = memoryStream.ToArray();
+
+    var fileName = GenerateFileName(entity, ".docx");
+    return File(bytes,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        fileName);
+}
+```
+
+### Guidance
+
+- `DocumentProcessManager.GenerateAsync()` always outputs PDF. For Word output, use Aspose `Document` directly with `SaveFormat.Docx`.
+- The `LoadTemplateAsync` method resolves the template from `FileTemplateConfiguration` the same way `DocumentProcessManager` does internally.
+- The `ExecuteMailMerge` helper uses reflection to extract field names and values from the DTO, handling `DataTable` regions and `DataSet` nested regions automatically.
+- For embedded resource templates, replace `LoadTemplateAsync` with `GetTemplate()` from `AsposeBuilderBase` (see SS4).
+- When offering **both** PDF and Word endpoints, share the DTO-building and mail merge logic in private methods and only vary the final `document.Save(...)` call and content type.
+
+---
+
 ## SS4 — Embedded Resource Template Variant
 
 Use this when the Word template is bundled in the assembly as an embedded resource instead of being uploaded via the admin UI. This is useful for default/fallback templates or when templates should be version-controlled with the code.
