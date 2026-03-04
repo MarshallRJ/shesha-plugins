@@ -98,8 +98,8 @@ The following property level attributes should be added to entity class properti
 | `[CascadeUpdateRules]` | Applies to properties that reference other entities to specify if updates and create actions should be cascaded to the referenced entity. |
 | `[Description("Description of Property name")]` | Description of Class/Property Name. |
 | `[Encrypt]` | Add to properties that should be persisted in the database as an encrypted string. |
-| `[EntityDisplayName]` | Specifies the property that represents the entity's display name to users. If not explicitly defined, the framework defaults to using a property named 'Name,' if it exists. |
-| `[InverseProperty("ColumnName")]` | Specifies the name of the DB column on the other side of a one-to-many relationship. Add this attribute on any property listing entities that reference it. For example, if you have a `Customer` entity with a collection of `Orders`, you would use this attribute on the `Orders` property to specify the `Customer` property on the `Order` entity, e.g., `[InverseProperty("CustomerId")]` or `[InverseProperty(nameof(Order.Customer) + "Id")]` is more robust. |
+| `[EntityDisplayName]` | Specifies the property that represents the entity's display name to users. **MUST be applied to a `string` property only** — applying it to non-string types (e.g., `Guid`, `int`) will cause GraphQL `_displayName` resolution errors at runtime. If not explicitly defined, the framework defaults to using a property named 'Name,' if it exists. |
+| `[InverseProperty("ColumnName")]` | Specifies the name of the **DB column** (not the C# property name) on the other side of a one-to-many relationship. Add this attribute on any property listing entities that reference it. **CRITICAL: The value must be the database column name, which includes the `Id` suffix for FK columns.** For example, if you have a `Customer` entity with a collection of `Orders`, you would use `[InverseProperty(nameof(Order.Customer) + "Id")]` (resolves to `"CustomerId"`). Using the property name without `Id` (e.g., `"Customer"`) will cause NHibernate `Invalid column name` errors at runtime. |
 | `[NotMapped]` | Identifies properties that Shesha should not attempt to map to the database for read or write purposes. Add this attribute for calculated properties at the application level. |
 | `[ReadonlyProperty]` | Add this attribute to any properties that map to the database but should not be updated by the application layer such as calculated columns at the database level. |
 | `[ReferenceList("RefListName", optional moduleName)]` | Add this to `int` or `long` properties that are associated with a reference list. DO NOT add this attribute when the property returns an enum based reference list as it is redundant. |
@@ -496,6 +496,103 @@ namespace MyApp.AccountsPayable.Domain.PaymentBatches
 </example>
 
 This allows developers to control whether an application service should always be generated, follow the default configuration, or be explicitly disabled.
+
+## View-Backed (Flattened) Entities
+
+When you need a read-only entity that flattens data from multiple related tables (e.g., for list views or reporting), create a **view-backed entity** mapped to a SQL database view.
+
+### Key Rules for View-Backed Entities
+
+1. **Map to a view using `[Table]`** — Use `[Table("ModulePrefix_vw_ViewName")]` to map the entity to the database view instead of a table.
+2. **Mark all properties `[ReadonlyProperty]`** — Since views are read-only, every property must have `[ReadonlyProperty]`.
+3. **Use the same `Id` as the primary table** — The view must return the primary table's `Id` column as its `Id` so NHibernate can map records correctly.
+4. **Do NOT include `TenantId` in the view** — Not all Shesha tables have a `TenantId` column (it depends on whether multi-tenancy filtering is enabled for that table). Including `TenantId` in the view SELECT when the source table lacks it will cause `Invalid column name 'TenantId'` migration errors that **prevent the application from starting**. Only include audit columns (`CreationTime`, `CreatorUserId`, `LastModificationTime`, `LastModifierUserId`, `IsDeleted`, `DeletionTime`, `DeleterUserId`) that actually exist on the source table.
+5. **Use `CREATE OR ALTER VIEW`** — This makes the migration idempotent and safe to re-run.
+6. **Use nullable types for joined columns** — Since LEFT JOINs may produce NULL values, all flattened properties from joined tables should be nullable (e.g., `RefListStatus?`, `Guid?`).
+7. **Flattened FK columns use plain types** — For flattened FK entity references (like `Director` or `PartOf`), keep the entity reference property type and NHibernate will map using the `{Property}Id` column from the view. For scalar values from joined tables (like `Status`, `Outcome`), use the appropriate value type.
+
+### Entity Class Example
+
+```csharp
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Abp.Domain.Entities.Auditing;
+using Shesha.Domain.Attributes;
+
+namespace MyApp.Domain.Orders
+{
+    /// <summary>
+    /// Read-only flattened view of Order with Customer info.
+    /// </summary>
+    [Table("MyModule_vw_OrdersWithCustomerInfo")]
+    [Entity(GenerateApplicationService = GenerateApplicationServiceState.AlwaysGenerateApplicationService,
+        FriendlyName = "Order With Customer Info")]
+    public class OrderWithCustomerInfo : FullAuditedEntity<Guid>
+    {
+        // Order properties
+        [ReadonlyProperty]
+        public virtual string OrderNo { get; set; }
+
+        [ReadonlyProperty]
+        public virtual DateTime? OrderDate { get; set; }
+
+        // Flattened Customer properties
+        [ReadonlyProperty]
+        public virtual string CustomerName { get; set; }
+
+        [ReadonlyProperty]
+        public virtual string CustomerEmail { get; set; }
+    }
+}
+```
+
+### Database Migration Example
+
+```csharp
+[Migration(20250508101500)]
+public class M20250508101500 : OneWayMigration
+{
+    public override void Up()
+    {
+        Execute.Sql(@"
+CREATE OR ALTER VIEW [dbo].[MyModule_vw_OrdersWithCustomerInfo]
+AS
+SELECT
+    o.Id,
+    o.CreationTime,
+    o.CreatorUserId,
+    o.LastModificationTime,
+    o.LastModifierUserId,
+    o.IsDeleted,
+    o.DeletionTime,
+    o.DeleterUserId,
+    o.OrderNo,
+    o.OrderDate,
+
+    -- Flattened Customer columns
+    c.Name          AS CustomerName,
+    c.Email         AS CustomerEmail
+
+FROM [dbo].[MyModule_Orders] o
+LEFT JOIN [dbo].[Core_Accounts] c
+    ON c.Id = o.CustomerId;
+");
+    }
+}
+```
+
+### Column Naming in Views
+
+When flattening properties from joined tables, follow this naming convention in the view SELECT:
+
+| Source | View Column Alias | Entity Property |
+|--------|------------------|-----------------|
+| Reference list (e.g., `StatusLkp`) | `JoinedEntityStatusLkp` | `RefListStatus? JoinedEntityStatus` |
+| Outcome (e.g., `OutcomeLkp`) | `JoinedEntityOutcomeLkp` | `RefListOutcome? JoinedEntityOutcome` |
+| FK column (e.g., `SubjectId`) | `JoinedEntitySubjectId` | `Person JoinedEntitySubject` |
+| Scalar (e.g., `Id`) | `JoinedEntityId` | `Guid? JoinedEntityId` |
+
+NHibernate maps reference list properties to columns with `Lkp` suffix and FK properties to columns with `Id` suffix automatically. The view column aliases must match what NHibernate expects.
 
 ## Placement of Files
 - Aggregate roots should be placed within their own namespace and folder under the Domain folder.

@@ -13,6 +13,7 @@ description: Creates and modifies domain entities, reference lists, and database
 - Adding **generic entity references** (`GenericEntityReference`) for polymorphic associations
 - Creating database migrations for new or modified entities
 - **Creating or updating standalone database migrations** (FluentMigrator migrations, schema changes, table alterations, column additions/removals) — even when no entity change is involved
+- **Creating view-backed (flattened) entities** mapped to database views for read-only querying across joined tables
 - Implementing or updating reference lists (code-based and data-based)
 - Renaming or refactoring domain model properties
 
@@ -163,6 +164,7 @@ After completing any domain model change **and** creating the corresponding data
 Determine the type of change, then follow the appropriate path:
 
 **Creating a new entity?** Follow the New Entity workflow.
+**Creating a view-backed (flattened) entity?** Follow the View-Backed Entity workflow.
 **Modifying an existing entity?** Follow the Entity Update workflow.
 
 ### New Entity Workflow
@@ -178,6 +180,28 @@ Determine the type of change, then follow the appropriate path:
 - [ ] Create database migration for new table(s) and columns
 - [ ] Run `/test-entity-crud-api` to verify all CRUD endpoints work
 ```
+
+### View-Backed Entity Workflow
+
+Use this when creating a read-only entity that flattens data from multiple tables via a database view.
+
+```
+- [ ] Read the source entities to understand all properties and their types
+- [ ] Check the actual database table columns (via migrations) — do NOT assume columns like TenantId exist
+- [ ] Create entity class with:
+      - [Table("ModulePrefix_vw_ViewName")] attribute mapping to the view
+      - [Entity] attribute with GenerateApplicationService and FriendlyName
+      - [ReadonlyProperty] on ALL properties (view is read-only)
+      - Nullable types for all flattened properties from joined tables
+- [ ] Create database migration with CREATE OR ALTER VIEW using Execute.Sql
+      - Use LEFT JOIN for all joined tables
+      - Alias columns correctly: Lkp suffix for reference lists, Id suffix for FKs
+      - Do NOT include TenantId unless verified to exist on the source table
+      - Include audit columns from the primary table only
+- [ ] Run `/test-entity-crud-api` to verify the endpoint works
+```
+
+See [reference/DomainModelling.md](reference/DomainModelling.md) § View-Backed (Flattened) Entities and [reference/DatabaseMigrations.md](reference/DatabaseMigrations.md) § Creating Database Views for detailed patterns and examples.
 
 ### Entity Update Workflow
 

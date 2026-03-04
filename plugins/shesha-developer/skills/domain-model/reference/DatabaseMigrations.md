@@ -339,6 +339,60 @@ namespace MyModule.Migrations
 
 </example>
 
+## Creating Database Views
+
+When creating view-backed (flattened) entities, use `Execute.Sql` with `CREATE OR ALTER VIEW` to create the database view:
+
+<example>
+
+```csharp
+[Migration(20250508101500)]
+public class M20250508101500 : OneWayMigration
+{
+    public override void Up()
+    {
+        Execute.Sql(@"
+CREATE OR ALTER VIEW [dbo].[MyModule_vw_OrdersWithCustomerInfo]
+AS
+SELECT
+    o.Id,
+    o.CreationTime,
+    o.CreatorUserId,
+    o.LastModificationTime,
+    o.LastModifierUserId,
+    o.IsDeleted,
+    o.DeletionTime,
+    o.DeleterUserId,
+    o.OrderNo,
+    o.OrderDate,
+    o.CustomerId,
+
+    -- Flattened columns from joined tables
+    c.Name          AS CustomerName,
+    c.StatusLkp     AS CustomerStatusLkp
+
+FROM [dbo].[MyModule_Orders] o
+LEFT JOIN [dbo].[Core_Accounts] c
+    ON c.Id = o.CustomerId;
+");
+    }
+}
+```
+
+</example>
+
+### Important Rules for View Migrations
+
+1. **Use `CREATE OR ALTER VIEW`** — This makes the migration idempotent. If the view already exists it will be updated, avoiding errors on re-run.
+2. **Use `LEFT JOIN`** — Always use LEFT JOIN for joined tables so rows from the primary table are not excluded when the joined record is NULL.
+3. **Alias flattened columns correctly** — NHibernate expects specific column name suffixes:
+   - Reference list properties → `{Alias}Lkp` suffix (e.g., `CustomerStatusLkp`)
+   - FK properties → `{Alias}Id` suffix (e.g., `CustomerId`)
+   - Scalar values → no suffix (e.g., `CustomerName`)
+4. **Do NOT include `TenantId`** — Not all Shesha tables have a `TenantId` column. Including it when the source table lacks it causes `Invalid column name 'TenantId'` errors that **prevent the application from starting**. Only include columns that actually exist on the source tables.
+5. **Include audit columns from the primary table only** — Include `CreationTime`, `CreatorUserId`, `LastModificationTime`, `LastModifierUserId`, `IsDeleted`, `DeletionTime`, `DeleterUserId` from the primary (base) table.
+6. **View naming convention** — Use `[ModuleDBPrefix]_vw_[PluralizedEntityName]` (e.g., `LB_vw_OrdersWithCustomerInfo`).
+
 ## Custom SQL Queries
 
 You can also use the `Execute.Sql` method to run custom SQL queries:
