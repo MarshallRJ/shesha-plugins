@@ -120,10 +120,7 @@ Example: 37, 36, 35, etc. (or BoxStack-37, BoxStack-36, etc.)
    - If `yarn.lock` exists → yarn
    - If `pnpm-lock.yaml` exists → pnpm
 
-7. **Run update command** (after asking user for permission):
-   - npm: `cd adminportal && npm install`
-   - yarn: `cd adminportal && yarn install`
-   - pnpm: `cd adminportal && pnpm install`
+7. **Note the detected package manager** for use in Step 5a if the user opts to install dependencies.
 
 **Packages to update (typical list):**
 - `@shesha-io/reactjs` (main frontend framework - use Shesha.Enterprise version)
@@ -230,11 +227,24 @@ After making changes:
      - Boxfusion.PublicPortal 0.8.16
    ```
 
-4. **Recommend next steps:**
-   - Run `npm install` (if not already run)
-   - Continue to Step 6 to build and verify backend
+4. **Ask about next steps using `AskUserQuestion` (multi-select):**
 
-### Step 6: Build and Verify Backend
+   Present the following options and let the user choose one or more:
+   - **Install frontend dependencies** — Run `npm install` (or `yarn`/`pnpm`) in `adminportal`
+   - **Build backend** — Run `dotnet restore` + `dotnet build` and resolve any errors
+
+   Only perform the selected actions. Proceed to the relevant sub-steps below based on the user's choices.
+
+#### Step 5a: Install Frontend Dependencies (if selected)
+
+Run the appropriate install command in the `adminportal` folder based on the lock file detected in Step 3:
+- npm: `cd adminportal && npm install`
+- yarn: `cd adminportal && yarn install`
+- pnpm: `cd adminportal && pnpm install`
+
+Report the outcome (success or errors).
+
+### Step 6: Build and Verify Backend (if selected)
 
 After updating backend dependencies, build the solution to catch any breaking changes or compatibility issues.
 
@@ -455,11 +465,12 @@ After upgrading:
    - Boxfusion.DevExpressReporting: 2.6.14
    - Boxfusion.PublicPortal: 0.8.16
    - BoxStack version: 37
-8. Build backend:
-   - Run `dotnet restore` in `/backend`
-   - Run `dotnet build` in `/backend`
-   - If build errors occur, investigate and fix or report to user
-   - Report: "✓ Backend build successful" or list errors found
+8. Ask next steps (AskUserQuestion multi-select):
+   - "Install frontend dependencies" → run `npm install` in `adminportal`
+   - "Build backend" → run `dotnet restore` + `dotnet build` in `/backend`
+9. Execute only the selected actions:
+   - If frontend install selected: run install command, report outcome
+   - If build backend selected: run dotnet build, investigate and fix errors or report to user
 
 ## Important Notes
 

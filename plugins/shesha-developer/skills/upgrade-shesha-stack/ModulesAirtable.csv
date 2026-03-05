@@ -1,6 +1,7 @@
 ﻿Name,Module,Release No,Dependencies,Description,Supported,From field: Dependencies,Created
 boxfusion.content-1.6.7,boxfusion.content,1.6.7,"Shesha.Enterprise-5.0.13,Shesha.Core-0.43.25",Updated to Shesha 0.43.25,,,2026-02-13 9:56am
 boxfusion.content-1.6.6,boxfusion.content,1.6.6,"Shesha.Core-0.43.24,Shesha.Enterprise-5.0.13",Updated to Shesha 0.43.24,,,2026-02-13 9:26am
+boxfusion.devexpressreporting-2.6.15,boxfusion.devexpressreporting,2.6.15,Shesha.Core-0.43.27,Updated to Shesha 0.43.27,,BoxStack-38,2026-03-02 10:25am
 boxfusion.devexpressreporting-2.6.14,boxfusion.devexpressreporting,2.6.14,Shesha.Core-0.43.25,Updated to Shesha 0.43.25,,BoxStack-37,2026-02-10 4:42pm
 boxfusion.devexpressreporting-2.6.13,boxfusion.devexpressreporting,2.6.13,Shesha.Core-0.43.24,Updated to Shesha 0.43.24,,BoxStack-36,2026-01-16 3:46pm
 boxfusion.devexpressreporting-2.6.12,boxfusion.devexpressreporting,2.6.12,Shesha.Core-0.43.23,Updated to Shesha 0.43.23,,BoxStack-35,2026-01-14 9:52am
@@ -36,6 +37,7 @@ boxfusion.devexpressreporting-2.1.0,boxfusion.devexpressreporting,2.1.0,,Updated
 boxfusion.devexpressreporting-2.0.0,boxfusion.devexpressreporting,2.0.0,,Updated to Shesha version 0.39.1,,BoxStack-1,2025-10-17 9:13am
 Boxfusion.PublicPortal-0.9.1,Boxfusion.PublicPortal,0.9.1,Shesha.Core-0.44.3,,,,2026-01-14 4:23pm
 Boxfusion.PublicPortal-0.9.0,Boxfusion.PublicPortal,0.9.0,Shesha.Core-0.44.1,,,,2026-01-14 4:22pm
+Boxfusion.PublicPortal-0.8.18,Boxfusion.PublicPortal,0.8.18,Shesha.Core-0.43.27,,,BoxStack-38,2026-03-02 10:25am
 Boxfusion.PublicPortal-0.8.16,Boxfusion.PublicPortal,0.8.16,Shesha.Core-0.43.25,,,BoxStack-37,2026-02-10 4:42pm
 Boxfusion.PublicPortal-0.8.15,Boxfusion.PublicPortal,0.8.15,Shesha.Core-0.43.24,,,BoxStack-36,2026-01-16 3:45pm
 Boxfusion.PublicPortal-0.8.14,Boxfusion.PublicPortal,0.8.14,Shesha.Core-0.43.23,,,BoxStack-35,2026-01-14 9:49am
@@ -72,6 +74,7 @@ Boxfusion.PublicPortal-0.2.5,Boxfusion.PublicPortal,0.2.5,Shesha.Core-0.39.2,,,,
 Boxfusion.PublicPortal-0.1.0,Boxfusion.PublicPortal,0.1.0,Shesha.Core-0.39.1,,,,2025-10-17 9:29am
 Boxfusion.Sheshamobile-1.3.7,Boxfusion.Sheshamobile,1.3.7,"Shesha.Core-0.43.25,Shesha.Enterprise-5.0.14",Updated to Shesha 0.43.24,,,2026-02-13 10:02am
 Boxfusion.Sheshamobile-1.3.6,Boxfusion.Sheshamobile,1.3.6,"Shesha.Core-0.43.24,Shesha.Enterprise-5.0.13",Updated to Shesha 0.43.24,,,2026-02-13 9:59am
+BoxStack-38,BoxStack,38,"Shesha.Core-0.43.27,boxfusion.devexpressreporting-2.6.15,Shesha.Enterprise-5.0.15,Boxfusion.PublicPortal-0.8.18",,,,2026-03-02 10:27am
 BoxStack-37,BoxStack,37,"Shesha.Core-0.43.25,boxfusion.devexpressreporting-2.6.14,Shesha.Enterprise-5.0.14,Boxfusion.PublicPortal-0.8.16",,,,2026-02-10 4:45pm
 BoxStack-36,BoxStack,36,"Shesha.Core-0.43.24,boxfusion.devexpressreporting-2.6.13,Shesha.Enterprise-5.0.13,Boxfusion.PublicPortal-0.8.15",,,,2026-01-16 3:48pm
 BoxStack-35,BoxStack,35,"Shesha.Core-0.43.23,boxfusion.devexpressreporting-2.6.12,Shesha.Enterprise-5.0.12,Boxfusion.PublicPortal-0.8.14",,,,2026-01-14 9:53am
@@ -113,6 +116,7 @@ Shesha.Core-0.44.3,Shesha.Core,0.44.3,,,,Boxfusion.PublicPortal-0.9.1,2026-01-14
 Shesha.Core-0.44.1,Shesha.Core,0.44.1,,"Fixed async functions, notifications, ReadOnly Button Group. Moved calendar component",,Boxfusion.PublicPortal-0.9.0,2025-11-19 1:30pm
 Shesha.Core-0.44.0,Shesha.Core,0.44.0,,"Updated property panels
 ",,Shesha.Enterprise-6.0.0,2025-10-20 12:13pm
+Shesha.Core-0.43.27,Shesha.Core,0.43.27,,"Auto logout, Back navigation in table; Fixed OnBeforeRowReorder validation logic, User details form fixes",,"Shesha.Enterprise-5.0.15,Boxfusion.PublicPortal-0.8.18,boxfusion.devexpressreporting-2.6.15,BoxStack-38",2026-03-02 10:19am
 Shesha.Core-0.43.25,Shesha.Core,0.43.25,,Enforce password update on first login; Custom footer for Wizard; New Accent property for Panel,,"boxfusion.devexpressreporting-2.6.14,Boxfusion.PublicPortal-0.8.16,Shesha.Enterprise-5.0.14,BoxStack-37,Shesha.Enterprise-5.0.13,boxfusion.content-1.6.7,Boxfusion.Sheshamobile-1.3.7",2026-02-10 4:39pm
 Shesha.Core-0.43.24,Shesha.Core,0.43.24,,Updating EasyNetQ package version to 8.0.1,,"Boxfusion.PublicPortal-0.8.15,boxfusion.devexpressreporting-2.6.13,BoxStack-36,boxfusion.content-1.6.6,Boxfusion.Sheshamobile-1.3.6",2026-01-16 3:40pm
 Shesha.Core-0.43.23,Shesha.Core,0.43.23,,FileList enchancement,,"Shesha.Enterprise-5.0.12,Boxfusion.PublicPortal-0.8.14,boxfusion.devexpressreporting-2.6.12,BoxStack-35",2026-01-14 9:45am
@@ -152,6 +156,7 @@ Shesha.Core-0.39.2,Shesha.Core,0.39.2,,Hotfix,,"Shesha.Enterprise-2.0.9,Boxfusio
 Shesha.Core-0.39.1,Shesha.Core,0.39.1,,Hotfix,,"Shesha.Enterprise-1.9.3,Boxfusion.PublicPortal-0.1.0,BoxStack-1",2025-10-17 9:23am
 Shesha.Core-0.39.0,Shesha.Core,0.39.0,,,,,2025-10-17 9:20am
 Shesha.Enterprise-6.0.0,Shesha.Enterprise,6.0.0,Shesha.Core-0.44.0,"Updated to the latest 0.44.0.Fixed questionnaire, qquestionnaire response, tree, checklist components. New Consolidated Map",,,2025-10-20 12:14pm
+Shesha.Enterprise-5.0.15,Shesha.Enterprise,5.0.15,Shesha.Core-0.43.27,"Updated to the latest 0.43.27. New signature component, new setting for SLA reminder",,BoxStack-38,2026-03-02 10:22am
 Shesha.Enterprise-5.0.14,Shesha.Enterprise,5.0.14,Shesha.Core-0.43.25,Updated to the latest Shesha 0.43.25. Fixed organisation positions forms; New Profile settings page; New Details kebab menu on the workflow action header,,"BoxStack-37,Shesha.Enterprise-5.0.13,Boxfusion.Sheshamobile-1.3.7",2026-02-10 4:43pm
 Shesha.Enterprise-5.0.13,Shesha.Enterprise,5.0.13,"Shesha.Core-0.43.25,Shesha.Enterprise-5.0.14",Updated to the latest 0.43.24. Implemented new custom action for workflow audit; workflow step header with friendly workflow name,,"BoxStack-36,boxfusion.content-1.6.6,boxfusion.content-1.6.7,Boxfusion.Sheshamobile-1.3.6",2026-01-16 3:42pm
 Shesha.Enterprise-5.0.12,Shesha.Enterprise,5.0.12,Shesha.Core-0.43.23,Updated to 0.43.23. Fixed the structured list items not deleting and onblur not working or saving on the richtext editor,,BoxStack-35,2026-01-14 9:46am
