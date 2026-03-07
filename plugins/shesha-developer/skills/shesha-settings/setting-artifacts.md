@@ -150,3 +150,57 @@ IocManager.RegisterSettingAccessor<I{ModuleName}Settings>(x =>
 - Registration goes in `Initialize()` after `RegisterAssemblyByConvention`
 - If the module already has `RegisterSettingAccessor`, add to the existing lambda
 - The `using` for the Configuration namespace must be added to the module file
+
+---
+
+## §5. Compound Setting Editor Form
+
+Compound settings require a configurable form in Shesha whose **form name** matches the `EditorFormName` specified on the `[Setting]` attribute. This form provides the admin UI for editing the compound setting values.
+
+### Creating the editor form via Shesha MCP (preferred)
+
+Check if the Shesha MCP server is connected by looking for MCP tools with names containing `shesha` (e.g., `shesha:create_form`).
+
+**If Shesha MCP IS available:**
+
+1. Use the MCP `create_form` tool to create the editor form. Pass the compound setting class properties as the form requirements. Example prompt to the MCP:
+   > Create a settings editor form named "{editor-form-name}" with fields for: {list each property from the compound class with its type and description}
+
+2. The form name passed to MCP **must exactly match** the `EditorFormName` in the `[Setting]` attribute.
+
+3. After the MCP tool completes, report to the user:
+   - The form name and module it was created under
+   - Any warnings or errors from the MCP
+   - The test URL (via `getTestUrl` MCP tool) so they can preview the form
+
+4. Field naming: use camelCase property names (e.g. `DebitDay` -> `debitDay`, `InitialReminder` -> `initialReminder`).
+
+**If Shesha MCP is NOT available:**
+
+Inform the user that the editor form must be created manually and provide instructions:
+
+> **The Shesha MCP server is not connected**, so the editor form `{editor-form-name}` could not be created automatically.
+>
+> To create it manually:
+> 1. In the Shesha UI, navigate to **Forms** and create a new form.
+> 2. Set the form **name** to `{editor-form-name}` (must match exactly).
+> 3. Add form fields for each property in the compound setting class, using camelCase names:
+>    {list each property with its camelCase name and type}
+> 4. Save and optionally publish the form.
+>
+> To enable automatic form creation in future, install the Shesha MCP server:
+> ```
+> claude mcp add shesha -s local --transport sse http://localhost:8000/sse \
+>   -H "backend_url: http://localhost:{port}" \
+>   -H "backend_username: admin" \
+>   -H "backend_password: 123qwe" \
+>   -H "db_server: ." \
+>   -H "db_database: {DBName}"
+> ```
+
+### Editor form requirements
+
+- Form name must exactly match `EditorFormName` in the `[Setting]` attribute
+- Each property in the compound class needs a corresponding form field in camelCase
+- Use appropriate field types: `number` for `int`/`decimal`, `checkbox` for `bool`, `textField` for `string`, `datePicker` for `DateTime`
+- Add descriptions to fields so administrators understand what each setting controls

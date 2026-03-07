@@ -16,6 +16,7 @@ Generate application setting artifacts for a Shesha/.NET/ABP application based o
 - Setting names follow the pattern `"{Namespace}.{ModuleName}.{SettingName}"`.
 - All entity properties must be `virtual` (NHibernate requirement) — this applies to domain entities, NOT setting classes.
 - Compound setting classes are plain POCOs (no `virtual`, no base class).
+- When creating compound settings, **attempt to create the editor form via the Shesha MCP** — see [setting-artifacts.md](setting-artifacts.md) §5.
 
 ## Artifact catalog
 
@@ -25,9 +26,10 @@ Generate application setting artifacts for a Shesha/.NET/ABP application based o
 | 2 | Setting Accessor Interface | Domain | [setting-artifacts.md](setting-artifacts.md) §2 |
 | 3 | Compound Setting Class | Domain | [setting-artifacts.md](setting-artifacts.md) §3 |
 | 4 | Module Registration | Application | [setting-artifacts.md](setting-artifacts.md) §4 |
-| 5 | Reading/Writing in Services | Application | [usage-patterns.md](usage-patterns.md) §1 |
-| 6 | Front-End Access | Front-End | [usage-patterns.md](usage-patterns.md) §2 |
-| 7 | User-Specific Settings | Domain | [usage-patterns.md](usage-patterns.md) §3 |
+| 5 | Compound Setting Editor Form | Front-End | [setting-artifacts.md](setting-artifacts.md) §5 |
+| 6 | Reading/Writing in Services | Application | [usage-patterns.md](usage-patterns.md) §1 |
+| 7 | Front-End Access | Front-End | [usage-patterns.md](usage-patterns.md) §2 |
+| 8 | User-Specific Settings | Domain | [usage-patterns.md](usage-patterns.md) §3 |
 
 ## Folder structure
 
