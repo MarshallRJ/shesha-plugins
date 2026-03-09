@@ -1,6 +1,6 @@
 ---
 name: shesha-domain-events
-description: Implements domain events and event handling in Shesha/.NET/ABP applications. Creates event data classes, event handlers, and integrates event triggering into services and entities. Covers custom domain events, predefined entity change events (EntityCreated, EntityUpdated, EntityDeleted), and background event queuing. Use when the user asks to create, implement, or wire up domain events, event handlers, event listeners, or event-driven logic in a Shesha project. Also use when the user wants to react to entity changes, decouple business logic via events, or trigger side effects (audit trails, sync, cascading updates) when domain state changes.
+description: Implements domain events and event handling in Shesha/.NET/ABP applications. Creates event data classes, event handlers, and integrates event triggering into services and entities. Covers custom domain events, predefined entity change events (EntityCreated, EntityUpdated, EntityDeleted), and background event queuing. Use when the user asks to create, implement, or wire up domain events, event handlers, event listeners, or event-driven logic in a Shesha project. Also use when the user wants to react to entity changes, decouple business logic via events, or trigger side effects (audit trails, sync, cascading updates) when domain state changes. ALSO USE when the user describes automatic behavior that should happen "when" or "whenever" an entity is created, updated, saved, or deleted — even if they don't mention events explicitly. Common trigger phrases include: "when [entity] is created", "whenever [entity] gets updated", "after [entity] is saved", "automatically [do something] on create/update", "assign [something] when [entity] changes", "sync [related data] when [entity] is modified", "log/track/notify when [entity] is [action]". If the requirement describes a side effect or reaction to an entity lifecycle change, this skill applies.
 ---
 
 # Shesha Domain Events
@@ -84,12 +84,15 @@ No manual registration or module wiring needed.
 
 ### Common use cases
 
-| Use Case | Approach |
-|----------|----------|
-| React to entity CRUD | Handle `EntityCreatedEventData<T>` etc. — no custom event needed |
-| Custom business event | Define `EventData` subclass → trigger via `IEventBus` → handle |
-| Decouple cross-cutting concerns | Handler in separate class, same or different module |
-| Async/background processing | Queue via `IBackgroundJobManager.EnqueueEventAsync()` |
-| Validate/prevent changes | Handle `*ing` event, throw exception to rollback |
+| Use Case | Example Request | Approach |
+|----------|----------------|----------|
+| React to entity CRUD | "Do X when entity is created/updated" | Handle `EntityCreatedEventData<T>` etc. — no custom event needed |
+| Sync related data on save | "Assign a role when employee is created or updated" | Handle `EntityCreatedEventData<T>` + `EntityUpdatedEventData<T>` |
+| Auto-create child records | "Create a verification record when a contact is created" | Handle `EntityCreatedEventData<T>` |
+| Cascade status changes | "When parent status changes, update all children" | Handle `EntityUpdatedEventData<T>`, check property value |
+| Custom business event | "Trigger approval workflow when loan is submitted" | Define `EventData` subclass → trigger via `IEventBus` → handle |
+| Decouple cross-cutting concerns | "Send notification when case is assigned" | Handler in separate class, same or different module |
+| Async/background processing | "Generate report after batch import completes" | Queue via `IBackgroundJobManager.EnqueueEventAsync()` |
+| Validate/prevent changes | "Prevent editing a locked record" | Handle `*ing` event, throw exception to rollback |
 
 Now generate the requested artifact(s) based on: $ARGUMENTS
