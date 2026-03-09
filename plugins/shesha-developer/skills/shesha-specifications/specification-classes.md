@@ -2,7 +2,7 @@
 
 ## §1. Basic Specification
 
-**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (co-located with entity)
+**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (Domain layer) or `Specifications/` (Application layer)
 
 ```csharp
 using Shesha.Specifications;
@@ -72,7 +72,7 @@ public override Expression<Func<{EntityName}, bool>> BuildExpression()
 
 ## §2. Global Specification
 
-**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (co-located with entity)
+**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (Domain layer) or `Specifications/` (Application layer)
 
 Global specifications apply automatically to ALL queries of the entity type via `Repository.GetAll()`. Use for security, data isolation, or access control.
 
@@ -137,7 +137,7 @@ return x => x.AreaLevel1 == currentPerson.AreaLevel1;
 
 ## §3. Parameterized Specification
 
-**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (co-located with entity)
+**File:** `{EntityNamePlural}{Description}Specification.cs` in `Domain/{EntityNamePlural}/` (Domain layer) or `Specifications/` (Application layer)
 
 Parameterized specifications accept constructor arguments. They are typically not auto-discovered for the Query Builder but are used programmatically via `ISpecificationManager`.
 
