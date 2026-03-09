@@ -37,7 +37,9 @@ At minimum, read `plugins/shesha-developer/skills/skill-creator/SKILL.md` before
 - **No extraneous files**: No README.md, CHANGELOG.md, or INSTALLATION_GUIDE.md inside skill folders
 - **All entity properties must be `virtual`** (NHibernate requirement)
 - **Forward slashes only** in file paths within skill docs (no Windows backslashes)
-- **Plugin version**: Bump the `version` field in `plugins/shesha-developer/.claude-plugin/plugin.json` (semver patch) **every time changes are pushed** to the remote. Do this as part of the commit being pushed.
+- **Plugin version**: Bump the `version` field in `plugins/shesha-developer/.claude-plugin/plugin.json` **every time changes are pushed** to the remote. Do this as part of the commit being pushed. Version increment rules:
+  - **Minor** (e.g., 1.6.0 → 1.7.0): When a **new skill** is added (new skill folder created).
+  - **Patch** (e.g., 1.7.0 → 1.7.1): When **enhancements or fixes** are made to existing skills.
 
 ## Commit Message Style
 
