@@ -56,14 +56,16 @@ Generate specification classes and usage code for a Shesha/.NET/ABP application 
 ### Naming convention
 
 `{PluralizedEntityName}{Description}Specification.cs`
+or
+`{EntityName}PermissionsSpecification.cs` for specifications, specifically for the enforcement data visibility rules based on user permissions.
 
 | Entity | Specification | File name |
 |--------|--------------|-----------|
 | `Account` | Active accounts | `AccountsWhereActiveSpecification.cs` |
 | `Organisation` | In user's region | `OrganizationsInUserRegionSpecification.cs` |
-| `Client` | Permitted by user | `ClientsWherePermittedSpecification.cs` |
 | `Order` | Current year | `OrdersForCurrentYearSpecification.cs` |
 | `Person` | Age 18+ | `PersonsWhereAge18PlusSpecification.cs` |
+| `Client` | Permitted by user based on assigned permissions. (Permissions convention). | `ClientPermissionsSpecification.cs` |
 
 ## Quick reference
 

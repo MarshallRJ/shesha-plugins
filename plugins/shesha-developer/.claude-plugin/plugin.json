@@ -1,6 +1,6 @@
 {
     "name": "shesha-developer",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "Shesha backend development toolkit with skills for creating entities, database migrations, and module projects following DDD patterns and framework conventions.",
     "author": {
         "name": "Shesha"
