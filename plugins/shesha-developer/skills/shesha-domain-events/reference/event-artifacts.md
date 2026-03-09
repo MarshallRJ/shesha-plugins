@@ -240,20 +240,48 @@ These handle ABP's **automatically triggered** entity change events — no manua
 
 ### React after entity creation
 
+> **IMPORTANT:** `*ed` events fire **after** the UoW/NHibernate session closes.
+> You MUST create a new UoW for any DB work, and re-load entities within it.
+> Do NOT pass `eventData.Entity` into new DB operations — it is detached from the closed session.
+
 ```csharp
 using Abp.Dependency;
+using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Events.Bus.Entities;
 using Abp.Events.Bus.Handlers;
+using System;
 using System.Threading.Tasks;
 
 namespace {ModuleNamespace}.Application.EventHandlers
 {
     public class {EntityName}CreatedHandler : IAsyncEventHandler<EntityCreatedEventData<{EntityName}>>, ITransientDependency
     {
+        private readonly IRepository<{EntityName}, Guid> _{entityName}Repository;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
+
+        public {EntityName}CreatedHandler(
+            IRepository<{EntityName}, Guid> {entityName}Repository,
+            IUnitOfWorkManager unitOfWorkManager)
+        {
+            _{entityName}Repository = {entityName}Repository;
+            _unitOfWorkManager = unitOfWorkManager;
+        }
+
         public async Task HandleEventAsync(EntityCreatedEventData<{EntityName}> eventData)
         {
-            var entity = eventData.Entity;
+            // Capture primitive values from the detached entity — safe to read
+            var entityId = eventData.Entity.Id;
+
+            // Create a new UoW to get an active NHibernate session
+            using var uow = _unitOfWorkManager.Begin();
+
+            // Re-load the entity within this session for any DB operations
+            var entity = await _{entityName}Repository.GetAsync(entityId);
+
             // React to creation — e.g., send welcome notification, create related records
+
+            await uow.CompleteAsync();
         }
     }
 }
@@ -287,18 +315,30 @@ namespace {ModuleNamespace}.Application.EventHandlers
 
 ```csharp
 using Abp.Dependency;
+using Abp.Domain.Uow;
 using Abp.Events.Bus.Entities;
 using Abp.Events.Bus.Handlers;
+using System;
 using System.Threading.Tasks;
 
 namespace {ModuleNamespace}.Application.EventHandlers
 {
     public class {EntityName}DeletedHandler : IAsyncEventHandler<EntityDeletedEventData<{EntityName}>>, ITransientDependency
     {
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
+
+        public {EntityName}DeletedHandler(IUnitOfWorkManager unitOfWorkManager)
+        {
+            _unitOfWorkManager = unitOfWorkManager;
+        }
+
         public async Task HandleEventAsync(EntityDeletedEventData<{EntityName}> eventData)
         {
-            var entity = eventData.Entity;
+            var entityId = eventData.Entity.Id;
+
+            using var uow = _unitOfWorkManager.Begin();
             // Clean up related resources, notify external systems, etc.
+            await uow.CompleteAsync();
         }
     }
 }
@@ -306,9 +346,10 @@ namespace {ModuleNamespace}.Application.EventHandlers
 
 **Key rules:**
 - Entity change events are in namespace `Abp.Events.Bus.Entities`.
-- `*ing` handlers (EntityCreating, EntityUpdating, EntityDeleting) run **before** transaction commit — throw to rollback.
-- `*ed` handlers (EntityCreated, EntityUpdated, EntityDeleted) run **after** transaction commit — cannot rollback.
-- The `eventData.Entity` property gives you the entity instance directly — no need to re-fetch from the repository.
+- `*ing` handlers (EntityCreating, EntityUpdating, EntityDeleting) run **before** transaction commit — throw to rollback. The NHibernate session is active, so `eventData.Entity` works directly.
+- `*ed` handlers (EntityCreated, EntityUpdated, EntityDeleted) run **after** transaction commit — cannot rollback. **The NHibernate session is CLOSED.**
+- **For `*ed` handlers:** Do NOT use `eventData.Entity` for DB operations — it is detached. Capture its ID/primitive values, create a new UoW with `_unitOfWorkManager.Begin()`, and re-load entities within the new session.
+- **For `*ing` handlers:** The `eventData.Entity` property gives you the entity instance directly — no need to re-fetch from the repository.
 - Inheritance works: handling `EntityCreatedEventData<Person>` also fires for `Student : Person`.
 - These fire automatically for any entity persisted via NHibernate — no opt-in required.
 

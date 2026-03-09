@@ -70,9 +70,43 @@ ABP automatically triggers these when entities are inserted, updated, or deleted
 | `EntityChangedEventData<T>` | After any change committed | Cannot rollback |
 
 **Key rules:**
-- `*ing` events fire before the transaction commits — throw an exception to rollback.
-- `*ed` events fire after commit — use for side effects (notifications, audit, sync).
+- `*ing` events fire before the transaction commits — throw an exception to rollback. The NHibernate session is still active, so `eventData.Entity` can be used directly.
+- `*ed` events fire after commit — use for side effects (notifications, audit, sync). **The NHibernate session is CLOSED** — see "Session gotchas" below.
 - Entity change events support inheritance: registering for `EntityCreatedEventData<Person>` also fires for `Student` if `Student : Person`.
+
+### Session gotchas for `*ed` event handlers
+
+**CRITICAL:** `*ed` events (`EntityCreated`, `EntityUpdated`, `EntityDeleted`) fire **after the UoW completes**, so there is **no active NHibernate session**. Any repository call or lazy-loaded property access will throw `NullReferenceException` or "No session" errors.
+
+**Rules for `*ed` handlers:**
+1. **Capture primitive values** (IDs, enums, strings) from `eventData.Entity` immediately — these are safe.
+2. **Create a new UoW** with `_unitOfWorkManager.Begin()` for any DB operations.
+3. **Re-load entities** within the new UoW using repositories — do NOT pass `eventData.Entity` to new DB operations, as it is detached from the closed session and will cause "Illegal attempt to associate a collection with two open sessions" errors.
+4. **Call `uow.CompleteAsync()`** to commit changes before the `using` block ends.
+
+```csharp
+// CORRECT pattern for *ed handlers:
+public async Task HandleEventAsync(EntityUpdatedEventData<MyEntity> eventData)
+{
+    var entityId = eventData.Entity.Id;           // Safe — just a Guid
+    var status = eventData.Entity.Status;          // Safe — just an enum value
+
+    using var uow = _unitOfWorkManager.Begin();
+    var freshEntity = await _repository.GetAsync(entityId);  // Load in new session
+    // ... do work with freshEntity ...
+    await uow.CompleteAsync();
+}
+
+// WRONG — will throw NullReferenceException or session errors:
+public async Task HandleEventAsync(EntityUpdatedEventData<MyEntity> eventData)
+{
+    var items = await _otherRepo.GetAll()          // No session!
+        .Where(x => x.ParentId == eventData.Entity.Id)
+        .ToListAsync();
+}
+```
+
+**`*ing` handlers** (`EntityCreating`, `EntityUpdating`, `EntityDeleting`) do NOT need this — the session is still active.
 
 ### Handler registration
 
