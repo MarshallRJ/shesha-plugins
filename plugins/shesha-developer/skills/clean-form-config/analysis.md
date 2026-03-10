@@ -121,6 +121,53 @@ For each component, for each key that IS in `allowedKeys` (valid properties):
 
 ---
 
+## Step 4d: Validate `values` item shape for dropdown components
+
+For every component where **`type === 'dropdown'`** and **`dataSourceType === 'values'`**:
+
+1. Skip if `values` is absent, `null`, or not an array.
+2. For each item in the array, check:
+   - **Required keys present**: `label` (string), `value` (string).
+   - **Known keys**: `label`, `value`, `color` (string), `icon` (string), `id` (string). Any other key is an **unknown key**.
+   - **Type check**: `label` and `value` must be strings. `color` and `icon`, if present, must be strings.
+3. Classify each issue:
+   - Missing `label` or `value` → **[MANUAL REVIEW]**
+   - Missing `color` → **[AUTO-FIXABLE]** — add `"color": ""`
+   - Wrong type for `label`, `value`, `color`, or `icon` → **[MANUAL REVIEW]**
+   - Unknown extra key on an item → **[MANUAL REVIEW]**
+4. Report issues grouped by component under "Step 5d". Track auto-fixable vs manual.
+
+---
+
+## Step 4e: Run layout checks
+
+Read [layout-checks.md](layout-checks.md) and run all checks (L1, L2, …) against the full component tree and `formSettings`. Collect results into two lists: **auto-fixable layout issues** and **manual-review layout issues**. Report under Steps 5e and 5f.
+
+---
+
+## Step 4f: Scan scripts for label used instead of propertyName
+
+Build a lookup of every component that has **both** a non-empty `label` (string) **and** a non-empty `propertyName` (string) where `label !== propertyName`.
+
+Walk all JS code strings in the form config (same strings scanned in Step 4b). For each label in the lookup, search the string for the label appearing in data-access patterns:
+
+```
+// bracket notation (works for labels with spaces)
+(?:data|formData|initialValues|values|form)\s*(?:\?\.)?\s*\[\s*['"]LABEL['"]\s*\]
+
+// dot notation (only relevant when label has no spaces)
+(?:data|formData|initialValues|values|form)\s*(?:\?\.)?\s*\.LABEL\b
+```
+
+For each match, record:
+- The component id and property key where the script lives
+- The label string found
+- The correct `propertyName` to use instead
+
+These are **never auto-fixable** — script replacements could change logic. Report under Step 5f.
+
+---
+
 ## Step 5: Present the dead property findings
 
 If no dead properties are found in either components or `formSettings`, skip this section.
@@ -189,6 +236,54 @@ Total: N mismatches (X auto-fixable, Y need manual review)
 
 ---
 
+## Step 5d: Present values shape findings
+
+If no issues were found, skip this section.
+
+Otherwise show:
+
+```
+values shape issues:
+  • "Category" (dropdown) — item[1]: missing color [AUTO-FIXABLE]
+  • "Status" (dropdown) — item[0]: label is not a string [MANUAL REVIEW]
+  • "Status" (dropdown) — item[2]: unknown key "extraProp" [MANUAL REVIEW]
+
+Total: N issues (X auto-fixable, Y manual review)
+```
+
+---
+
+## Step 5e: Present layout findings
+
+If no layout issues were found, skip this section.
+
+Otherwise show auto-fixable issues first, then manual-review issues:
+
+```
+Layout issues:
+  [L2 — span] formSettings: wrapperCol.span=null → set to 16 [AUTO-FIXABLE]
+  [L1 — overflow] "Container1" (container) — desktop: width 200% [MANUAL REVIEW]
+  [L2 — span] "First Name" (textField): 10+10=20 ≠ 24 [MANUAL REVIEW]
+
+Total: N issues (X auto-fixable, Y manual review)
+```
+
+---
+
+## Step 5f: Present script label reference findings
+
+If no matches were found, skip this section.
+
+Otherwise show:
+
+```
+Script label references (N found):
+  • "Submit" (button) [customAction]: uses data['First Name'] — should be data['firstName'] [MANUAL REVIEW]
+  • "Panel" (container) [onLoad]: uses data['Status'] — should be data['status'] [MANUAL REVIEW]
+```
+
+---
+
 ## Step 6: Confirm removal
 
 Ask the user a **single** confirm prompt covering all findings:
@@ -197,14 +292,17 @@ Ask the user a **single** confirm prompt covering all findings:
 >   - X dead properties removed
 >   - Y console.log calls removed
 >   - Z type fixes (W items need manual review — listed above)
+>   - V values shape fixes (U items need manual review — listed above)
+>   - X layout fixes (Y items need manual review — listed above)
+>   - N script label references (manual review only — listed above)
 >
 > Proceed? (yes / no / skip-type-fixes)
 
 Adjust to omit whichever counts are zero. If there is nothing to clean, tell the user and stop.
 
 - **no** → stop, output nothing.
-- **yes** → apply everything (dead props + console.log + all auto-fixable type fixes).
-- **skip-type-fixes** → apply dead props and console.log only.
+- **yes** → apply everything (dead props + console.log + all auto-fixable type/values fixes).
+- **skip-type-fixes** → apply dead props and console.log only (skips both type and values auto-fixes).
 
 ---
 
@@ -219,8 +317,15 @@ Adjust to omit whichever counts are zero. If there is nothing to clean, tell the
    - `"123"` → `parseFloat("123")` for number properties.
    - If the value was wrapped (`_mode: 'value'`), fix `_value` rather than the outer key.
    - Do **not** modify `[MANUAL REVIEW]` items.
-6. Do **not** modify component structure or any valid non-flagged properties.
-7. Output the cleaned `{ components, formSettings }` object as a formatted JSON code block.
+6. Apply auto-fixable values shape fixes:
+   - For each item flagged with missing `color` → add `"color": ""` to the item.
+   - Do **not** modify items flagged `[MANUAL REVIEW]`.
+7. Apply auto-fixable layout fixes (L2 span fixes only):
+   - For each `[AUTO-FIXABLE]` L2 issue: set the absent/null span to `24 − knownSpan` on the same object (`formSettings`, `component.labelCol`, or `component.wrapperCol`).
+   - Do **not** modify `[MANUAL REVIEW]` layout items.
+8. Do **not** auto-fix script label references from Step 4f — these are manual review only.
+9. Do **not** modify component structure or any valid non-flagged properties.
+9. Output the cleaned `{ components, formSettings }` object as a formatted JSON code block.
 
 ---
 
@@ -241,8 +346,24 @@ Type fixes applied:
   • "First Name" (textField) → spellCheck: "true" → true
   • "Age" (numberField) → max: "100" → 100
 
+Values shape fixes applied:
+  • "Category" (dropdown) → item[1]: added color ""
+
+Values items needing manual review (not changed):
+  • "Status" (dropdown) → item[0]: label is not a string
+
 Items needing manual review (not changed):
   • "Container" (container) → alignItems: expected string, got object
+
+Layout fixes applied:
+  • [L2] formSettings: wrapperCol.span set to 16
+
+Layout issues needing manual review (not changed):
+  • [L1] "Container1" (container) — desktop: width 200% (wrap enabled)
+  • [L2] "First Name" (textField): labelCol=10 + wrapperCol=10 = 20
+
+Script label references needing manual review (not changed):
+  • "Submit" (button) [customAction]: uses data['First Name'] — should be data['firstName']
 
 Original size:  XX,XXX chars
 Cleaned size:   YY,YYY chars

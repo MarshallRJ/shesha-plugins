@@ -19,14 +19,28 @@ Run whenever `.claude/shesha/component-properties.json` is:
 mkdir -p .claude/shesha
 ```
 
-Write the following script to `.claude/shesha/generate-component-props.mjs`, then run it:
+Write the script below to `.claude/shesha/generate-component-props.mjs`, then run it using one of these two paths:
 
+**Option A — project already has shesha-reactjs locally** (CWD contains `src/designer-components/`):
 ```bash
 node .claude/shesha/generate-component-props.mjs
 ```
 
-If the script exits with `ERROR: src/designer-components/ not found`, tell the user:
-> This skill must be run from the `shesha-reactjs` project root (the directory containing `src/designer-components/`).
+**Option B — fetch from GitHub** (no local shesha-reactjs):
+```bash
+mkdir -p .claude/shesha/_shesha-tmp
+cd .claude/shesha/_shesha-tmp
+git init
+git remote add origin https://github.com/shesha-io/shesha-reactjs.git
+git sparse-checkout init --cone
+git sparse-checkout set src/designer-components
+git pull --depth=1 origin main
+cd -
+node .claude/shesha/generate-component-props.mjs --root=.claude/shesha/_shesha-tmp
+rm -rf .claude/shesha/_shesha-tmp
+```
+
+If the script exits with `ERROR: src/designer-components/ not found`, the sparse clone likely failed — check network access to GitHub and retry Option B.
 
 ---
 
@@ -37,13 +51,15 @@ import { readFileSync, readdirSync, statSync, writeFileSync, existsSync, mkdirSy
 import { join, dirname, resolve } from 'path';
 
 const CWD = process.cwd();
-const DESIGNER_COMPONENTS_DIR = resolve(CWD, 'src/designer-components');
+const rootArg = process.argv.find(a => a.startsWith('--root='));
+const ROOT = rootArg ? resolve(rootArg.replace('--root=', '')) : CWD;
+const DESIGNER_COMPONENTS_DIR = resolve(ROOT, 'src/designer-components');
 const OUTPUT_DIR = resolve(CWD, '.claude/shesha');
 const OUTPUT_FILE = resolve(OUTPUT_DIR, 'component-properties.json');
 
 if (!existsSync(DESIGNER_COMPONENTS_DIR)) {
   console.error(`ERROR: src/designer-components/ not found at ${DESIGNER_COMPONENTS_DIR}`);
-  console.error('Run this script from the shesha-reactjs project root.');
+  console.error('Run with --root=<path-to-shesha-reactjs> or use the GitHub sparse-clone approach in generate-index.md.');
   process.exit(1);
 }
 

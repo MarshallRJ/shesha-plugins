@@ -1,6 +1,6 @@
 ---
 name: clean-form-config
-description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, and validates property value types. Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
+description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, validates property value types, validates the shape of dropdown values items, detects scripts referencing component labels instead of propertyNames, and runs layout validations (container dimension overflow, labelCol+wrapperCol span checks, device-specific style path conflicts). Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
 ---
 
 # Clean Form Configuration
@@ -21,7 +21,7 @@ node -e "require('fs').statSync('.claude/shesha/component-properties.json')" 2>/
 
 - If **EXISTS** and `data._meta?.version === 2` → proceed to Step 2.
 - If the key `_baseProperties` is present (v1 format) → tell the user "Index is in old format, regenerating..." then treat as MISSING.
-- If **MISSING** → follow [generate-index.md](generate-index.md) to write and run the extraction script.
+- If **MISSING** → follow [generate-index.md](generate-index.md) to write and run the extraction script. If the project does not have a local `shesha-reactjs` checkout, use the GitHub sparse-clone option described there.
 
 ---
 
@@ -44,11 +44,13 @@ Follow [analysis.md](analysis.md) for:
 - **Step 3** — Load and interpret the component properties index (v2 format).
 - **Step 4** — Walk the component tree; identify dead properties and unknown types.
 - **Step 4b** — Scan all string values for `console.log` calls.
-- **Step 4c** — Type-check valid properties; flag auto-fixable and manual-review mismatches.
-- **Step 5 / 5b / 5c** — Present findings (dead props, console.log, type mismatches).
+- **Step 4c / 4d / 4e / 4f** — Type-check valid properties; validate dropdown `values` item shapes; run layout checks (overflow, span, device-style path); scan scripts for label used instead of propertyName.
+- **Step 5 / 5b / 5c / 5d / 5e** — Present findings (dead props, console.log, type mismatches, values shape issues, layout issues).
 - **Step 6** — Single confirmation prompt.
 - **Step 7** — Apply all cleanups and output cleaned JSON.
 - **Step 8** — Summary with size reduction.
+
+Layout checks are defined in [layout-checks.md](layout-checks.md) — new checks can be appended there as L3, L4, etc.
 
 ---
 
