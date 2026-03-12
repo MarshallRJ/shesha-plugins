@@ -94,3 +94,38 @@ curl -s -G "{BASE_URL}/api/services/Shesha/FormConfiguration/GetJson" \
 ```
 
 The response body is the raw form JSON string (same shapes as the normalisation table in [analysis.md § Normalisation](analysis.md#normalisation)). Parse and normalise to `{ components, formSettings }` using the normalisation table in [analysis.md](analysis.md) before proceeding to Step 3.
+
+---
+
+## 5. Push cleaned config to the backend (ImportJson)
+
+Used by Step 9 of the `clean-form-config` skill. `FORM_ID` and `ACCESS_TOKEN` must already be set (from sections 2–4 above, or collected fresh for local-file flows).
+
+Write the cleaned config to a temp file and build the request body via Node to avoid shell-escaping issues:
+
+```bash
+# Write cleaned JSON to temp file first (replace /tmp/cleaned-form.json with the actual output path)
+node -e "
+const fs = require('fs');
+const markup = fs.readFileSync('/tmp/cleaned-form.json', 'utf8');
+const body = JSON.stringify({ itemId: '{FORM_ID}', markup });
+fs.writeFileSync('/tmp/import-body.json', body);
+"
+
+curl -s -X POST "{BASE_URL}/api/services/Shesha/FormConfiguration/ImportJson" \
+  -H "Authorization: Bearer {ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d @/tmp/import-body.json
+```
+
+A successful response looks like:
+
+```json
+{ "result": true }
+```
+
+If the call fails (non-200 status, `result` is `false`, or an `error` key is present), show the raw response to the user and stop — do **not** retry automatically.
+
+On success, confirm:
+
+> Form config successfully pushed to `{BASE_URL}` for form `{FORM_ID}`.
