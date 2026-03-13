@@ -54,6 +54,22 @@ Layout checks are defined in [layout-checks.md](layout-checks.md) — new checks
 
 ---
 
+## Step 9: Push cleaned config back to the API (optional)
+
+After producing the cleaned JSON, ask the user:
+
+> The form has been cleaned. Would you like to push the updated config back to the Shesha backend via the API? (yes / no)
+
+**If no** → skip this step, work is done.
+
+**If yes** → follow Section 5 of [api.md](api.md) to call `ImportJson`.
+
+- If the form was loaded via the API (Step 2 Option A), `FORM_ID` and `ACCESS_TOKEN` are already available — use them directly.
+- If the form was loaded from a local file (Step 2 Option B), or `FORM_ID` / `ACCESS_TOKEN` are not available, first follow [api.md](api.md) sections 1–2 to resolve the base URL and authenticate, then ask the user:
+  > Please enter the form's `itemId` (the UUID of the form configuration record):
+
+---
+
 ## Notes
 
 - **Conservative approach**: ambiguous properties go to manual review, not auto-clean.
