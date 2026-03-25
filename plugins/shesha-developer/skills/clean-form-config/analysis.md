@@ -21,7 +21,7 @@ Verify you have an object with a `components` array before continuing.
 
 ## Step 3: Load the component properties index
 
-Read `.claude/shesha/component-properties.json` (v2 format).
+Read the bundled index: `plugins/shesha-developer/skills/clean-form-config/assets/component-properties.json` (v2 format).
 
 Structure:
 - `_meta` — skip.
@@ -168,6 +168,107 @@ These are **never auto-fixable** — script replacements could change logic. Rep
 
 ---
 
+## Step 4g: Validate JavaScript syntax of code strings
+
+**Scope:** Collect all JS code strings from the component tree:
+- `IPropertySetting` objects where `_mode === 'code'` — use the `_code` string.
+- Standalone string values that contain JS indicators: `function`, `=>`, `return `, `if(`, `var `, `let `, `const `.
+
+For each code string, check for these syntax problems:
+
+| Heuristic | How to detect |
+|---|---|
+| Unmatched braces/parens/brackets | Count opens vs closes for `{`, `[`, `(` — flag if the totals differ |
+| Unclosed string literal | Count unescaped `'`, `"`, `` ` `` occurrences — flag if any count is odd |
+| Template literal `${` without closing `}` | Count `${` vs `}` inside template literals — flag mismatch |
+| `function` missing closing `)` or `{` | Check that each `function(` or `function name(` has a matching `)` followed by `{` |
+
+These are heuristics — reason about the script content to identify the most likely issue. When a script is too long to analyze fully, check the first and last 300 characters for obvious unclosed constructs.
+
+Severity: **`[CRITICAL]`** — invalid scripts throw runtime errors and break form functionality.
+**Never auto-fixable** — repair requires developer intent.
+
+Output format per finding:
+```
+[CRITICAL] Script syntax error
+  Component: <id> (<type>)
+  Property:  <key>
+  Issue:     <description, e.g. "unmatched braces: 3 opens, 2 closes">
+  Excerpt:   <first 120 chars of script>
+```
+
+---
+
+## Step 4h: Detect API calls missing try-catch
+
+Walk all JS code strings (same set as Step 4g).
+
+**API call patterns to match (regex):**
+- `axios\s*\.\s*(get|post|put|delete|patch|request)\s*\(`
+- `fetch\s*\(`
+- `\b(getHttp|postHttp|putHttp|deleteHttp|patchHttp)\s*\(` (Shesha HTTP helpers)
+- `http\s*\.\s*(get|post|put|delete|patch)\s*\(`
+
+For each script containing a match, check whether the call site is inside a try-catch block:
+- Heuristic: scan backwards from the match position for a `try\s*{` that has not yet been closed by a matching `}`.
+- If no enclosing try-catch is found → flag.
+
+Severity: **`[MANUAL REVIEW]`** — best practice, not a crash risk on its own.
+**Never auto-fixable** — the surrounding function structure varies.
+
+Output format per finding:
+```
+[MANUAL REVIEW — add try-catch]
+  Component: <id> (<type>)
+  Property:  <key>
+  API call:  <matched text excerpt>
+  Suggested: wrap the call in try { ... } catch (error) { ... }
+```
+
+---
+
+## Step 4i: Detect API calls missing async/promise handling
+
+Walk all JS code strings (same set as Step 4g). Use the API call patterns from Step 4h.
+
+**Async-context property keys** — these Shesha lifecycle hooks must return a Promise or be declared async:
+
+```
+onFinish, onSubmit, getData, postData, customValidators,
+onValuesChange, onInitialized, onComplete
+```
+
+Flag the following two scenarios as **`[CRITICAL]`**:
+
+**Scenario A — `await` used outside an `async` function:**
+- Script contains `await ` (with trailing space or opening paren) **and**
+- The containing function is NOT declared `async`: none of `async function`, `async (`, `async\s+\w+\s*(` match.
+- This is broken JavaScript — `await` in a non-async context is a syntax/runtime error.
+
+**Scenario B — API call in an async-context property without async handling:**
+- The property key matches the async-context list above **and**
+- The script contains an API call pattern **and**
+- The function is NOT async (no `async function` / `async (`) **and**
+- The call is NOT chained with `.then\s*(` **and**
+- The script does NOT contain `return new Promise\s*(`.
+- Result: the hook executes the call but does not await the response — the operation silently runs in the background and any return value is lost.
+
+**Never auto-fixable.** Report under Step 5i.
+
+Output format per finding:
+```
+[CRITICAL] Missing async/promise handling
+  Component: <id> (<type>)
+  Property:  <key>  (async context — must return a Promise)
+  Scenario:  A — await used in non-async function
+             B — API call result not awaited or chained in async-context property
+  API call:  <matched text excerpt>
+  Fix:       declare the function async and await the call,
+             or chain .then(...).catch(...)
+```
+
+---
+
 ## Step 5: Present the dead property findings
 
 If no dead properties are found in either components or `formSettings`, skip this section.
@@ -284,6 +385,62 @@ Script label references (N found):
 
 ---
 
+## Step 5g: Present script syntax error findings
+
+If no syntax errors were found, skip this section.
+
+Otherwise show:
+
+```
+Script syntax errors (N found — CRITICAL):
+  • "Submit" (button) [customAction]
+      Issue:   unmatched braces: 3 opens, 2 closes
+      Excerpt: function onSubmit(data) { if (data.id) { return axios.post('/api/...
+  • "Panel" (container) [onLoad]
+      Issue:   unclosed string literal (odd number of " characters)
+      Excerpt: const label = "First Name;
+```
+
+---
+
+## Step 5h: Present missing try-catch findings
+
+If no API calls without try-catch were found, skip this section.
+
+Otherwise show:
+
+```
+API calls missing try-catch (N found — manual review recommended):
+  • "Submit" (button) [onFinish]
+      API call:  axios.post('/api/services/...')
+      Suggested: wrap in try { ... } catch (error) { ... }
+  • "Load Data" (customComponent) [getData]
+      API call:  getHttp('/api/...')
+      Suggested: wrap in try { ... } catch (error) { ... }
+```
+
+---
+
+## Step 5i: Present missing async/promise findings
+
+If no async/promise issues were found, skip this section.
+
+Otherwise show:
+
+```
+API calls missing async/promise handling (N found — CRITICAL):
+  • "Submit" (button) [onFinish]  (async context — must return a Promise)
+      Scenario: B — API call not awaited or chained
+      API call:  axios.post('/api/services/...')
+      Fix:       declare function async and await the call, or chain .then().catch()
+  • "Validator" (textField) [customValidators]  (async context — must return a Promise)
+      Scenario: A — await used in non-async function
+      API call:  fetch('/api/...')
+      Fix:       declare function async
+```
+
+---
+
 ## Step 6: Confirm removal
 
 Ask the user a **single** confirm prompt covering all findings:
@@ -295,6 +452,9 @@ Ask the user a **single** confirm prompt covering all findings:
 >   - V values shape fixes (U items need manual review — listed above)
 >   - X layout fixes (Y items need manual review — listed above)
 >   - N script label references (manual review only — listed above)
+>   - S script syntax error(s) — CRITICAL, manual fix required
+>   - T API call(s) missing try-catch — manual review recommended
+>   - U API call(s) missing async handling — CRITICAL, manual fix required
 >
 > Proceed? (yes / no / skip-type-fixes)
 
@@ -364,6 +524,18 @@ Layout issues needing manual review (not changed):
 
 Script label references needing manual review (not changed):
   • "Submit" (button) [customAction]: uses data['First Name'] — should be data['firstName']
+
+Script syntax errors — CRITICAL, fix required:
+  • "Submit" (button) [customAction]: unmatched braces: 3 opens, 2 closes
+  • "Panel" (container) [onLoad]: unclosed string literal
+
+API calls missing try-catch (manual review recommended):
+  • "Submit" (button) [onFinish]: axios.post(...)
+  • "Load Data" (customComponent) [getData]: getHttp(...)
+
+API calls missing async/promise handling — CRITICAL, fix required:
+  • "Submit" (button) [onFinish]: Scenario B — API call not awaited or chained
+  • "Validator" (textField) [customValidators]: Scenario A — await in non-async function
 
 Original size:  XX,XXX chars
 Cleaned size:   YY,YYY chars

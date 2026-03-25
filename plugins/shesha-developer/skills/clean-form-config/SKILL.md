@@ -1,6 +1,6 @@
 ---
 name: clean-form-config
-description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, validates property value types, validates the shape of dropdown values items, detects scripts referencing component labels instead of propertyNames, and runs layout validations (container dimension overflow, labelCol+wrapperCol span checks, device-specific style path conflicts). Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
+description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, validates property value types, validates the shape of dropdown values items, detects scripts referencing component labels instead of propertyNames, runs layout validations (container dimension overflow, labelCol+wrapperCol span checks, device-specific style path conflicts), validates JavaScript syntax of embedded code strings, flags API calls missing try-catch as a best-practice recommendation, and flags API calls in async-context properties that are missing async/await or promise chaining as critical. Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
 ---
 
 # Clean Form Configuration
@@ -9,19 +9,17 @@ Identify and remove **dead properties**, **console.log debug statements**, and *
 
 ---
 
-## Step 1: Ensure component properties index is available
+## Step 1: Load the component properties index
 
-See [generate-index.md](generate-index.md) for full instructions.
+Read the bundled index from the skill's own assets folder:
 
-Check whether `.claude/shesha/component-properties.json` already exists:
-
-```bash
-node -e "require('fs').statSync('.claude/shesha/component-properties.json')" 2>/dev/null && echo "EXISTS" || echo "MISSING"
+```
+plugins/shesha-developer/skills/clean-form-config/assets/component-properties.json
 ```
 
-- If **EXISTS** and `data._meta?.version === 2` → proceed to Step 2.
-- If the key `_baseProperties` is present (v1 format) → tell the user "Index is in old format, regenerating..." then treat as MISSING.
-- If **MISSING** → follow [generate-index.md](generate-index.md) to write and run the extraction script. If the project does not have a local `shesha-reactjs` checkout, use the GitHub sparse-clone option described there.
+This file is maintained by the skill author and ships with the plugin — no generation step is needed. Proceed directly to Step 2.
+
+> **Note for skill maintainers:** To refresh the index after a shesha-reactjs upgrade, follow [generate-index.md](generate-index.md) and replace the file above.
 
 ---
 
@@ -45,7 +43,10 @@ Follow [analysis.md](analysis.md) for:
 - **Step 4** — Walk the component tree; identify dead properties and unknown types.
 - **Step 4b** — Scan all string values for `console.log` calls.
 - **Step 4c / 4d / 4e / 4f** — Type-check valid properties; validate dropdown `values` item shapes; run layout checks (overflow, span, device-style path); scan scripts for label used instead of propertyName.
-- **Step 5 / 5b / 5c / 5d / 5e** — Present findings (dead props, console.log, type mismatches, values shape issues, layout issues).
+- **Step 4g** — Validate JavaScript syntax of all embedded code strings; flag broken scripts as `[CRITICAL]`.
+- **Step 4h** — Detect API calls missing try-catch error handling; flag as `[MANUAL REVIEW]`.
+- **Step 4i** — Detect API calls in async-context properties (onFinish, onSubmit, getData, etc.) that are missing async/await or promise chaining; flag as `[CRITICAL]`. Also flags `await` used outside an `async` function.
+- **Step 5 / 5b / 5c / 5d / 5e / 5f / 5g / 5h / 5i** — Present findings (dead props, console.log, type mismatches, values shape issues, layout issues, label references, script syntax errors, missing try-catch, missing async/promise).
 - **Step 6** — Single confirmation prompt.
 - **Step 7** — Apply all cleanups and output cleaned JSON.
 - **Step 8** — Summary with size reduction.
