@@ -40,6 +40,11 @@ Add the following NuGet package references to your `.csproj` file(s):
 
 - For multiple projects: Add to each `.csproj` file
 
+**Skip these project types — do NOT add analyzers to:**
+- Test projects (any `.csproj` containing `<IsTestProject>true</IsTestProject>` or referencing xUnit/NUnit/MSTest)
+- `*.Web.Host` projects
+- `*.Web.Core` projects
+
 ## Step 2: Configure Analyzer Rules
 
 Replace or update your `.editorconfig` file in the backend folder with the following configuration:

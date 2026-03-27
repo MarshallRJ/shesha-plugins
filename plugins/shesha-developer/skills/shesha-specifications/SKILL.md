@@ -9,7 +9,8 @@ Generate specification classes and usage code for a Shesha/.NET/ABP application 
 
 ## Instructions
 
-- Place specification classes in the **same folder as the entity** they apply to (e.g. `Domain/Accounts/`).
+- **Domain layer specs** (entity filters, global specs, access control): place in the **same folder as the entity** (e.g. `Domain/Accounts/`).
+- **Application layer specs** (service-specific, cross-entity, or depend on application services): place in a `Specifications/` folder in the Application project.
 - Name specs as `{PluralizedEntityName}{Description}Specification.cs` — e.g. `AccountsWhereActiveSpecification.cs`, `OrdersForCurrentUserSpecification.cs`.
 - Specifications must inherit from `ShaSpecification<T>` and implement `BuildExpression()`.
 - All specifications are auto-discovered at startup — no manual registration needed.
@@ -39,21 +40,32 @@ Generate specification classes and usage code for a Shesha/.NET/ABP application 
     {EntityNamePlural}{Description}Specification.cs   ← co-located with entity
 
 {ModuleName}.Application/
+  Specifications/
+    {EntityNamePlural}{Description}Specification.cs   ← application-layer specs
   Services/{EntityNamePlural}/
     {EntityName}AppService.cs          ← inject ISpecificationManager or use attributes
 ```
 
+### Placement guidance
+
+| Place in | When |
+|----------|------|
+| **Domain** (`Domain/{EntityNamePlural}/`) | The spec filters a single entity using only domain concepts (properties, navigation, session context). This is the **default and most common** placement. |
+| **Application** (`Specifications/`) | The spec depends on application services, crosses multiple entity boundaries, or contains orchestration logic that doesn't belong in the domain layer. |
+
 ### Naming convention
 
 `{PluralizedEntityName}{Description}Specification.cs`
+or
+`{EntityName}PermissionsSpecification.cs` for specifications, specifically for the enforcement data visibility rules based on user permissions.
 
 | Entity | Specification | File name |
 |--------|--------------|-----------|
 | `Account` | Active accounts | `AccountsWhereActiveSpecification.cs` |
 | `Organisation` | In user's region | `OrganizationsInUserRegionSpecification.cs` |
-| `Client` | Permitted by user | `ClientsWherePermittedSpecification.cs` |
 | `Order` | Current year | `OrdersForCurrentYearSpecification.cs` |
 | `Person` | Age 18+ | `PersonsWhereAge18PlusSpecification.cs` |
+| `Client` | Permitted by user based on assigned permissions. (Permissions convention). | `ClientPermissionsSpecification.cs` |
 
 ## Quick reference
 
