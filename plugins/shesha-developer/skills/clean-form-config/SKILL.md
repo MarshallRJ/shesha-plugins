@@ -1,6 +1,6 @@
 ---
 name: clean-form-config
-description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, validates property value types, validates the shape of dropdown values items, detects scripts referencing component labels instead of propertyNames, runs layout validations (container dimension overflow, labelCol+wrapperCol span checks, device-specific style path conflicts), validates JavaScript syntax of embedded code strings, flags API calls missing try-catch as a best-practice recommendation, and flags API calls in async-context properties that are missing async/await or promise chaining as critical. Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
+description: Analyzes a Shesha form configuration JSON and removes dead/obsolete component properties, strips console.log calls from JS code strings, validates property value types, validates the shape of dropdown values items, detects scripts referencing component labels instead of propertyNames, runs layout validations (container dimension overflow, labelCol+wrapperCol span checks, device-specific style path conflicts), validates JavaScript syntax of embedded code strings, auto-fixes API calls missing try-catch by wrapping the function body in try/catch, and auto-fixes API calls in async-context properties that are missing async/await by adding the async keyword and awaiting calls. Falls back to manual review when function structure is ambiguous. Also detects API calls using .then() chaining and flags them for conversion to async/await + try-catch. Use when a form has been migrated, components have been refactored, or you want to clean up stale properties and debug statements.
 ---
 
 # Clean Form Configuration
@@ -44,9 +44,10 @@ Follow [analysis.md](analysis.md) for:
 - **Step 4b** — Scan all string values for `console.log` calls.
 - **Step 4c / 4d / 4e / 4f** — Type-check valid properties; validate dropdown `values` item shapes; run layout checks (overflow, span, device-style path); scan scripts for label used instead of propertyName.
 - **Step 4g** — Validate JavaScript syntax of all embedded code strings; flag broken scripts as `[CRITICAL]`.
-- **Step 4h** — Detect API calls missing try-catch error handling; flag as `[MANUAL REVIEW]`.
-- **Step 4i** — Detect API calls in async-context properties (onFinish, onSubmit, getData, etc.) that are missing async/await or promise chaining; flag as `[CRITICAL]`. Also flags `await` used outside an `async` function.
-- **Step 5 / 5b / 5c / 5d / 5e / 5f / 5g / 5h / 5i** — Present findings (dead props, console.log, type mismatches, values shape issues, layout issues, label references, script syntax errors, missing try-catch, missing async/promise).
+- **Step 4h** — Detect API calls missing try-catch; auto-fix by wrapping the function body in try/catch where the structure is unambiguous; fall back to `[MANUAL REVIEW]` for complex scripts.
+- **Step 4i** — Detect API calls in async-context properties (onFinish, onSubmit, getData, etc.) missing async/await; auto-fix by adding `async` to the function signature and `await` before the call; fall back to `[MANUAL REVIEW]` for ambiguous structures. Also detects `await` used outside an `async` function (Scenario A) and auto-fixes it.
+- **Step 4j** — Detect API calls using `.then()` chaining; flag as `[MANUAL REVIEW]` with a recommendation to convert to async/await + try-catch.
+- **Step 5 / 5b / 5c / 5d / 5e / 5f / 5g / 5h / 5i / 5j** — Present findings (dead props, console.log, type mismatches, values shape issues, layout issues, label references, script syntax errors, missing try-catch, missing async/promise, .then() chaining).
 - **Step 6** — Single confirmation prompt.
 - **Step 7** — Apply all cleanups and output cleaned JSON.
 - **Step 8** — Summary with size reduction.

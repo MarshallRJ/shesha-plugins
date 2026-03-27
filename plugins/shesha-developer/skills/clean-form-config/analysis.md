@@ -211,18 +211,34 @@ Walk all JS code strings (same set as Step 4g).
 
 For each script containing a match, check whether the call site is inside a try-catch block:
 - Heuristic: scan backwards from the match position for a `try\s*{` that has not yet been closed by a matching `}`.
-- If no enclosing try-catch is found → flag.
+- If no enclosing try-catch is found → attempt auto-fix.
 
-Severity: **`[MANUAL REVIEW]`** — best practice, not a crash risk on its own.
-**Never auto-fixable** — the surrounding function structure varies.
+**Auto-fix algorithm:**
+1. Locate the outermost function body (between the opening `{` after the function signature and its matching closing `}`).
+2. If the script contains exactly **one** top-level function and no existing partial try-catch wrapping the same call, replace the function body with:
+   ```
+   try {
+     <original body>
+   } catch (error) {
+     console.error('API call failed:', error);
+   }
+   ```
+3. If the script has **multiple top-level functions**, nested function declarations that own the API call, or a partially existing try-catch at the same level → fall back to `[MANUAL REVIEW]`.
+
+Severity: **`[AUTO-FIXABLE]`** for simple single-function scripts; **`[MANUAL REVIEW]`** for complex ones.
 
 Output format per finding:
 ```
+[AUTO-FIXABLE — try-catch added]
+  Component: <id> (<type>)
+  Property:  <key>
+  API call:  <matched text excerpt>
+
 [MANUAL REVIEW — add try-catch]
   Component: <id> (<type>)
   Property:  <key>
   API call:  <matched text excerpt>
-  Suggested: wrap the call in try { ... } catch (error) { ... }
+  Reason:    <why auto-fix was skipped, e.g. "multiple top-level functions">
 ```
 
 ---
@@ -238,12 +254,18 @@ onFinish, onSubmit, getData, postData, customValidators,
 onValuesChange, onInitialized, onComplete
 ```
 
-Flag the following two scenarios as **`[CRITICAL]`**:
+Detect the following two scenarios and attempt auto-fix:
 
 **Scenario A — `await` used outside an `async` function:**
 - Script contains `await ` (with trailing space or opening paren) **and**
 - The containing function is NOT declared `async`: none of `async function`, `async (`, `async\s+\w+\s*(` match.
 - This is broken JavaScript — `await` in a non-async context is a syntax/runtime error.
+
+**Auto-fix for Scenario A:** Add `async` before the function keyword or arrow:
+- `function name(` → `async function name(`
+- `(params) =>` → `async (params) =>`
+- Named arrow assigned to `const name = (params) =>` → `const name = async (params) =>`
+- Fall back to `[MANUAL REVIEW]` if there are multiple function declarations and it is ambiguous which one owns the `await`.
 
 **Scenario B — API call in an async-context property without async handling:**
 - The property key matches the async-context list above **and**
@@ -253,18 +275,51 @@ Flag the following two scenarios as **`[CRITICAL]`**:
 - The script does NOT contain `return new Promise\s*(`.
 - Result: the hook executes the call but does not await the response — the operation silently runs in the background and any return value is lost.
 
-**Never auto-fixable.** Report under Step 5i.
+**Auto-fix for Scenario B:**
+1. Add `async` to the function signature (same rules as Scenario A fix).
+2. Prepend `await ` before each matched API call expression that is not already preceded by `await`.
+3. Fall back to `[MANUAL REVIEW]` if the function structure is ambiguous (e.g., multiple top-level functions, generator functions).
 
 Output format per finding:
 ```
-[CRITICAL] Missing async/promise handling
+[AUTO-FIXABLE] Missing async/promise handling
   Component: <id> (<type>)
   Property:  <key>  (async context — must return a Promise)
-  Scenario:  A — await used in non-async function
-             B — API call result not awaited or chained in async-context property
+  Scenario:  A — await used in non-async function  →  added async to function signature
+             B — API call result not awaited        →  added async + await to call site(s)
   API call:  <matched text excerpt>
-  Fix:       declare the function async and await the call,
-             or chain .then(...).catch(...)
+
+[MANUAL REVIEW] Missing async/promise handling
+  Component: <id> (<type>)
+  Property:  <key>  (async context — must return a Promise)
+  Scenario:  A or B
+  API call:  <matched text excerpt>
+  Reason:    <why auto-fix was skipped>
+  Fix:       declare the function async and await the call
+```
+
+---
+
+## Step 4j: Detect API calls using .then() chaining
+
+Walk all JS code strings (same set as Step 4g). Use the API call patterns from Step 4h.
+
+For each script where an API call pattern is followed by `.then\s*\(`, flag it as a style issue — `.then()` chaining works but is inconsistent with the async/await style used throughout Shesha.
+
+Only flag cases where the `.then(` directly follows an API call pattern or is chained within the same expression. Do not flag `.then(` on non-API call chains.
+
+Severity: **`[MANUAL REVIEW]`** — converting `.then()` callbacks to async/await requires restructuring the callback body, so this is never auto-fixed.
+
+> **Note:** Step 4i still skips Scenario B detection for scripts that use `.then()` (they are handling the async result), but Step 4j will flag those same scripts here for style conversion.
+
+Output format per finding:
+```
+[MANUAL REVIEW — replace .then() with async/await + try-catch]
+  Component: <id> (<type>)
+  Property:  <key>
+  API call:  <matched text excerpt including .then(>
+  Fix:       declare the function async, await the call,
+             and wrap in try { ... } catch (error) { ... }
 ```
 
 ---
@@ -407,16 +462,20 @@ Script syntax errors (N found — CRITICAL):
 
 If no API calls without try-catch were found, skip this section.
 
-Otherwise show:
+Show auto-fixable items first, then manual-review items:
 
 ```
-API calls missing try-catch (N found — manual review recommended):
+API calls missing try-catch (N found):
+  Auto-fixable (try-catch will be added):
   • "Submit" (button) [onFinish]
       API call:  axios.post('/api/services/...')
-      Suggested: wrap in try { ... } catch (error) { ... }
   • "Load Data" (customComponent) [getData]
       API call:  getHttp('/api/...')
-      Suggested: wrap in try { ... } catch (error) { ... }
+
+  Manual review required (not changed):
+  • "Complex" (customComponent) [onLoad]
+      API call:  axios.get('/api/...')
+      Reason:    multiple top-level functions — cannot determine wrapping scope
 ```
 
 ---
@@ -425,18 +484,44 @@ API calls missing try-catch (N found — manual review recommended):
 
 If no async/promise issues were found, skip this section.
 
-Otherwise show:
+Show auto-fixable items first, then manual-review items:
 
 ```
-API calls missing async/promise handling (N found — CRITICAL):
+API calls missing async/promise handling (N found):
+  Auto-fixable (will be updated):
   • "Submit" (button) [onFinish]  (async context — must return a Promise)
       Scenario: B — API call not awaited or chained
       API call:  axios.post('/api/services/...')
-      Fix:       declare function async and await the call, or chain .then().catch()
+      Fix:       add async to function signature + await before call
   • "Validator" (textField) [customValidators]  (async context — must return a Promise)
       Scenario: A — await used in non-async function
       API call:  fetch('/api/...')
-      Fix:       declare function async
+      Fix:       add async to function signature
+
+  Manual review required (not changed):
+  • "Complex" (button) [onFinish]  (async context — must return a Promise)
+      Scenario: B — API call not awaited or chained
+      API call:  axios.post('/api/...')
+      Reason:    ambiguous — multiple top-level functions
+      Fix:       declare the function async and await the call
+```
+
+---
+
+## Step 5j: Present .then() chaining findings
+
+If no `.then()` chaining on API calls was found, skip this section.
+
+Otherwise show:
+
+```
+API calls using .then() chaining (N found — manual review recommended):
+  • "Submit" (button) [onFinish]
+      API call:  axios.post('/api/services/...').then(result => {
+      Fix:       declare function async, await the call, wrap in try { ... } catch (error) { ... }
+  • "Load Data" (customComponent) [getData]
+      API call:  getHttp('/api/...').then(data => {
+      Fix:       declare function async, await the call, wrap in try { ... } catch (error) { ... }
 ```
 
 ---
@@ -453,16 +538,17 @@ Ask the user a **single** confirm prompt covering all findings:
 >   - X layout fixes (Y items need manual review — listed above)
 >   - N script label references (manual review only — listed above)
 >   - S script syntax error(s) — CRITICAL, manual fix required
->   - T API call(s) missing try-catch — manual review recommended
->   - U API call(s) missing async handling — CRITICAL, manual fix required
+>   - T API call(s) missing try-catch auto-fixed (M need manual review — listed above)
+>   - U API call(s) missing async handling auto-fixed (P need manual review — listed above)
+>   - V API call(s) using .then() — manual review recommended (listed above)
 >
 > Proceed? (yes / no / skip-type-fixes)
 
 Adjust to omit whichever counts are zero. If there is nothing to clean, tell the user and stop.
 
 - **no** → stop, output nothing.
-- **yes** → apply everything (dead props + console.log + all auto-fixable type/values fixes).
-- **skip-type-fixes** → apply dead props and console.log only (skips both type and values auto-fixes).
+- **yes** → apply everything (dead props + console.log + all auto-fixable type/values/API fixes).
+- **skip-type-fixes** → apply dead props and console.log only (skips type, values, and API auto-fixes).
 
 ---
 
@@ -484,8 +570,18 @@ Adjust to omit whichever counts are zero. If there is nothing to clean, tell the
    - For each `[AUTO-FIXABLE]` L2 issue: set the absent/null span to `24 − knownSpan` on the same object (`formSettings`, `component.labelCol`, or `component.wrapperCol`).
    - Do **not** modify `[MANUAL REVIEW]` layout items.
 8. Do **not** auto-fix script label references from Step 4f — these are manual review only.
-9. Do **not** modify component structure or any valid non-flagged properties.
-9. Output the cleaned `{ components, formSettings }` object as a formatted JSON code block.
+9. Apply auto-fixable try-catch fixes (Step 4h `[AUTO-FIXABLE]` items):
+   - For each flagged script, locate the outermost function body and wrap its content in `try { ... } catch (error) { console.error('API call failed:', error); }`.
+   - Update the property string value in the cloned component/formSettings object.
+   - Do **not** modify `[MANUAL REVIEW]` try-catch items.
+10. Apply auto-fixable async/await fixes (Step 4i `[AUTO-FIXABLE]` items):
+    - **Scenario A**: In the script string, find the function declaration or arrow that owns the `await` and insert `async` before the `function` keyword or before the parameter list of an arrow function.
+    - **Scenario B**: Apply the Scenario A async-add first, then prepend `await ` before each matched API call expression that is not already preceded by `await `.
+    - Update the property string value in the cloned component/formSettings object.
+    - Do **not** modify `[MANUAL REVIEW]` async items.
+11. Do **not** auto-fix `.then()` chaining findings from Step 4j — these are manual review only.
+12. Do **not** modify component structure or any valid non-flagged properties.
+13. Output the cleaned `{ components, formSettings }` object as a formatted JSON code block.
 
 ---
 
@@ -529,13 +625,23 @@ Script syntax errors — CRITICAL, fix required:
   • "Submit" (button) [customAction]: unmatched braces: 3 opens, 2 closes
   • "Panel" (container) [onLoad]: unclosed string literal
 
-API calls missing try-catch (manual review recommended):
-  • "Submit" (button) [onFinish]: axios.post(...)
-  • "Load Data" (customComponent) [getData]: getHttp(...)
+Try-catch fixes applied:
+  • "Submit" (button) [onFinish]: wrapped function body in try/catch
+  • "Load Data" (customComponent) [getData]: wrapped function body in try/catch
 
-API calls missing async/promise handling — CRITICAL, fix required:
-  • "Submit" (button) [onFinish]: Scenario B — API call not awaited or chained
-  • "Validator" (textField) [customValidators]: Scenario A — await in non-async function
+Try-catch needing manual review (not changed):
+  • "Complex" (customComponent) [onLoad]: multiple top-level functions
+
+Async/await fixes applied:
+  • "Submit" (button) [onFinish]: added async + await before axios.post(...)
+  • "Validator" (textField) [customValidators]: added async to function signature
+
+Async/await needing manual review (not changed):
+  • "Complex" (button) [onFinish]: ambiguous — multiple top-level functions
+
+API calls using .then() — manual review recommended (not changed):
+  • "Submit" (button) [onFinish]: axios.post(...).then(result => {
+  • "Load Data" (customComponent) [getData]: getHttp(...).then(data => {
 
 Original size:  XX,XXX chars
 Cleaned size:   YY,YYY chars
