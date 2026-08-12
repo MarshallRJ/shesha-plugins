@@ -1,6 +1,6 @@
 # Bulk/fleet form transforms (pilot-first)
 
-Mechanics for changing many forms at once without losing fields or regressing working wiring. Routing thresholds (when to go fleet-mode at all) live in [levels.md](levels.md) and SKILL.md; agent dispatch lives in [orchestration.md](orchestration.md). This file is the HOW.
+Mechanics for changing many forms at once without losing fields or regressing working wiring. Routing thresholds (when to go fleet-mode at all) live in SKILL.md Step R; agent dispatch lives in [orchestration.md](orchestration.md). This file is the HOW.
 
 ---
 

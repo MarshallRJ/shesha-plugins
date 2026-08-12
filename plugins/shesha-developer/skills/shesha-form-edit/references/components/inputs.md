@@ -5,6 +5,20 @@ For autocomplete / entityPicker → [selectors.md](selectors.md).
 
 `editMode` per the form-type rule (detail forms `"inherited"`, dialogs/action pages `"editable"`) — see [edit-mode.md](edit-mode.md).
 
+## `defaultValue` is a mustache-TEMPLATE STRING, never a literal non-string
+
+Applies to **every** input type, which is why it lives here rather than under one component.
+
+At render the value resolver calls `defaultValue.match(/{{key.accessor}}/)` to detect a template.
+A literal **array** (a multi-select default like `["a","b"]`), **number** or **object** has no
+`.match` → **`e.match is not a function`**, and the component — often the whole form — fails to
+render.
+
+Allowed: a plain string (returned as-is when it isn't a `{{…}}` expression), or a mustache string.
+
+For a multi-select default (`checkboxGroup`, multi-`dropdown`) do **not** set a literal-array
+`defaultValue` — bind the value through form data / the data loader, or omit it entirely.
+
 ---
 
 ## textField

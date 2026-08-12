@@ -1,6 +1,6 @@
 # Multi-agent orchestration for form fleets
 
-When work spans many forms (or many full-stack pages), single-context editing degrades — context fills with markup, later forms get sloppier, and verification gets skipped. This file is the dispatch playbook. Mechanics of the transforms themselves: [bulk-operations.md](bulk-operations.md). Routing thresholds: [levels.md](levels.md).
+When work spans many forms (or many full-stack pages), single-context editing degrades — context fills with markup, later forms get sloppier, and verification gets skipped. This file is the dispatch playbook. Mechanics of the transforms themselves: [bulk-operations.md](bulk-operations.md). Routing thresholds: SKILL.md Step R.
 
 ---
 

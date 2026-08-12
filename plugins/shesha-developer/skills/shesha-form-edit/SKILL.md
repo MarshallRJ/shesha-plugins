@@ -23,7 +23,7 @@ Round-trip: **GET form JSON → edit → PUT/POST it back**. Also creates new fo
 
 > **Building a form to match a design?** If the requirements arrive as a **layout blueprint** (`<screen>.blueprint.md` from `shesha-developer:shesha-design-comprehension`, usually via the `shesha-claude-designer` orchestrator), treat that blueprint as the structure spec: its `Archetype` picks the seed, its `layout-tree` `flex=[…]`/nesting drive the **flex-container splits** (a `container` with `display:"flex"` + `flexDirection:"row"`, children sized via `desktop.dimensions.width` — **never the `columns` component**) + `parentId`s, and its `bindings` drive `propertyName`s. Build to it exactly — then expect a placement re-measure (the orchestrator's gate 5a.5) against the blueprint's `assertions`. See [references/blueprint-consumption.md](references/blueprint-consumption.md).
 
-Args received: `$ARGUMENTS`. Flags: `--refresh-cache` (ignore TTL, re-distill metadata/seeds), `--no-browser` (skip Step 9 browser smoke), `--no-design` (skip Step 0 / 9.5 design passes).
+Args received: `$ARGUMENTS`. Flags: `--refresh-cache` (ignore TTL, re-distill metadata/seeds), `--no-browser` (skip Step 9 browser smoke).
 
 ## Non-interactive (headless) runs — read this first
 
@@ -41,18 +41,6 @@ Match your process weight to the task, and **default down** when unsure:
 Also **route OUT non-form work** — a pure backend ask (reference list, role, notification, background job, API) goes straight to the sibling skill, not wrapped in form workflow.
 
 **This skill does not AUTHOR style values — but the blocks it composes arrive pre-styled.** Structure + CRUD wiring is the job; *deciding* appearance (palette, type scale, spacing rhythm, surfaces, the brand theme) belongs to `shesha-developer:shesha-design-system`. Composing a block whose overlay is already baked in is not authoring — it is the supported path, and it is why forms come out on-brand without a second pass ([block-library.md](references/block-library.md)). What is banned is inventing hexes, fonts or spacing freehand in a form; that belongs in the block's overlay plus a re-bake. A structural build/edit never reads styling docs and never authors v7 appearance blocks. When the request is "make it look like X / match the design / style it / it looks bad / apply our brand", build/confirm the structure, then hand off: `Skill(shesha-developer:shesha-design-system)`. The ONE layout concern that stays here is **structural splits**, which are flex `container` rows (`display:"flex"` + `flexDirection:"row"`, children sized via `desktop.dimensions.width`) — **never the `columns` component** (firm project rule).
-
-## Step 0 — Design consultation (ask first)
-
-For brand-new forms or major restructures, **ask the user via `AskUserQuestion`** whether to invoke the `frontend-design` skill for a design plan (typography, palette, spatial system, section list):
-
-> Want a design consultation from the `frontend-design` skill for this form? It returns aesthetic direction (~30s extra) before authoring.
-> - **Yes — get a design plan** (recommended for new pages / major restructures)
-> - **No — author from seeds only** (good for adding fields, small tweaks, internal forms)
-
-On Yes: invoke `Skill(skill="frontend-design", ...)` per [references/design.md](references/design.md); cache the plan at `.claude/cache/shesha-form-edit/design-plans/<form-name>.md` for Step 9.5.
-
-**Don't ask** (skip silently) for: trivial edits (add a field, fix a script, change a propertyName), bug fixes, row-template / sub-form / utility forms, or when `--no-design` is in `$ARGUMENTS`. If `frontend-design` isn't installed, warn the user once and continue without it.
 
 ## Step 1 — Resolve backend URL
 
@@ -300,16 +288,6 @@ Full recipes: [references/verification.md](references/verification.md).
 
 **On any captured error or 4xx/5xx**: consult [references/debug.md](references/debug.md) before guessing — it maps common symptoms to causes. Quote the captured error verbatim; reference the matching row number.
 
-## Step 9.5 — Aesthetic review (ask first; skip if `--no-design` or no Step 0 plan)
-
-If a design plan exists for this form, **ask the user via `AskUserQuestion`** whether to run a post-render aesthetic critique:
-
-> Run an aesthetic review on the rendered form via `frontend-design`? It compares the screenshot against the design plan and returns up to 5 prop-level tweaks.
-> - **Yes — review and suggest tweaks**
-> - **No — confirm and finish**
-
-On Yes: pass screenshot + plan + original requirements to `frontend-design`. Surface findings as **suggestions, not blockers** — accept/reject per item; on accept, loop back to Step 5 → 8 → 9. Recipe: [references/design.md](references/design.md).
-
 ## Step 10 — Confirm
 
 Tell the user: form `$FORM_ID` updated. Authenticated forms render at `/dynamic/<module>/<form>`; anonymous at `/no-auth/<module>/<form>`.
@@ -320,58 +298,52 @@ Project-scoped learning state. **Skill reads `.summary.md` by default; opens raw
 
 ## Non-negotiables
 
-- **"list" → `datalist`, "table"/"grid" → `datatable` — build the component the user's wording names.** A "list of X" (or "cards", "feed", "tiles", "gallery") is a `datalist` (card view) — never a datatable, and **never** stacked static `container` cards. A "table"/"grid"/"spreadsheet" is a `datatable` (column grid). Honor the explicit noun even when the other would also render the data; for multi-select-from-a-list use `selectionMode: "multiple"` on the `datalist` (not a switch to a datatable). When the prompt names neither and the shape is genuinely ambiguous, **ask** before building. Decision table + both seeds: [data-tables.md](references/components/data-tables.md).
-- **Every `propertyName` is camelCase — including datatable column `propertyName`s.** Entity GQL field keys are camelCase, but `Metadata/GetProperties` returns the `path` in PascalCase. A PascalCase column still fetches data + shows the right row count, but renders **blank cells** (the cell accessor reads the literal key). Lower-case the first letter (`ActionedBy`→`actionedBy`). **Datalist row-template cards** also have their own runtime rules (name-mode bound text, `dimensions: fit-content`, single-line `ellipsis` for long text, status chip on its own row, padding/overflow via the legacy `style` prop, card `height:"auto"`) — see [data-tables.md](references/components/data-tables.md).
-- **`dataContext` (v8) is the data wrapper for `datatable`/`datalist`.** It's the universal wrapper — verified to render display tables, multiselect tables, datalists, AND inline-editable tables, and it reliably fires the entity data query. Wrap every `datatable`/`datalist` in a `dataContext` carrying `sourceType: "Entity"` + `entityType` (string) + the fetching props (see the template below). The canonical seeds `employee-table.json` / `rs-table.json` use it.
-- **`dataContext` requires explicit `entityType` + `sourceType`** — it does NOT inherit from `formSettings.modelType`. A bare `dataContext` without these props causes HTTP 500 on page load. Mandatory props: `entityType` (string — the resolved `fullClassName` of the same entity `formSettings.modelType` binds; `dataContext.entityType` keeps the string form even though `modelType` is the `{ name, module }` object), `sourceType: "Entity"`, `dataFetchingMode: "paging"`, `defaultPageSize: 10`, `uniqueStateId: "<componentName>"`, `componentName: "<name>"`, `propertyName: "<name>"`. Template:
-  ```json
-  {
-    "type": "dataContext",
-    "version": 8,
-    "entityType": "<resolved fullClassName string — same entity formSettings.modelType binds (modelType is the {name,module} object; this stays a string)>",
-    "sourceType": "Entity",
-    "dataFetchingMode": "paging",
-    "defaultPageSize": 10,
-    "uniqueStateId": "myTable",
-    "componentName": "myTable",
-    "propertyName": "myTable",
-    "sortMode": "standard",
-    "allowReordering": "no"
-  }
-  ```
-- **Every page-level form is wrapped in ONE page-shell card, and everything else lives inside it.** The only root component is a `card` with `hideHeading: true`, `className: "sha-page"`, and border `style: "none"` on the base **and** all three breakpoints; the whole page body goes in its `content.components`. Compose it from [`assets/blocks/page-shell.block.json`](assets/blocks/page-shell.block.json). Full spec + the two traps in the live revision it came from: [containers.md](references/components/containers.md) "page shell". Dialogs and row-template card forms are not page-level and do not take the shell.
-- **Fidelity comes from literal per-component style values, not from the app theme.** A breakpoint block overrides theme defaults per key, so the AntD app theme only reaches chrome (primary button, link, focus ring, canvas, base radius) — tuning it and expecting a page to transform is the most reliably wasted hour in this pipeline. **Compose from pre-styled blocks** ([block-library.md](references/block-library.md)) — that is the whole mechanism. Do not paste literals by hand; a value a block lacks belongs in its overlay plus a re-bake. Detail: [app-theme.md](../shesha-design-system/references/app-theme.md).
-- **`parentId` on every component** — set to the direct parent's `id`; root-level components get `"root"`. Use `stampTree` (see Step 5). Missing `parentId` or all-`root` parentIds crashes the Shesha renderer with no useful error.
-- **`id` must be unique, opaque and stable** — mint with `crypto.randomUUID()`. The failure mode is **short sequential placeholders** (`btn1`, `pr2`), which render blank; it is *not* "non-UUID". Shipped seeds and exported forms are full of nanoid (`8jJ1tFFwhdXB8tGQn7xbB2cwTvcPLe`) and truncated hex that render perfectly, so asserting UUID *format* produces ~110 false findings against a canonical seed — see [verification.md §0](references/verification.md).
-- **Every authored component carries its component-type's current `version`** (an integer). At render Shesha runs each component's settings-migration chain as `upgrade({ ...settings, version: settings.version ?? -1 })`. A component with **no `version`** is treated as `-1`, so the ENTIRE legacy migration chain re-runs on already-current data and a step can throw (`e.match is not a function`, `Cannot read properties of undefined (reading 'migrator')` / `(reading 'version')`). Copy components from a canonical seed that carries `version`, or stamp the current version. Versions are framework-version-specific. **The authority is `assets/components-kb/_index.json`** — `grep -A2 '"<type>"' assets/components-kb/_index.json`, or use the mirrored table in [component-cheatsheet.md](references/component-cheatsheet.md), which `scripts/check-references.mjs` keeps in sync. Do not hand-maintain a third list here; the one that used to live on this line had `dataContext` at 7 while the template 20 lines above says 8. **A stale/too-low version doesn't only risk a migration throw — it can SILENTLY DROP the component's entire `desktop` style block** (style-lab verified: a `numberField` at v3 ignored its style block entirely; at v5 the same block applied). So copying versions from the running app is a *styling* prerequisite, not just a render one.
-- **`defaultValue` is a mustache-TEMPLATE STRING, never a literal non-string.** At render the value resolver does `defaultValue.match(/{{key.accessor}}/)` to detect templates. A literal **array** (e.g. a multi-select default `["a","b"]`), **number**, or **object** has no `.match` → **`e.match is not a function`**, and the component (often the whole form) fails to render. Allowed: a plain string (returned as-is when not a `{{…}}` expression) or a mustache string. For a multi-select default (checkboxGroup / multi-`dropdown`), do NOT set a literal-array `defaultValue` — bind the value through form data / the data loader, or omit it.
-- **Datatable inline-editing column editors (verified shape):** an inline-editable `data` column's `editComponent`/`createComponent` MUST be either `{ "type": "[not-editable]" }` (read-only cell) OR `{ "type": "<editorType>", "settings": { <FULL component model: its own `type` + `version` + `editMode:"inherited"` + `hideLabel:true` + styling> } }`. **NEVER `{ "type": "[default]" }`** (only `displayComponent` resolves `[default]`; edit/create cells pass it straight to the component wrapper → `F6()["[default]"]` is `undefined` → `reading 'migrator'`), and **NEVER a FLAT model without the `settings` wrapper** (the cell wrapper reads `customComponent.settings`; flat → `undefined` → `reading 'version'`). Per-row Edit/Delete/Save controls require a `{ "columnType": "crud-operations", "sortOrder": -1, "itemType": "item" }` column, plus `canEditInline`/`canAddInline`/`canDeleteInline: "yes"` on the datatable. Full recipe + seed: [inline-editable-tables.md](references/components/inline-editable-tables.md).
-- **`checkboxGroup` hardcoded options use `items` (NOT `values`), each `{ label, value }`** — plus `version: 5`, `dataSourceType: "values"`, `referenceListId: null`, `container: {}`, `validate: {}`. (`dropdown`/`radio` use `values` with `{id,label,value}`; `checkboxGroup` is different — do not conflate.) See [dropdowns.md](references/components/dropdowns.md).
-- **CRUD wiring follows the canonical examples (`references/examples.md`), not ad-hoc navigation:**
-  - **Table "Add" button** = a `buttonGroup` item with `buttonAction: "dialogue"`, `actionConfiguration.actionName: "Show Dialog"` (owner `shesha.common`), `actionArguments.formId: { name: "<create-form>", module: "<module>" }`, `modalWidth: "60%"`, `formMode: "edit"`. It opens the create form in a **modal** — verified to render the create form's fields inline. Do NOT make Add a Navigate.
-  - **Detail-view lifecycle buttons** = a header `buttonGroup`: Edit → `Start Edit`, Save → `Submit`, Cancel → `Cancel Edit` (all owner `shesha.form`); optional Audit Log → `Show Dialog` → `{ name: "entity-change-audit-log", module: "Shesha" }`. The form toggles edit state in place; there is no manual navigate-back Save.
-  - **Standalone create/edit page Save + Back** = one `buttonGroup`: Save → `Submit`/`shesha.form` (primary), Back → `Navigate`/`shesha.common` (default). Copy `assets/examples/standalone-create.json` whole. **The Back button is mandatory even when the prompt mentions no buttons** (e.g. "a form with one required field") — a create form with no way out is incomplete.
-  - **Toolbar Refresh / column-toggle** buttons use `actionName: "Refresh table"` / `"Toggle Columns Selector"` with `actionOwner` set to the **dataContext component's id**.
-  - **Row → detail navigation** (only when a separate detail page is wanted): action column item with `columnType: "action"`, `action: "navigate"`, `targetUrl: "/dynamic/<module>/<form>?id={{selectedRow.id}}"`, `icon: "EditOutlined"`.
-- **`actionArguments.target`** for plain Navigate actions: `{ actionName: "Navigate", actionOwner: "shesha.common", actionArguments: { target: "/dynamic/..." } }`.
-- **Preserve ids** on existing components — fresh GUIDs only on clones / new nodes.
-- **`editMode` is per form type — never blanket-stamp either value.** Detail forms with Start Edit/Submit lifecycle: `"inherited"` (explicit `"editable"` makes fields editable before Edit is clicked). Create/edit dialogs and action/anonymous pages: `"editable"` (`"inherited"` renders dead inputs there). Visual components: omit. Full decision table: [edit-mode.md](references/components/edit-mode.md).
-- **Contextually-preset required FKs on create dialogs need BOTH a real component AND `formSettings.onPrepareSubmitData`** — `formArguments`/`setFieldsValue` alone never reach the submit payload (only `_formFields` serialize). Omission = `Crud/Create` 500. See [add-dialogs.md](references/components/add-dialogs.md).
-- **Row delete/unlink = Execute Script + `await http.delete(...)` + onSuccess `Refresh table` with actionOwner = the dataContext component id.** `actionName: "Delete row"` with owner `"table"` does not exist and throws. See [junction-subtables.md](references/components/junction-subtables.md).
-- **Code-mode props are objects** — a dataContext `endpoint` (or any code-carrying prop) stored as a plain JS string is silently stripped on save; use `{ "_mode": "code", "_code": "..." }`.
-- **JSON-safe script strings** — ALL script values embedded in form JSON must be serialisable without breaking the outer `JSON.stringify`. Rules: (a) no template literals — use string concatenation instead of `` `${x}` ``; (b) no unescaped newlines — use `\n`; (c) no smart/curly quotes — use straight quotes; (d) validate every script-containing component with `node -e "JSON.stringify(comp)"` before push. A broken script string produces `"Expected ',' or '}' after property value"` parse errors in the browser.
-- **No `globalState`** for cross-form state. Default to `contexts.appContext` (app-wide) or `pageContext` (inter-page). `localStorage` / `sessionStorage` are OK only when state must survive a hard refresh AND the data is not sensitive (no auth tokens / PII) — see [shared-state.md](references/components/shared-state.md).
-- **API calls in scripts**: `try/catch` + `async/await` (no `.then()` chains) — see [scripts.md](references/components/scripts.md).
-- **Mustache expressions always use `{{double braces}}`** — e.g. `{{data.id}}`, `{{selectedRow.id}}`. Never write `{data.id}` (single brace). Single-brace expressions are silently ignored at runtime, producing empty values with no error.
-- **A domain change requires a backend rebuild + restart before the entity is usable** — follow [references/backend-restart.md](references/backend-restart.md). Order: domain change → restart → poll the entity's `…/Crud/GetAll` until 200 → then build the form. **Never relaunch IIS Express outside Visual Studio** (`hostingModel=InProcess` + `%LAUNCHER_PATH%` → 500.0 ANCM); headless = take over :21021 with `dotnet` (Kestrel), attended = hand the restart to VS. A **new** entity needs **two boots** (its dynamic CRUD controller registers a boot late). After any restart, re-verify your forms resolve by name (`GetByName`) and re-push if a live revision was orphaned.
-- **`access: 5`** on anonymous forms (login, register, OTP). Verify post-push via re-fetch.
-- **PowerShell + non-ASCII body**: pass UTF-8 bytes (em dashes / curly quotes trigger server 500 — `Unable to translate bytes [E2] ... from specified code page to Unicode`). Use `[System.Text.Encoding]::UTF8.GetBytes($jsonBody)` or `curl --data-binary @file`. And write staged JSON files **without a BOM** (`New-Object System.Text.UTF8Encoding $false`) — `Out-File -Encoding utf8` emits a BOM that breaks Node's `JSON.parse`. Recipe in [api.md](references/api.md).
-- **Human-readable labels on every field** — labels are user-facing AND how browser-based tests locate fields; a raw `propertyName` as a label fails both. Full contract: [form-quality.md](references/form-quality.md).
-- **`modelType` is the object `{ name, module }`, resolved, never assumed** — write `formSettings.modelType` as `{ "name": "<ShortClass>", "module": "<Module>" }` (e.g. `{ "name": "Person", "module": "Shesha" }`), the shape current Shesha builds emit. A bare full-class-name string still renders on legacy forms but is not the shape to author. Resolve `name`+`module` (and the `fullClassName` string the metadata fetch + `dataContext.entityType` need) from `EntityConfig/GetMainDataList` for the running backend (Step 4.5). Never hardcode a namespace from memory or from this doc's examples; `Shesha.Core.*` vs `Shesha.Domain.*` is version-dependent and a mismatch 500s at runtime.
-- **Favour the default endpoints when binding a form to a type.** An entity-bound form (`formSettings.modelType` set) uses `dataLoaderType: "gql"` + `dataSubmitterType: "gql"` — the entity's standard dynamic CRUD/GraphQL endpoints, resolved from `modelType` with no URL supplied. Use `"none"` only for non-loading forms (card templates, anonymous/action pages). A **custom form-level loader/submitter endpoint is opt-in only** — wire one solely when the user explicitly asks for a specific endpoint (or in a documented forced case), and build/verify it via `shesha-developer:shesha-app-layer` first. Never reach for a custom endpoint by default. Detail + decision table: [form-shape.md](references/components/form-shape.md).
-- **A `validationErrors` component is ALWAYS in the tree** (conventionally just above the action row) **whenever the form has any required input**. Omitting it makes a failed submit render nothing — the user sees a dead form. Type string is exactly `validationErrors`; it takes no props. This applies to simple forms too — it is not an "advanced" extra.
-- **Form action buttons live in a `buttonGroup`, never as standalone `button` components — and the Save button MUST carry `actionConfiguration: { actionName: "Submit", actionOwner: "shesha.form" }`.** Save/Submit, Back/Cancel, Edit, Delete, Refresh, Add — every action goes in a single `buttonGroup` (`items[]` of `{ itemType: "item", itemSubType: "button", buttonType, buttonAction, actionConfiguration }`), not as loose top-level `button` nodes. This is the **single highest-leverage rule** — a standalone `button` (type `"button"`) or a Submit wired to anything other than `Submit`/`shesha.form` causes three problems at once: (1) the scattered button reads as ungrouped/inconsistent layout; (2) tooling that infers a form's *intent* from its `buttonGroup` item actions can misread an editable form as read-only when there's no proper `Submit`/`shesha.form` action to detect; and (3) the submit wiring never fires. The standalone `button` type in [actions.md](references/components/actions.md) is reserved for rare inline-in-content cases (e.g. a button beside a paragraph), never the form's action row. A **Back** button is a `buttonGroup` item with `actionName: "Navigate"` (owner `shesha.common`). Canonical structure: copy a `buttonGroup` from a seed in `assets/examples/`.
-- **Minimal component count — add only what the request needs, but the Submit + exit pair is part of the floor, not an extra.** Every editable form is exactly: the requested input fields + a `validationErrors` + one `buttonGroup` holding **both Submit and an exit (Back/Close/Cancel) button** + the minimum structure to satisfy layout (one `columns`/`sectionSeparator` when >5 inputs). A terse prompt that names only fields ("a form with one required first-name field") still gets the Submit **and** the exit button — they are part of a working form, never "unnecessary extras", and a Submit with no exit is an incomplete form. What to avoid is padding the user didn't ask for: extra containers, decorative panels, headers, or duplicate wrappers, and (for tables) unrequested toolbar chrome. Seeds are a starting point: after copying, strip every node the current request doesn't use — but never the `validationErrors` or the Submit/exit pair.
+Rules that have no other home, or that are cheap to state and expensive to miss. **Everything else
+lives in exactly one reference file** — the table below is the index, not a summary. This section
+used to restate ~24 rules that already existed verbatim elsewhere; the copies drifted (four
+independent component-version lists, three `editMode` rules, four `modelType` rules), which is the
+whole reason for the split.
+
+### Renderer-fatal — get these wrong and the form renders blank or throws
+
+- **`parentId` on every component** — the direct parent's `id`; root-level components get `"root"`. Stamp with `stampTree` (Step 5). Missing or all-`root` parentIds crash the renderer with no useful error.
+- **`id` unique, opaque and stable** — mint with `crypto.randomUUID()`. The failure is **short sequential placeholders** (`btn1`, `pr2`), not "non-UUID": nanoid and truncated-hex ids render fine ([verification.md §0](references/verification.md)).
+- **Every component carries its integer `version`.** A versionless component is treated as `-1`, re-runs the entire legacy migration chain and can throw (`e.match is not a function`, `reading 'migrator'`). Worse, a **too-low version silently drops the component's whole `desktop` style block** — `numberField` at v3 ignored its styling; at v5 the same block applied. Numbers: [component-cheatsheet.md](references/component-cheatsheet.md), mirrored from `assets/components-kb/_index.json`. Never hand-maintain another list.
+- **`defaultValue` is a mustache-template STRING**, never a literal array/number/object — [inputs.md](references/components/inputs.md).
+- **Code-mode props are objects** — a `dataContext` `endpoint` (or any code-carrying prop) stored as a plain string is silently stripped on save; use `{ "_mode": "code", "_code": "…" }`.
+- **Mustache always `{{double braces}}`** — `{data.id}` is silently ignored at runtime and yields an empty value with no error.
+- **`dataContext` is the data wrapper for every `datatable`/`datalist`** — the universal wrapper, and it fires the entity query. It needs explicit `entityType` + `sourceType`; it does **not** inherit them from `formSettings.modelType`, and a bare one 500s on page load. Shape: [component-cheatsheet.md](references/component-cheatsheet.md); rules: [data-tables.md](references/components/data-tables.md).
+
+### Structural
+
+- **One page-shell card wraps every page-level form**, everything else inside its `content.components` — `hideHeading: true`, `className: "sha-page"`, no border on base and all three breakpoints. Compose [`assets/blocks/page-shell.block.json`](assets/blocks/page-shell.block.json). Dialogs and row templates are not pages. Spec: [containers.md](references/components/containers.md).
+- **Splits are flex `container` rows, never `columns`** — [capability-matrix.md §flex-split](../shesha-design-system/references/capability-matrix.md#flex-split).
+- **Preserve ids** on existing components; fresh ids only on clones and new nodes.
+- **`access: 5`** on anonymous forms (login, register, OTP) — verify by re-fetch after push.
+- **`actionArguments.target`** for plain Navigate: `{ actionName: "Navigate", actionOwner: "shesha.common", actionArguments: { target: "/dynamic/…" } }`.
+
+### Fidelity
+
+- **The app theme only reaches chrome.** A breakpoint block overrides theme defaults per key, so tuning the AntD theme and expecting a page to transform is the most reliably wasted hour here. Compose pre-styled blocks ([block-library.md](references/block-library.md)); a value a block lacks belongs in its overlay plus a re-bake, never typed into a form. Why: [app-theme.md](../shesha-design-system/references/app-theme.md).
+
+### Everything else — one owner each, read on demand
+
+| Rule | Owner |
+|---|---|
+| "list" → `datalist`, "table"/"grid" → `datatable`; row-template card runtime rules | [data-tables.md](references/components/data-tables.md) |
+| camelCase every `propertyName`, incl. datatable columns | [form-quality.md](references/form-quality.md) |
+| `editMode` per form type, incl. the read-only rail case | [edit-mode.md](references/components/edit-mode.md) |
+| `modelType` = resolved `{ name, module }`; default gql endpoints | [form-shape.md](references/components/form-shape.md) |
+| CRUD wiring — Add dialog, detail lifecycle, standalone Save+Back, toolbar, row→detail | [examples.md](references/examples.md) |
+| Contextually-preset FKs need a real component **and** `onPrepareSubmitData` | [add-dialogs.md](references/components/add-dialogs.md) |
+| Row delete/unlink = Execute Script + `http.delete` + `Refresh table` | [junction-subtables.md](references/components/junction-subtables.md) |
+| Inline-editing column editors (`[not-editable]` / full `settings`, never `[default]`) | [inline-editable-tables.md](references/components/inline-editable-tables.md) |
+| `checkboxGroup` uses `items`, not `values` | [dropdowns.md](references/components/dropdowns.md) |
+| `validationErrors` always present; human-readable labels; buttonGroup + Submit/exit pair; minimal component count | [form-quality.md](references/form-quality.md) |
+| JSON-safe script strings; `try/catch` + `async/await`, no `.then()` | [scripts.md](references/components/scripts.md) + Step 5.5 |
+| No `globalState` — use `contexts.appContext` / `pageContext` | [shared-state.md](references/components/shared-state.md) |
+| Backend rebuild + restart after a domain change (budget 2–3 boots) | [backend-restart.md](references/backend-restart.md) |
+| PowerShell UTF-8 bytes + BOM-free staged files | [api.md](references/api.md) |
 
 ## Required skill & agent invocations
 
