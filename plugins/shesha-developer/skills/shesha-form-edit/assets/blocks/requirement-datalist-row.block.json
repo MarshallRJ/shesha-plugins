@@ -54,7 +54,10 @@
         "componentName": "dc_requirements",
         "propertyName": "dc_requirements",
         "version": 7,
-        "entityType": { "name": "$binding:rowEntityName", "module": "$binding:rowEntityModule" },
+        "entityType": {
+          "name": "$binding:rowEntityName",
+          "module": "$binding:rowEntityModule"
+        },
         "sourceType": "Url",
         "endpoint": {
           "_mode": "code",
@@ -77,8 +80,23 @@
             "flexWrap": "nowrap",
             "gap": "8px",
             "components": [
-              { "type": "datatable.quickSearch", "componentName": "qs_requirements", "propertyName": "qs_requirements", "version": 3, "desktop": {}, "tablet": {}, "mobile": {} },
-              { "type": "datatable.pager", "componentName": "pager_requirements", "version": 4, "desktop": {}, "tablet": {}, "mobile": {} }
+              {
+                "type": "datatable.quickSearch",
+                "componentName": "qs_requirements",
+                "propertyName": "qs_requirements",
+                "version": 3,
+                "desktop": {},
+                "tablet": {},
+                "mobile": {}
+              },
+              {
+                "type": "datatable.pager",
+                "componentName": "pager_requirements",
+                "version": 4,
+                "desktop": {},
+                "tablet": {},
+                "mobile": {}
+              }
             ]
           },
           {
@@ -87,7 +105,10 @@
             "componentName": "dl_requirements",
             "propertyName": "dl_requirements",
             "formSelectionMode": "name",
-            "formId": { "module": "$binding:rowTemplateModule", "name": "$binding:rowTemplateFormName" },
+            "formId": {
+              "module": "$binding:rowTemplateModule",
+              "name": "$binding:rowTemplateFormName"
+            },
             "formType": "Table",
             "selectionMode": "none",
             "orientation": "vertical",
@@ -104,7 +125,11 @@
     ]
   },
   "$rowTemplate": {
-    "$publishAs": { "formType": "Table", "module": "$binding:rowTemplateModule", "name": "$binding:rowTemplateFormName" },
+    "$publishAs": {
+      "formType": "Table",
+      "module": "$binding:rowTemplateModule",
+      "name": "$binding:rowTemplateFormName"
+    },
     "$note": "Published as its own Table-type form; the datalist stamps one instance per record. Root is the CARD surface (a styled container, NOT a 'card' component — the whole row is one flex column). The `style` overflow values and the body minHeight reserve are the row-template COLLAPSE/SCROLL fix (see block $note) and must NOT be stripped; brand visuals (bg/border/radius/shadow/padding/fonts) come from the requirement-datalist-row overlay.",
     "type": "container",
     "componentName": "rowCard",
@@ -116,7 +141,48 @@
     "flexWrap": "nowrap",
     "gap": "8",
     "style": "return { overflow: 'hidden', boxSizing: 'border-box' };",
-    "desktop": { "dimensions": { "width": "auto", "height": "auto", "minHeight": "fit-content", "maxHeight": "auto", "minWidth": "0px", "maxWidth": "100%" } },
+    "desktop": {
+      "dimensions": {
+        "width": "auto",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "100%"
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "stylingBox": "{\"paddingTop\":\"14\",\"paddingRight\":\"16\",\"paddingBottom\":\"14\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
+    },
     "components": [
       {
         "type": "container",
@@ -129,7 +195,15 @@
         "flexWrap": "nowrap",
         "gap": "8",
         "style": "return { overflow: 'visible' };",
-        "desktop": { "dimensions": { "width": "100%", "minWidth": "100%", "maxWidth": "100%", "minHeight": "fit-content" } },
+        "desktop": {
+          "dimensions": {
+            "width": "100%",
+            "minWidth": "100%",
+            "maxWidth": "100%",
+            "minHeight": "fit-content"
+          },
+          "stylingBox": "{}"
+        },
         "components": [
           {
             "type": "container",
@@ -142,7 +216,13 @@
             "flexWrap": "wrap",
             "gap": "8",
             "style": "return { overflow: 'visible' };",
-            "desktop": { "dimensions": { "width": "fit-content", "minWidth": "0px", "maxWidth": "calc(100% - 80px)" } },
+            "desktop": {
+              "dimensions": {
+                "width": "fit-content",
+                "minWidth": "0px",
+                "maxWidth": "calc(100% - 80px)"
+              }
+            },
             "components": [
               {
                 "type": "text",
@@ -151,8 +231,50 @@
                 "version": 5,
                 "textType": "span",
                 "contentDisplay": "content",
-                "content": { "_mode": "code", "_code": "$binding:rowNumberContent  // return data.refNo;  // OMIT this component if there is no stable per-row number" },
-                "strong": true
+                "content": {
+                  "_mode": "code",
+                  "_code": "$binding:rowNumberContent  // return data.refNo;  // OMIT this component if there is no stable per-row number"
+                },
+                "strong": true,
+                "desktop": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 12,
+                    "weight": "700",
+                    "align": "left",
+                    "color": "#9BA3B8"
+                  },
+                  "border": {},
+                  "background": {},
+                  "shadow": {},
+                  "stylingBox": "{}"
+                },
+                "tablet": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 12,
+                    "weight": "700",
+                    "align": "left",
+                    "color": "#9BA3B8"
+                  },
+                  "border": {},
+                  "background": {},
+                  "shadow": {},
+                  "stylingBox": "{}"
+                },
+                "mobile": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 12,
+                    "weight": "700",
+                    "align": "left",
+                    "color": "#9BA3B8"
+                  },
+                  "border": {},
+                  "background": {},
+                  "shadow": {},
+                  "stylingBox": "{}"
+                }
               },
               {
                 "type": "refListStatus",
@@ -162,7 +284,10 @@
                 "hideLabel": true,
                 "editMode": "readOnly",
                 "showIcon": false,
-                "referenceListId": { "name": "$binding:rowTypeReflistName", "module": "$binding:rowTypeReflistModule" },
+                "referenceListId": {
+                  "name": "$binding:rowTypeReflistName",
+                  "module": "$binding:rowTypeReflistModule"
+                },
                 "solidBackground": true,
                 "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };"
               },
@@ -174,11 +299,26 @@
                 "hideLabel": true,
                 "editMode": "readOnly",
                 "showIcon": false,
-                "referenceListId": { "name": "$binding:rowStatusReflistName", "module": "$binding:rowStatusReflistModule" },
+                "referenceListId": {
+                  "name": "$binding:rowStatusReflistName",
+                  "module": "$binding:rowStatusReflistModule"
+                },
                 "solidBackground": true,
                 "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };"
               }
-            ]
+            ],
+            "tablet": {
+              "dimensions": {
+                "width": "fit-content",
+                "maxWidth": "calc(100% - 80px)"
+              }
+            },
+            "mobile": {
+              "dimensions": {
+                "width": "fit-content",
+                "maxWidth": "calc(100% - 72px)"
+              }
+            }
           },
           {
             "type": "buttonGroup",
@@ -189,10 +329,29 @@
             "editMode": "editable",
             "spaceSize": "small",
             "style": "return { overflow: 'visible' };",
-            "desktop": { "dimensions": { "width": "fit-content", "height": "auto", "minHeight": "auto", "maxHeight": "auto" } },
+            "desktop": {
+              "dimensions": {
+                "width": "fit-content",
+                "height": "auto",
+                "minHeight": "auto",
+                "maxHeight": "auto"
+              }
+            },
             "items": []
           }
-        ]
+        ],
+        "tablet": {
+          "dimensions": {
+            "width": "100%"
+          },
+          "stylingBox": "{}"
+        },
+        "mobile": {
+          "dimensions": {
+            "width": "100%"
+          },
+          "stylingBox": "{}"
+        }
       },
       {
         "type": "text",
@@ -201,10 +360,67 @@
         "version": 5,
         "textType": "paragraph",
         "contentDisplay": "content",
-        "content": { "_mode": "code", "_code": "$binding:rowBodyContent  // return data.requirement;" },
+        "content": {
+          "_mode": "code",
+          "_code": "$binding:rowBodyContent  // return data.requirement;"
+        },
         "ellipsis": false,
-        "dimensions": { "width": "auto", "height": "auto", "minHeight": "24px", "maxHeight": "auto", "minWidth": "0px", "maxWidth": "100%" },
-        "style": "return { whiteSpace: 'normal', wordBreak: 'break-word', overflow: 'hidden', display: 'block', maxWidth: '100%' };"
+        "dimensions": {
+          "width": "auto",
+          "height": "auto",
+          "minHeight": "24px",
+          "maxHeight": "auto",
+          "minWidth": "0px",
+          "maxWidth": "100%"
+        },
+        "style": "return { whiteSpace: 'normal', wordBreak: 'break-word', overflow: 'hidden', display: 'block', maxWidth: '100%' };",
+        "desktop": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 14,
+            "weight": "500",
+            "align": "left",
+            "color": "#181818"
+          },
+          "dimensions": {
+            "width": "auto",
+            "height": "auto",
+            "minHeight": "24px",
+            "maxHeight": "auto",
+            "minWidth": "0px",
+            "maxWidth": "100%"
+          },
+          "border": {},
+          "background": {},
+          "shadow": {},
+          "stylingBox": "{\"marginTop\":\"2\",\"marginBottom\":\"2\"}"
+        },
+        "tablet": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 14,
+            "weight": "500",
+            "align": "left",
+            "color": "#181818"
+          },
+          "border": {},
+          "background": {},
+          "shadow": {},
+          "stylingBox": "{\"marginTop\":\"2\",\"marginBottom\":\"2\"}"
+        },
+        "mobile": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 14,
+            "weight": "500",
+            "align": "left",
+            "color": "#181818"
+          },
+          "border": {},
+          "background": {},
+          "shadow": {},
+          "stylingBox": "{\"marginTop\":\"2\",\"marginBottom\":\"2\"}"
+        }
       },
       {
         "type": "container",
@@ -217,8 +433,102 @@
         "flexWrap": "wrap",
         "gap": "16",
         "style": "return { overflow: 'visible' };",
-        "components": []
+        "components": [],
+        "desktop": {
+          "dimensions": {
+            "width": "100%",
+            "height": "auto",
+            "minHeight": "fit-content"
+          },
+          "stylingBox": "{}"
+        },
+        "tablet": {
+          "stylingBox": "{}"
+        },
+        "mobile": {
+          "stylingBox": "{}"
+        }
       }
-    ]
+    ],
+    "tablet": {
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "dimensions": {
+        "width": "auto",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxWidth": "100%"
+      },
+      "stylingBox": "{\"paddingTop\":\"14\",\"paddingRight\":\"16\",\"paddingBottom\":\"14\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
+    },
+    "mobile": {
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "dimensions": {
+        "width": "auto",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxWidth": "100%"
+      },
+      "stylingBox": "{\"paddingTop\":\"14\",\"paddingRight\":\"16\",\"paddingBottom\":\"14\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
+    }
   }
 }

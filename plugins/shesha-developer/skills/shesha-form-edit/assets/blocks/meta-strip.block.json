@@ -8,7 +8,11 @@
     "cell.value.text": "subtree.components[].components[1].content"
   },
   "$bindings": [
-    { "placeholder": "$cell.value.propertyName", "where": "each cell's value text/control propertyName", "note": "bind to the meta field; use contentDisplay:'name'+code content for a bound text, or swap the value child for a refListStatus/progress/control as needed" }
+    {
+      "placeholder": "$cell.value.propertyName",
+      "where": "each cell's value text/control propertyName",
+      "note": "bind to the meta field; use contentDisplay:'name'+code content for a bound text, or swap the value child for a refListStatus/progress/control as needed"
+    }
   ],
   "$validatedAgainst": [
     "container:display=flex+flexDirection=row+gap (the strip; flex inert without display:flex)",
@@ -60,7 +64,34 @@
               "_mode": "code",
               "_code": "return { letterSpacing: '0.06em', textTransform: 'uppercase' };"
             },
-            "stylingBox": "{\"marginBottom\":\"4\"}"
+            "stylingBox": "{\"marginBottom\":\"4\"}",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            }
           },
           {
             "type": "text",
@@ -71,7 +102,34 @@
             "textType": "span",
             "content": "—",
             "contentDisplay": "content",
-            "dataType": "string"
+            "dataType": "string",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            }
           }
         ]
       },
@@ -103,7 +161,34 @@
               "_mode": "code",
               "_code": "return { letterSpacing: '0.06em', textTransform: 'uppercase' };"
             },
-            "stylingBox": "{\"marginBottom\":\"4\"}"
+            "stylingBox": "{\"marginBottom\":\"4\"}",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            }
           },
           {
             "type": "text",
@@ -114,7 +199,34 @@
             "textType": "span",
             "content": "—",
             "contentDisplay": "content",
-            "dataType": "string"
+            "dataType": "string",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            }
           }
         ]
       },
@@ -146,7 +258,34 @@
               "_mode": "code",
               "_code": "return { letterSpacing: '0.06em', textTransform: 'uppercase' };"
             },
-            "stylingBox": "{\"marginBottom\":\"4\"}"
+            "stylingBox": "{\"marginBottom\":\"4\"}",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 11,
+                "weight": "600",
+                "color": "#9BA3B8",
+                "align": "left"
+              }
+            }
           },
           {
             "type": "text",
@@ -157,10 +296,79 @@
             "textType": "span",
             "content": "—",
             "contentDisplay": "content",
-            "dataType": "string"
+            "dataType": "string",
+            "desktop": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "tablet": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            },
+            "mobile": {
+              "font": {
+                "type": "Segoe UI",
+                "size": 13.5,
+                "weight": "400",
+                "color": "#181818",
+                "align": "left"
+              }
+            }
           }
         ]
       }
-    ]
+    ],
+    "desktop": {
+      "border": {
+        "border": {
+          "bottom": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#F0F2F5"
+          }
+        },
+        "borderType": "custom"
+      },
+      "background": {},
+      "shadow": {}
+    },
+    "tablet": {
+      "border": {
+        "border": {
+          "bottom": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#F0F2F5"
+          }
+        },
+        "borderType": "custom"
+      },
+      "background": {},
+      "shadow": {}
+    },
+    "mobile": {
+      "border": {
+        "border": {
+          "bottom": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#F0F2F5"
+          }
+        },
+        "borderType": "custom"
+      },
+      "background": {},
+      "shadow": {}
+    }
   }
 }

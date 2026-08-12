@@ -10,12 +10,36 @@
     "datalist": "content.components[0].components[1]"
   },
   "$bindings": [
-    { "name": "dataContext.entityType", "path": "content.components[0].entityType", "note": "{name,module} of the link/junction entity the rail lists (e.g. ViewDefinitionRequiredApi)" },
-    { "name": "dataContext.endpoint", "path": "content.components[0].endpoint", "note": "code-mode GetAll URL filtered to the owner record + &properties projection" },
-    { "name": "count.binding", "path": "content.components[0].components[0].components[0].components[1].content", "note": "{{...}} expression resolving the linked-item count (or a static placeholder)" },
-    { "name": "datalist.formId", "path": "content.components[0].components[1].formId", "note": "{name,module} of the per-row list-item form (e.g. view-endpoint-row)" },
-    { "name": "add.formId", "path": "content.components[0].components[0].components[1].components[0].items[0].actionConfiguration.actionArguments.formId", "note": "{name,module} of the add/link dialog form" },
-    { "name": "add.onSuccess.actionOwner", "path": "content.components[0].components[0].components[1].components[0].items[0].actionConfiguration.onSuccess.actionOwner", "note": "MUST equal the dataContext id so the add dialog refreshes this rail's datalist" }
+    {
+      "name": "dataContext.entityType",
+      "path": "content.components[0].entityType",
+      "note": "{name,module} of the link/junction entity the rail lists (e.g. ViewDefinitionRequiredApi)"
+    },
+    {
+      "name": "dataContext.endpoint",
+      "path": "content.components[0].endpoint",
+      "note": "code-mode GetAll URL filtered to the owner record + &properties projection"
+    },
+    {
+      "name": "count.binding",
+      "path": "content.components[0].components[0].components[0].components[1].content",
+      "note": "{{...}} expression resolving the linked-item count (or a static placeholder)"
+    },
+    {
+      "name": "datalist.formId",
+      "path": "content.components[0].components[1].formId",
+      "note": "{name,module} of the per-row list-item form (e.g. view-endpoint-row)"
+    },
+    {
+      "name": "add.formId",
+      "path": "content.components[0].components[0].components[1].components[0].items[0].actionConfiguration.actionArguments.formId",
+      "note": "{name,module} of the add/link dialog form"
+    },
+    {
+      "name": "add.onSuccess.actionOwner",
+      "path": "content.components[0].components[0].components[1].components[0].items[0].actionConfiguration.onSuccess.actionOwner",
+      "note": "MUST equal the dataContext id so the add dialog refreshes this rail's datalist"
+    }
   ],
   "$validatedAgainst": [
     "card:bg/border/shadow/radius",
@@ -36,7 +60,10 @@
     "label": "Rail Panel",
     "hideHeading": true,
     "enableStyleOnReadonly": false,
-    "header": { "id": "rail-panel-header", "components": [] },
+    "header": {
+      "id": "rail-panel-header",
+      "components": []
+    },
     "content": {
       "id": "rail-panel-content",
       "components": [
@@ -47,9 +74,15 @@
           "propertyName": "railDc",
           "componentName": "railDc",
           "label": "Rail Data",
-          "entityType": { "name": "$binding:entityType.name", "module": "$binding:entityType.module" },
+          "entityType": {
+            "name": "$binding:entityType.name",
+            "module": "$binding:entityType.module"
+          },
           "sourceType": "Url",
-          "endpoint": { "_mode": "code", "_code": "return '/api/dynamic/$MODULE/$ENTITY/Crud/GetAll?filter=' + encodeURIComponent(JSON.stringify({and:[{\"==\":[{var:\"$OWNERFK.id\"},data.id]}]})) + '&properties=' + encodeURIComponent('$PROJECTION');" },
+          "endpoint": {
+            "_mode": "code",
+            "_code": "return '/api/dynamic/$MODULE/$ENTITY/Crud/GetAll?filter=' + encodeURIComponent(JSON.stringify({and:[{\"==\":[{var:\"$OWNERFK.id\"},data.id]}]})) + '&properties=' + encodeURIComponent('$PROJECTION');"
+          },
           "dataFetchingMode": "paging",
           "defaultPageSize": 50,
           "sortMode": "standard",
@@ -97,7 +130,49 @@
                       "content": "Required End-points",
                       "contentDisplay": "content",
                       "strong": false,
-                      "enableStyleOnReadonly": false
+                      "enableStyleOnReadonly": false,
+                      "desktop": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 14,
+                          "weight": "600",
+                          "align": "left",
+                          "color": "#181818"
+                        },
+                        "dimensions": {
+                          "width": "auto"
+                        },
+                        "border": {},
+                        "background": {},
+                        "shadow": {},
+                        "stylingBox": "{}"
+                      },
+                      "tablet": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 14,
+                          "weight": "600",
+                          "align": "left",
+                          "color": "#181818"
+                        },
+                        "border": {},
+                        "background": {},
+                        "shadow": {},
+                        "stylingBox": "{}"
+                      },
+                      "mobile": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 14,
+                          "weight": "600",
+                          "align": "left",
+                          "color": "#181818"
+                        },
+                        "border": {},
+                        "background": {},
+                        "shadow": {},
+                        "stylingBox": "{}"
+                      }
                     },
                     {
                       "id": "rail-count",
@@ -110,9 +185,160 @@
                       "content": "0",
                       "contentDisplay": "content",
                       "strong": false,
-                      "enableStyleOnReadonly": false
+                      "enableStyleOnReadonly": false,
+                      "desktop": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 12,
+                          "weight": "500",
+                          "align": "center",
+                          "color": "#9BA3B8"
+                        },
+                        "background": {
+                          "type": "color",
+                          "color": "#f0f2f5"
+                        },
+                        "border": {
+                          "hideBorder": false,
+                          "radiusType": "all",
+                          "borderType": "all",
+                          "border": {
+                            "all": {
+                              "width": "1px",
+                              "style": "none",
+                              "color": "#E8EAF0"
+                            },
+                            "top": {},
+                            "bottom": {},
+                            "left": {},
+                            "right": {}
+                          },
+                          "radius": {
+                            "all": 10
+                          }
+                        },
+                        "dimensions": {
+                          "width": "auto",
+                          "height": "auto",
+                          "minHeight": "20px",
+                          "maxHeight": "auto",
+                          "minWidth": "20px",
+                          "maxWidth": "auto"
+                        },
+                        "stylingBox": "{\"paddingTop\":\"0\",\"paddingRight\":\"8\",\"paddingBottom\":\"0\",\"paddingLeft\":\"8\"}",
+                        "shadow": {}
+                      },
+                      "tablet": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 12,
+                          "weight": "500",
+                          "align": "center",
+                          "color": "#9BA3B8"
+                        },
+                        "background": {
+                          "type": "color",
+                          "color": "#f0f2f5"
+                        },
+                        "border": {
+                          "hideBorder": false,
+                          "radiusType": "all",
+                          "borderType": "all",
+                          "border": {
+                            "all": {
+                              "width": "1px",
+                              "style": "none",
+                              "color": "#E8EAF0"
+                            },
+                            "top": {},
+                            "bottom": {},
+                            "left": {},
+                            "right": {}
+                          },
+                          "radius": {
+                            "all": 10
+                          }
+                        },
+                        "stylingBox": "{\"paddingTop\":\"0\",\"paddingRight\":\"8\",\"paddingBottom\":\"0\",\"paddingLeft\":\"8\"}",
+                        "shadow": {}
+                      },
+                      "mobile": {
+                        "font": {
+                          "type": "Segoe UI",
+                          "size": 12,
+                          "weight": "500",
+                          "align": "center",
+                          "color": "#9BA3B8"
+                        },
+                        "background": {
+                          "type": "color",
+                          "color": "#f0f2f5"
+                        },
+                        "border": {
+                          "hideBorder": false,
+                          "radiusType": "all",
+                          "borderType": "all",
+                          "border": {
+                            "all": {
+                              "width": "1px",
+                              "style": "none",
+                              "color": "#E8EAF0"
+                            },
+                            "top": {},
+                            "bottom": {},
+                            "left": {},
+                            "right": {}
+                          },
+                          "radius": {
+                            "all": 10
+                          }
+                        },
+                        "stylingBox": "{\"paddingTop\":\"0\",\"paddingRight\":\"8\",\"paddingBottom\":\"0\",\"paddingLeft\":\"8\"}",
+                        "shadow": {}
+                      }
                     }
-                  ]
+                  ],
+                  "desktop": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-start",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto",
+                      "height": "auto",
+                      "minHeight": "fit-content",
+                      "maxHeight": "auto",
+                      "minWidth": "0px",
+                      "maxWidth": "none"
+                    },
+                    "stylingBox": "{}"
+                  },
+                  "tablet": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-start",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto"
+                    },
+                    "stylingBox": "{}"
+                  },
+                  "mobile": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-start",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto"
+                    },
+                    "stylingBox": "{}"
+                  }
                 },
                 {
                   "id": "rail-add-wrap",
@@ -174,7 +400,10 @@
                               "formMode": "edit",
                               "formArguments": "return { $OWNERFK: { id: data.id, _displayName: data.name, _className: '$OWNERCLASSNAME' } };",
                               "modalWidth": "60%",
-                              "formId": { "name": "$binding:add.formId.name", "module": "$binding:add.formId.module" },
+                              "formId": {
+                                "name": "$binding:add.formId.name",
+                                "module": "$binding:add.formId.module"
+                              },
                               "version": 1,
                               "showCloseIcon": true
                             }
@@ -182,9 +411,94 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "desktop": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-end",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto",
+                      "height": "auto",
+                      "minHeight": "fit-content",
+                      "maxHeight": "auto",
+                      "minWidth": "0px",
+                      "maxWidth": "none"
+                    },
+                    "stylingBox": "{}"
+                  },
+                  "tablet": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-end",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto"
+                    },
+                    "stylingBox": "{}"
+                  },
+                  "mobile": {
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "alignItems": "center",
+                    "justifyContent": "flex-end",
+                    "flexWrap": "nowrap",
+                    "gap": "8px",
+                    "dimensions": {
+                      "width": "auto"
+                    },
+                    "stylingBox": "{}"
+                  }
                 }
-              ]
+              ],
+              "desktop": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "flexWrap": "nowrap",
+                "gap": "8px",
+                "dimensions": {
+                  "width": "100%",
+                  "height": "auto",
+                  "minHeight": "fit-content",
+                  "maxHeight": "auto",
+                  "minWidth": "0px",
+                  "maxWidth": "100%"
+                },
+                "stylingBox": "{\"marginBottom\":\"12\"}",
+                "enableStyleOnReadonly": false
+              },
+              "tablet": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "flexWrap": "nowrap",
+                "gap": "8px",
+                "dimensions": {
+                  "width": "100%"
+                },
+                "stylingBox": "{\"marginBottom\":\"12\"}",
+                "enableStyleOnReadonly": false
+              },
+              "mobile": {
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "flexWrap": "nowrap",
+                "gap": "8px",
+                "dimensions": {
+                  "width": "100%"
+                },
+                "stylingBox": "{\"marginBottom\":\"12\"}",
+                "enableStyleOnReadonly": false
+              }
             },
             {
               "id": "rail-datalist",
@@ -194,7 +508,10 @@
               "componentName": "railDatalist",
               "parentId": "rail-dc",
               "formSelectionMode": "name",
-              "formId": { "module": "$binding:datalist.formId.module", "name": "$binding:datalist.formId.name" },
+              "formId": {
+                "module": "$binding:datalist.formId.module",
+                "name": "$binding:datalist.formId.name"
+              },
               "formType": "Table",
               "selectionMode": "none",
               "orientation": "vertical",
@@ -210,6 +527,124 @@
           ]
         }
       ]
+    },
+    "desktop": {
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "0px",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "auto"
+      },
+      "stylingBox": "{\"paddingTop\":\"16\",\"paddingRight\":\"16\",\"paddingBottom\":\"16\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
+    },
+    "tablet": {
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "dimensions": {
+        "width": "100%",
+        "height": "auto"
+      },
+      "stylingBox": "{\"paddingTop\":\"16\",\"paddingRight\":\"16\",\"paddingBottom\":\"16\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
+    },
+    "mobile": {
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "all",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "solid",
+            "color": "#E8EAF0"
+          },
+          "top": {},
+          "bottom": {},
+          "left": {},
+          "right": {}
+        },
+        "radius": {
+          "all": 8
+        }
+      },
+      "shadow": {
+        "offsetX": 0,
+        "offsetY": 1,
+        "blurRadius": 4,
+        "spreadRadius": 0,
+        "color": "rgba(0,0,0,0.06)"
+      },
+      "dimensions": {
+        "width": "100%",
+        "height": "auto"
+      },
+      "stylingBox": "{\"paddingTop\":\"16\",\"paddingRight\":\"16\",\"paddingBottom\":\"16\",\"paddingLeft\":\"16\"}",
+      "enableStyleOnReadonly": false
     }
   }
 }

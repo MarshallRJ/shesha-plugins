@@ -87,7 +87,7 @@
             "hidden": false,
             "size": "small",
             "buttonAction": null,
-            "color": "$role:addButtonText",
+            "color": "#003BB2",
             "actionConfiguration": {
               "_type": "action-config",
               "actionName": "Show Dialog",
@@ -122,8 +122,155 @@
         "mobile": {}
       }
     ],
-    "desktop": {},
-    "tablet": {},
-    "mobile": {}
+    "desktop": {
+      "display": "flex",
+      "flexDirection": "row",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "none"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    },
+    "tablet": {
+      "display": "flex",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    },
+    "mobile": {
+      "display": "flex",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    }
   }
 }

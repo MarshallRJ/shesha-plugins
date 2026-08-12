@@ -1,10 +1,42 @@
 # Block library
 
 Authored layout **blocks** — small, parented, version-stamped component subtrees that you
-**compose** into a form. A block is structure only; the matching **style overlay** lives in
-`shesha-design-system` and is applied after composition. Never hand-copy a 25K-line seed —
-map each blueprint node to a block, insert its subtree into a named `$slot`, re-stamp ids,
-fill `$bindings`, then hand off to the design-system overlay.
+**compose** into a form. Never hand-copy a 25K-line seed — map each blueprint node to a block,
+insert its subtree into a named `$slot`, re-stamp ids, fill `$bindings`.
+
+## Blocks now ship pre-styled — there is no separate overlay pass
+
+Every block's paired overlay has been **baked into its subtree as literal values** (44 targets
+across 10 blocks, `scripts/bake-overlays.mjs`). Composing a block now yields a styled result
+**by construction**. Do not apply the overlay again afterwards; it is already in there.
+
+Why the change: the overlay used to be a second pass applied after composition, and a second
+pass is one that gets skipped — which is how forms kept shipping as raw AntD. The app theme
+cannot cover for it either: a breakpoint block overrides theme defaults per key, so the AntD
+theme only reaches chrome ([app-theme.md](../../shesha-design-system/references/app-theme.md)).
+
+Three silent defects surfaced while baking, all pre-existing:
+
+- **`page-header-band` had no overlay file at all** despite declaring one, so its 7 nodes — the
+  title band of every detail page — carried zero styling and always rendered as AntD defaults.
+  The overlay is now written.
+- **`$role:progressAccent` and `$role:addButtonText`** were referenced by `completeness-bar` and
+  `dashed-add-button` but defined nowhere, so the renderer received the literal string
+  `"$role:…"` as a colour and fell back. Both roles are now defined and resolved to `#003BB2`.
+- `requirement-datalist-row`'s `rowMetaText` target matches no node **by design** — its `$note`
+  says it applies to text components the *form* adds at compose time. Advisory targets like this
+  stay overlay-only and cannot be baked.
+
+The overlays remain on disk as the record of what a block's styling *means*, and as the input to
+the transform. They are no longer needed at build time. Re-run the transform after editing one:
+
+```bash
+node scripts/bake-overlays.mjs assets/blocks ../shesha-design-system/assets/block-styles ../shesha-design-system/assets/themes/shesha.tokens.json --apply
+```
+
+It is idempotent, refuses to write unless every target resolves and node counts are unchanged,
+and fails loudly on an unresolvable `$role`. Literal hexes in blocks make `validate-blocks.js`
+emit colour WARNs — that is the recorded trade, not a defect to re-tokenise.
 
 Blocks live in `assets/blocks/*.block.json`. Every block file carries: `$block`, `$archetype`,
 `$styleOverlay` (the paired overlay name in shesha-design-system), `$slots`, `$bindings`,
