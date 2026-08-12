@@ -48,6 +48,27 @@ Build the URL with **string concatenation, not template literals** — the whole
 
 ---
 
+## page shell — the mandatory outer card on EVERY page-level form
+
+**Every page-level form is wrapped in one `card`, and every other component on that page goes inside its `content.components`.** Nothing else sits at `root`. The shell is invisible chrome, configured exactly three ways:
+
+| Property | Value | Why |
+|---|---|---|
+| `hideHeading` | `true` | suppresses the card's own title row — the page's real title is a `text` inside |
+| `className` | `"sha-page"` | the app-level page class the portal styles against |
+| border | `style: "none"` on **base and all three breakpoints** | the shell frames the page; a visible box around everything reads as a stray panel |
+
+Plus `background #fff`, `radius 8`, no shadow, `width 100%`, `height auto` + `minHeight fit-content`, `stylingBox {"marginBottom":"5"}`.
+
+Ready to compose: **[`assets/blocks/page-shell.block.json`](../../assets/blocks/page-shell.block.json)** — insert the page body into its `content` slot. Derived from the approved `boxfusion.test/bookings-table` revision 2.
+
+**Two traps that revision itself contains**, so don't copy a live page blindly:
+
+- The border was cleared on `desktop` only; `tablet`, `mobile` and the base were left `style: "solid" #d9d9d9`. Breakpoint blocks override base *per key*, so tablet and mobile still draw a 1px box. Clear it in all four places.
+- `height` was a fixed `"30px"` on all breakpoints. On a wrapper holding an entire page that is wrong — use `auto` with `minHeight: "fit-content"`.
+
+Typical body order inside the shell: title band (title + subtitle) → `dataContext` → toolbar → table/content → pager. Literal spacing and type values: [`shesha-design-system/assets/house-style.json`](../../../shesha-design-system/assets/house-style.json).
+
 ## card
 
 Shesha's card component — a bordered, rounded, optionally-shadowed white box. **Children do NOT go in `components`** — they go in `content.components`. The card has two slots:

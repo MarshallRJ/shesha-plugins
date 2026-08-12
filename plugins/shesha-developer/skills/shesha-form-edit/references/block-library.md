@@ -15,6 +15,7 @@ Some also carry a `$rowTemplate` (a separately-published Table-type row form).
 
 | Block | Archetype | Builds | Key `$slots` | Key `$bindings` |
 |---|---|---|---|---|
+| `page-shell` | page | **MANDATORY outermost wrapper on every page-level form** — a borderless, heading-less `card` carrying `className: "sha-page"`. Every other component goes in its `content`; nothing else sits at root. Not for dialogs or row-template cards. | `content` | none (pure chrome) |
 | `flex-split-main-rail` | record-detail | The body split: one flex `container` (row, gap 16) with a fill `main` column + a fixed 332px `rail` column. The clean fixed/`calc` idiom — never `columns`. | `main`, `rail` | none (pure structure) |
 | `page-header-band` | record-detail | In-page detail title band: breadcrumb + title row (title text + status chip on the left, Edit/Save/Cancel buttonGroup on the right). NOT the global header form. | `titleText`, `statusChip`, `actionItems`, `breadcrumbContent` | title content, status `propertyName` + reflist id, actions width `calc` |
 | `meta-strip` | fragment | A horizontal strip of label/value meta cells (MODULE / RELEASE / VIEW TYPE …) under a header. | `cells`, `cell.label.text`, `cell.value.text` | each cell value `propertyName`/content |

@@ -25,6 +25,12 @@ The default shapes are the house style, not a ceiling. A user's explicit instruc
 
 When two fit, prefer the one whose **primary action** matches the user's verb: "review a booking" → `record-detail`; "book a flight" → `capture`.
 
+## Every page-level archetype starts with the page shell
+
+Before the archetype's own shape: the only root component is the **page-shell card** (`assets/blocks/page-shell.block.json` — `hideHeading`, `className: "sha-page"`, no border), and the archetype's default shape goes inside its `content.components`. This applies to `record-detail`, `list-card`, `hub`, `dashboard`, `wizard` and `solution-map`. It does **not** apply to `capture` when built as a dialog, or to `inline-card`, since neither is a page. Spec: [components/containers.md](components/containers.md) "page shell".
+
+Literal type, spacing and surface values for the shapes below: [`shesha-design-system/assets/house-style.json`](../../shesha-design-system/assets/house-style.json). Paste them; do not re-derive them from theme tokens at build time — the app theme is overridden per-key by any breakpoint block, so derivation is where fidelity leaks away.
+
 ## The eight
 
 Seed sizes are given because several are very large — **open them with `Grep`/offset for the fragment you need, never read one wholesale** (`rs-detail-with-header.json` alone is ~755 KB). Prefer composing from `assets/blocks/` where a block exists; that is ~600 lines instead of tens of thousands.
