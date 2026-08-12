@@ -29,7 +29,7 @@ When two fit, prefer the one whose **primary action** matches the user's verb: "
 
 Before the archetype's own shape: the only root component is the **page-shell card** (`assets/blocks/page-shell.block.json` — `hideHeading`, `className: "sha-page"`, no border), and the archetype's default shape goes inside its `content.components`. This applies to `record-detail`, `list-card`, `hub`, `dashboard`, `wizard` and `solution-map`. It does **not** apply to `capture` when built as a dialog, or to `inline-card`, since neither is a page. Spec: [components/containers.md](components/containers.md) "page shell".
 
-Literal type, spacing and surface values for the shapes below: [`shesha-design-system/assets/house-style.json`](../../shesha-design-system/assets/house-style.json). Paste them; do not re-derive them from theme tokens at build time — the app theme is overridden per-key by any breakpoint block, so derivation is where fidelity leaks away.
+Type, spacing and surface values come **baked into the blocks** ([block-library.md](block-library.md)) — compose them and the shape arrives styled. Don't hand-type values into a form: the app theme is overridden per-key by any breakpoint block, so freehand styling is where fidelity leaks. If a block lacks a value, change its overlay in `shesha-design-system/assets/block-styles/` and re-bake.
 
 ## The eight
 

@@ -41,7 +41,7 @@ The whole point of the rework is a **clean responsibility split** — each skill
 2. **Comprehend** (`shesha-design-comprehension`) — each screen → `blueprints/<screen>.blueprint.md`, a measured layout map with a placement `assertions` block. This is what stops container placement from drifting.
 3. **Plan** (`shesha-claude-designer`) — establish the theme **once**, then map each blueprint region to a **block** (`shesha-form-edit/assets/blocks`) + its paired **style overlay/recipe** (`shesha-design-system`). The per-screen plan is `{archetype, blocks[], recipes[]}`.
 4. **Build** — for each screen: **(a)** `shesha-form-edit` composes the blocks into native structure, wires CRUD, validates, pushes; **(b)** `shesha-design-system` resolves the token overlays and returns styled JSON — which `shesha-form-edit` pushes through its single push path.
-5. **Verify** — three gates in order: **structural** (native components, fully flexed, fields bound) → **placement diff** (`shesha-design-comprehension` re-measures the live form against the blueprint assertions) → **visual** (screenshot vs theme). Mismatches route back to the owning skill.
+5. **Verify** — four gates in order: **structural** (native components, fully flexed, fields bound) → **placement diff** (`shesha-design-comprehension` re-measures the live form against the blueprint assertions) → **design critique** (`design-critic`; `generic` is not done) → **visual** (screenshot vs theme). Mismatches route back to the owning skill.
 
 The contract that wires the conductor to the sub-skills is [`references/handoff-contract.md`](references/handoff-contract.md).
 
@@ -128,7 +128,7 @@ shesha-design-system/              ── APPEARANCE ──
 
 ## Firm rules (invariants the whole pipeline obeys)
 
-- **Splits are flex `container` rows, never the `columns` component.** Size children via `desktop.dimensions.width` (calc/%/px) — `customStyle:{flex}` is inert on the outer div.
+- **Splits follow the flex-split idiom** — [capability-matrix.md §flex-split](../shesha-design-system/references/capability-matrix.md#flex-split).
 - **Structure (form-edit) and appearance (design-system) never mix.** A hex in a block subtree is a bug — it belongs in the overlay/token file.
 - **Comprehend before building; verify placement by measurement.** No screen is "done" until its placement assertions pass.
 - **One push path** (form-edit). Theme is set **once**, via Configuration Studio / the token file — not per-form, and not by editing frontend source.

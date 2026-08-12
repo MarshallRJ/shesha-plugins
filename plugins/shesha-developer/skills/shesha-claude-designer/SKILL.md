@@ -41,6 +41,11 @@ When routing away, pass the full context (backend URL, credentials, module, `$RU
 
 ## Steps
 
+> **The contracts between the four skills — what each hands over, gate order, sequencing rules —
+> live in [references/handoff-contract.md](references/handoff-contract.md).** Read it once per
+> session. It was previously reachable only from `README.md`, which nothing links, so the spine of
+> the pipeline was effectively unreachable from its own entry point.
+
 ### Step 0 — Pre-flight: create the run directory (once per run, before anything else)
 
 Everything this pipeline produces lands in **one** directory, `$RUN_DIR`, created now:

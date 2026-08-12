@@ -89,10 +89,17 @@ Symptom of omission: the dialog renders fine, but submit hits `/api/dynamic/<Mod
 
 ## Create-form layout canon
 
-Per `sectionSeparator` section, top to bottom (canonical grid; see [containers.md](containers.md) for `columns` shape):
+Per `sectionSeparator` section, top to bottom:
 
 1. A `validationErrors` component at the top of the content container.
-2. ALL short fields in **fully-paired 12/12 `columns` rows** (gutter 12, `marginBottom` 5). Dissolve unpaired rows and re-pair consecutively; only the FINAL row of a section may be half-filled.
+2. ALL short fields in **fully-paired two-cell flex rows**: a `container` with `display:"flex"`,
+   `flexDirection:"row"`, `gap:"12"`, holding two child `container`s each sized
+   `desktop.dimensions.width: "calc(50% - 6px)"`. Dissolve unpaired rows and re-pair
+   consecutively; only the FINAL row of a section may be half-filled.
+   **This used to say "fully-paired 12/12 `columns` rows".** The `columns` component is banned
+   project-wide and `validate-blocks.js` fails any block containing one — but this file was a
+   *canon* instructing you to author them, which is how they kept appearing. Flex rows are the
+   idiom ([containers.md](containers.md) "page shell" and the flex-split rule).
 3. Full-width multi pickers: `autocomplete` with `mode: 'multiple'`, `valueFormat: 'simple'`, `dataSourceType: 'entitiesList'`.
 4. `textArea`s at the section BOTTOM. Long-text props (description / requirement / logic / validationRules / …) are `textArea`, NOT `textField`.
 
@@ -102,7 +109,7 @@ Rules:
 - Every input `editMode: 'editable'` — see [edit-mode.md](edit-mode.md).
 - Reflist dropdowns: `dataSourceType: 'referenceList'` + `referenceListId: {module, name}` where `name` is the FULL dotted `referenceListName` from entity metadata — the reflist name often ≠ the property name (see [dropdowns.md](dropdowns.md)).
 - Owned-M:M picker judgment: include only the pickers the user actually asked for — a 16-picker dialog was rejected as unusable and reverted.
-- Transform assertions (the #1 risk is silent field loss): non-final rows have both cells filled; no `columns` row after a `textArea` within a section; field-set identical before/after.
+- Transform assertions (the #1 risk is silent field loss): non-final rows have both cells filled; no paired row after a `textArea` within a section; field-set identical before/after.
 
 ---
 

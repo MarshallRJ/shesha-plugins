@@ -11,7 +11,8 @@ There is no single correct value. Both blanket rules caused real production bugs
 | **Entity detail form** with a Start Edit / Submit / Cancel Edit lifecycle | `"inherited"` | The form-level mode governs; the lifecycle buttons toggle it. Explicit `"editable"` makes fields editable while the form is still in read mode. |
 | **Create / edit dialog** (opened via Show Dialog with `formMode: "edit"`) | `"editable"` | A dialog is always an edit context; proven canon across 33 production create forms. Also keeps the dialog testable standalone. |
 | **Action / anonymous pages** (`dataLoaderType: "none"`, login, OTP, search forms, custom toolbars) and inline `link`s | `"editable"` | The effective mode resolves read-only, so `"inherited"` renders fields that won't accept input and buttons that swallow clicks. |
-| **Pure visual / display** (`text`, `image`, `container`, `columns`, `card`, `refListStatus`) | `"inherited"` or omit | No interactive surface. |
+| **Read-only attribute rail / detail summary** — controls the user *reads*, never edits inline | `"readOnly"` per control | `"inherited"` defers to form mode and renders **blank** in the default view state, so an entity/reflist field shows an empty cell until the form enters edit mode (the "rail labels with no values" defect). `"readOnly"` resolves and displays the `_displayName` immediately. |
+| **Pure visual / display** (`text`, `image`, `container`, `card`, `refListStatus`) | `"inherited"` or omit | No interactive surface. |
 | **Detail-header lifecycle `buttonGroup`** (Edit/Save/Cancel) | copy the canonical seed verbatim | The seeds encode the working config; don't restamp. |
 
 Never blanket-stamp either value across a whole form. When validating an edit: walk the tree and assert each interactive component's `editMode` matches the **form-type rule above** — flag mismatches per form type, not against a single absolute.

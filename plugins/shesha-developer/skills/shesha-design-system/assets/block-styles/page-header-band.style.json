@@ -1,6 +1,6 @@
 {
   "$overlay": "page-header-band",
-  "$note": "Brand visuals for the detail-page title band (paired with the page-header-band block). This file did not exist until 2026-08-12 — the block declared it and every node shipped with NO style at all, so the title band of every detail page rendered as raw AntD defaults. Values are the literals from ../house-style.json, matching the approved boxfusion.test/bookings-table title band: 24/600 #181818 title, 14/400 #9BA3B8 muted, Segoe UI throughout. The band sits INSIDE the page-shell card, so it carries no surface of its own — no background, no border, no shadow.",
+  "$note": "Brand visuals for the detail-page title band (paired with the page-header-band block). This file did not exist until 2026-08-12 — the block declared it and every node shipped with NO style at all, so the title band of every detail page rendered as raw AntD defaults. Values match the approved boxfusion.test/bookings-table title band: 24/600 #181818 title, 14/400 #9BA3B8 muted, Segoe UI throughout — the same literals the brand tokens resolve to (ink.primary / ink.soft). The band sits INSIDE the page-shell card, so it carries no surface of its own — no background, no border, no shadow.",
   "targets": {
     "pageHeaderBand": {
       "desktop": {

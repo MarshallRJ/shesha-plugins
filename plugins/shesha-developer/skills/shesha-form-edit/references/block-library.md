@@ -90,23 +90,28 @@ Compose from blocks — **never** copy a 25K-line seed and edit it down.
    entity `propertyName`s (validate every one against entity metadata), reflist `{module,name}`,
    labels, count/body content expressions, dataContext endpoints, dialog `formId`s, and the
    `onSuccess.actionOwner` that must equal the owning dataContext/datalist id.
-5. **Resolve + stamp the style overlay**: take `$styleOverlay`, fetch that overlay from
-   `shesha-design-system`, resolve its `$role:` tokens against the active brand token file, and
-   stamp the resolved `desktop`/`tablet`/`mobile` style blocks onto the matching components.
-   **form-edit composes structure; design-system owns the overlays** — do not invent hexes,
-   fonts, or per-component colours in the block subtree.
-6. **Validate**: run `scripts/validate-blocks.js` (skeleton JSON parses, every `$validatedAgainst`
-   row is `renders`/`gotcha` in the capability matrix, no `columns`, no stray hex, no flex row
-   missing `display:flex`). Then validate the assembled form against the component-properties index.
-7. **Push** via the form-edit API (Create / UpdateMarkup / ImportJson) and publish any
+5. **Validate**: run `scripts/validate-blocks.js` (skeleton JSON parses, every `$validatedAgainst`
+   row is `renders`/`gotcha` in the capability matrix, no `columns`, no flex row missing
+   `display:flex`). Then validate the assembled form against the component-properties index.
+6. **Push** via the form-edit API (Create / UpdateMarkup / ImportJson) and publish any
    `$rowTemplate` as its own Table-type form. Expect the gate-5a.5 placement re-measure.
 
-## The styling boundary (read this twice)
+> There is no "stamp the overlay" step. It used to be step 5 here — 80 lines below a section
+> stating the opposite — so a builder either skipped it or double-stamped. The overlays are baked
+> in (see the top of this file).
 
-A block's `subtree` is **structure** — containers, flex direction/gap, nesting, parentIds,
-component types/versions, bindings. The few style values present in a subtree (radius, hairline
-colours on `card-with-header-strip`, pill `customStyle`) are structural defaults that the overlay
-overrides. **All brand styling — colour, type scale, spacing rhythm, shadow, status lifecycle —
-comes from the paired overlay in `shesha-design-system`**, addressed by `$styleOverlay` and
-resolved through `$role:` tokens. If you find yourself typing a hex into a block subtree, stop:
-that value belongs in the overlay. form-edit composes; design-system styles.
+## The styling boundary
+
+**form-edit may not *author* style values; it *inserts* pre-baked block subtrees.** That is the
+whole rule, and it replaces an earlier boundary that said all brand styling "comes from the paired
+overlay" — true before the bake, false now, and the source of a three-way contradiction across
+this file, `SKILL.md` and the designer.
+
+- **Composing a block?** Its style is already in the subtree. Insert it and move on.
+- **Need a value a block doesn't carry?** That is a change to the block's overlay in
+  `shesha-design-system/assets/block-styles/`, followed by a re-bake — not a hex typed into a form.
+- **Restyling a form this library did not produce** (a hand-composed or live legacy form) is
+  `shesha-design-system`'s job, and its output still goes back through form-edit's single push path.
+
+So "if you find yourself typing a hex" still holds — but the destination is the overlay plus a
+re-bake, not a separate styling pass over the built form.

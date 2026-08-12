@@ -67,7 +67,7 @@ Ready to compose: **[`assets/blocks/page-shell.block.json`](../../assets/blocks/
 - The border was cleared on `desktop` only; `tablet`, `mobile` and the base were left `style: "solid" #d9d9d9`. Breakpoint blocks override base *per key*, so tablet and mobile still draw a 1px box. Clear it in all four places.
 - `height` was a fixed `"30px"` on all breakpoints. On a wrapper holding an entire page that is wrong — use `auto` with `minHeight: "fit-content"`.
 
-Typical body order inside the shell: title band (title + subtitle) → `dataContext` → toolbar → table/content → pager. Literal spacing and type values: [`shesha-design-system/assets/house-style.json`](../../../shesha-design-system/assets/house-style.json).
+Typical body order inside the shell: title band (title + subtitle) → `dataContext` → toolbar → table/content → pager. Spacing and type come baked into the blocks — see [block-library.md](../block-library.md).
 
 ## card
 
@@ -99,7 +99,13 @@ The card's outer width defaults to its parent's width. To constrain it, set `des
 
 ---
 
-## columns
+## columns — LEGACY, do not author
+
+> **You will see `columns` in existing forms and in the captured seeds; do not add new ones.**
+> Splits are flex `container` rows sized via `desktop.dimensions.width` — the rule is canonical in
+> [`capability-matrix.md`](../../../shesha-design-system/references/capability-matrix.md)
+> (`crossCuttingRules`) and `validate-blocks.js` fails any block containing a `columns`. This
+> section stays so you can read and migrate legacy markup.
 
 Two-up / three-up layouts. `columns` array has child slots:
 

@@ -33,9 +33,10 @@ The conductor (`shesha-claude-designer`) coordinates three specialists. This is 
 
 ## Sequencing rules
 
-1. **Token/app theme first, once** — establish the theme + set app-level primary/font/radius before per-screen styling.
-2. **Comprehend before build** — every screen has a `blueprint.md` (Step 2) before `shesha-form-edit` is invoked.
-3. **Structure before style, per screen.**
-4. **Gate order: 5a structural integrity → 5a.5 PLACEMENT diff → 5b visual audit.** Placement is checked *before* styling; a form that fails placement is routed back to `shesha-form-edit`, never styled over.
-5. **One push path** — all writes through `shesha-form-edit`.
-6. **Multi-screen** — `shesha-form-edit` may dispatch one form-author per distinct new form; `shesha-design-system` styles centrally to keep the look coherent; comprehension verifies each screen's placement independently.
+1. **Brand resolved first, once** — pick the brand and set the app-level primary/font/radius before any screen is built. Note the app theme only reaches chrome; per-screen fidelity comes from the pre-baked blocks ([app-theme.md](../../shesha-design-system/references/app-theme.md)).
+2. **Comprehend before build** — every screen has a blueprint (Step 2) before `shesha-form-edit` is invoked. **With no design source this is Step 1b → a Tier D blueprint**, derived from the screen's archetype and the brand rather than measured. Tier D is a documented path, not a shortcut, and it still gets a blueprint: with nothing to compare against, structural drift is *harder* to notice.
+3. **Structure and style are not separate passes.** Blocks arrive pre-styled, so a screen is built on-brand in one step ([block-library.md](../../shesha-form-edit/references/block-library.md)). `shesha-design-system` still owns the one-time app theme and re-styling forms this pipeline did not produce; anything it returns re-enters through form-edit's single push path.
+4. **Gate order: 5a structural integrity → 5a.5 placement diff → 5b visual audit → 5c design critique.** A form failing placement is routed back to `shesha-form-edit`, never styled over. **5c (`design-critic`) is part of the contract** — on a brief that asked for a designed result, `generic` is not done; apply its ranked fixes and re-run, or report the verdict verbatim. Cap: 2 cycles each on 5a.5 and 5c, then an honest partial report.
+   On Tier D, say what 5a.5 proved: the build matches the *archetype's* intended structure, not a user's design — there wasn't one.
+5. **One push path** — all writes through `shesha-form-edit`. Sub-skills return paths, never pushes; `clean-form-config` hands back cleaned JSON and does not push either.
+6. **Multi-screen** — `shesha-form-edit` may dispatch one form-author per distinct new form; comprehension verifies each screen's placement independently. **After every dispatch, verify the artifact on disk before accepting the agent's verdict** (see Contract A).

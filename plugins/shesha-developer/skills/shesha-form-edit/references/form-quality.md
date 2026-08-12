@@ -99,14 +99,8 @@ submit renders nothing — the form looks dead, with no surfaced validation mess
 `validationErrors`, it takes no props, and it belongs on simple forms too — not just complex
 ones.
 
-**`editMode` matches the form type.** Inputs on detail forms governed by
-Start Edit/Submit/Cancel Edit use `inherited` (explicit `editable` makes fields editable
-before Edit is clicked). **But a read-only attribute rail that must ALWAYS show its values —
-a detail summary the user reads, not a section they edit inline — uses `editMode: "readOnly"`
-per control, NOT `"inherited"`.** `inherited` defers to form mode and renders **blank** in the
-default (non-edit) view state, so an entity/reflist field shows an empty cell until the form
-enters edit mode (the "rail labels with no values" defect); `readOnly` resolves and displays the
-`_displayName` immediately. Full decision table: [components/edit-mode.md](components/edit-mode.md).
+**`editMode` matches the form type**, including the read-only-rail case that renders blank if you
+use `inherited`. One decision table, no copies: [components/edit-mode.md](components/edit-mode.md).
 
 **No duplicate ids; no double-slot card children.** Every component `id` is unique across the
 WHOLE tree — the renderer keys components by id, so a collision renders one twice / drops the

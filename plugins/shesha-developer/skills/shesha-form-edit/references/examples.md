@@ -88,7 +88,7 @@ The captured `employee-table` Add button has `handleSuccess: false`, so creating
 
 - **Data context type is `dataContext`** (canonical here) with `sourceType: "Entity"`, `entityType: "<full.Class.Name>"`, `dataFetchingMode: "paging"`, `defaultPageSize: 10`, `uniqueStateId`, `componentName`, `propertyName`, `sortMode: "standard"`, `allowReordering: "no"`. (`dataContext` is an accepted alias but match the example and use `dataContext`.)
 - **Toolbar buttons are context-scoped**: Refresh = `actionName: "Refresh table"`, column toggle = `"Toggle Columns Selector"`, both with `actionOwner` set to the **dataContext component's id** (not `shesha.common`).
-- **Layout uses a `columns` component** named `detailsPanel`, `hideLabel: true`, `gutterX: 10`, `gutterY: 10`, two columns each `flex: 12` (24-grid → 50/50). Fields go inside the columns' `components`.
+- **The captured seed uses a `columns` component** named `detailsPanel`, `hideLabel: true`, `gutterX: 10`, `gutterY: 10`, two columns each `flex: 12` (24-grid → 50/50) — **replace it with a two-cell flex row when you copy** (`columns` is legacy; see [containers.md](components/containers.md)). Fields go inside the columns' `components`.
 - **Component choice is driven by the property's data type** — see [components/by-datatype.md](components/by-datatype.md).
 - **Child-table filter** uses JsonLogic + mustache:
   ```json
