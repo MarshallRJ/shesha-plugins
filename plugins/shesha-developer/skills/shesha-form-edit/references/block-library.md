@@ -38,7 +38,7 @@ It is idempotent, refuses to write unless every target resolves and node counts 
 and fails loudly on an unresolvable `$role`. Literal hexes in blocks make `validate-blocks.js`
 emit colour WARNs — that is the recorded trade, not a defect to re-tokenise.
 
-Blocks live in `assets/blocks/*.block.json`. Every block file carries: `$block`, `$archetype`,
+Blocks live in `assets/blocks/*.block.json`. Every block file carries: `$block`, `$scope`,
 `$styleOverlay` (the paired overlay name in shesha-design-system), `$slots`, `$bindings`,
 `$validatedAgainst` (matrix rows the structure relies on), and a `subtree` (the literal markup).
 Some also carry a `$rowTemplate` (a separately-published Table-type row form).
@@ -69,7 +69,13 @@ Some also carry a `$rowTemplate` (a separately-published Table-type row form).
 
 Compose from blocks — **never** copy a 25K-line seed and edit it down.
 
-1. **Map** each blueprint `layout-tree` node to a block (use `$archetype` + the catalogue above).
+1. **Map** each blueprint `layout-tree` node to a block **by the catalogue above** — match what the
+   node *is* (a header band → `page-header-band`, a body split → `flex-split-main-rail`). Do **not**
+   try to match on screen archetype: `$scope` (`page` / `region` / `fragment`) describes how big a
+   block is, deliberately a different axis from the eight screen archetypes in
+   [archetypes.md](archetypes.md). This field was called `$archetype` and carried values
+   (`page`, `fragment`, `list`) that appear in no archetype list, so the documented join key never
+   resolved for any non-`record-detail` screen.
    Body split → `flex-split-main-rail`; title band → `page-header-band`; each rail collection →
    `rail-panel` (+ `dashed-add-button`); attribute rows → `rail-label-value-row`; the wide list →
    `requirement-datalist-row` (host + row template).

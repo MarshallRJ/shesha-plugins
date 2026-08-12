@@ -44,12 +44,19 @@ Authenticate ONCE; write the bearer token to **`$RUN_DIR/access-token`** (the ru
 
 > SKILL_ROOT: `<path>`. `$RUN_DIR`: `<path>` (token at `$RUN_DIR/access-token`; write the transform script and all staged JSON under `$RUN_DIR/staged/`). Backend `<url>`. Targets: `<form list>`. Pilot: `<form>`. Approval mode: pilot-stop. Transform spec: `<spec-file>`. Assertions: `<list — e.g. field-set unchanged, component delta == N>`. Follow references/bulk-operations.md exactly.
 
+## `SKILL_ROOT` means the shesha-form-edit skill directory
+
+Everything an agent reads hangs off it — `SKILL_ROOT/scripts/…`, `SKILL_ROOT/assets/groups/…`,
+`SKILL_ROOT/references/…`. It is **not** the `skills/` directory. Three docs briefly used the
+other reading, which silently pointed the mandatory disk-verification gate at a path that does
+not exist; if you add a new dispatch site, match the agents.
+
 ## Never accept an agent's word for an artifact — check the disk
 
 **MUST, after every `form-author` dispatch, before the returned verdict counts for anything:**
 
 ```bash
-node <SKILL_ROOT>/shesha-form-edit/scripts/verify-artifact.mjs <outputPath> \
+node <SKILL_ROOT>/scripts/verify-artifact.mjs <outputPath> \
   --backend <url> --token <token-file> --json
 ```
 

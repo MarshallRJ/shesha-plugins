@@ -1,6 +1,6 @@
 {
   "$block": "meta-strip",
-  "$archetype": "fragment",
+  "$scope": "region",
   "$styleOverlay": "meta-strip",
   "$slots": {
     "cells": "subtree.components",

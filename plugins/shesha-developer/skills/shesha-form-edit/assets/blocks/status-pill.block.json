@@ -1,6 +1,6 @@
 {
   "$block": "status-pill",
-  "$archetype": "fragment",
+  "$scope": "fragment",
   "$styleOverlay": "status-pill",
   "$slots": {},
   "$bindings": [

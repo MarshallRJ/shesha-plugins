@@ -1,6 +1,6 @@
 {
   "$block": "card-with-header-strip",
-  "$archetype": "fragment",
+  "$scope": "region",
   "$styleOverlay": "card-with-header-strip",
   "$slots": {
     "header": "subtree.components.0.components",

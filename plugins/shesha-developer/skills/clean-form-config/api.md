@@ -19,12 +19,17 @@ Strip any trailing slash from the resolved URL. Store as `BASE_URL`.
 
 ## 2. Authenticate
 
-Ask the user:
+**Do not ask the user for credentials.** This skill is a mandatory blocking step inside
+`shesha-form-edit`'s push path, which is frequently headless — an interactive prompt here
+dead-ends the entire run.
 
-> Please enter your Shesha username (or email) and password to fetch the form via the API.
-> Leave blank to provide a local file path instead.
+Resolve in this order, matching `shesha-form-edit/SKILL.md` Step 2 (the canonical recipe — follow
+[its api.md §§1–2](../shesha-form-edit/references/api.md) rather than duplicating it here):
 
-If the user leaves credentials blank → skip to Option B in Step 2 of `SKILL.md`.
+1. A token or credentials supplied in the dispatch context / already held by the caller.
+2. `SHESHA_BACKEND_URL` + the local-dev default `admin` / `123qwe`.
+3. If neither resolves, fall back to Option B in Step 2 of `SKILL.md` (operate on a local file)
+   and say so in the report — do not block.
 
 If credentials are provided, run:
 

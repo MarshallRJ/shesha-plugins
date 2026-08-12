@@ -100,7 +100,7 @@ Per screen, in order:
 
   **This step is not optional, and it is emphatically not optional when there was no design source.** A form that only ever gets structure is default AntD, and that is exactly the reported failure: *"the dialogs are unstyled AntD defaults… the 'warm' aesthetic is really just one cream background colour and doesn't extend into typography, spacing, or button colour."* On the Tier D path the brand file **is** the design — if it isn't applied, nothing else in the run makes the screen look designed. Every screen gets the pass, dialogs included; a dialog is a screen.
 
-- **(c) Verify the artifact on disk before believing any of it** — `node <SKILL_ROOT>/shesha-form-edit/scripts/verify-artifact.mjs <staged-path> --backend <url> --token $RUN_DIR/access-token`. Exit `0` pass · `1` fail · `2` unreadable · `3` partial. Cross-form references are resolved here, which is what stops a screen going live pointing at a sibling that was never created.
+- **(c) Verify the artifact on disk before believing any of it** — `node <FORM_EDIT_SKILL_ROOT>/scripts/verify-artifact.mjs <staged-path> --backend <url> --token $RUN_DIR/access-token`. Exit `0` pass · `1` fail · `2` unreadable · `3` partial. Cross-form references are resolved here, which is what stops a screen going live pointing at a sibling that was never created.
 
 ### Step 5 — Verify (four gates, in order)
 - **5a — Structural integrity:** archetype built, native components only, layout fully flexed, fields bound. Failures route back to `shesha-form-edit`, not on to styling.

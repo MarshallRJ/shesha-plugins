@@ -53,7 +53,7 @@ If multiple symptoms fire at once, fix them in source order — earlier rows oft
 
 ## Capture protocol
 
-When the playwright smoke step (Step 9) reports a finding:
+When the browser smoke step (Step 9) reports a finding:
 
 1. Quote the captured error / network response **verbatim** in your reply.
 2. Reference the row number above (e.g. "matches debug.md row 1 — editMode missing").

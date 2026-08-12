@@ -1,6 +1,6 @@
 {
   "$block": "completeness-bar",
-  "$archetype": "fragment",
+  "$scope": "fragment",
   "$styleOverlay": "completeness-bar",
   "$slots": {
     "label": "subtree.components.0.content",
@@ -90,7 +90,7 @@
         "showInfo": true,
         "progressType": "line",
         "strokeColor": "#003BB2",
-        "trailColor": "#e5e7eb",
+        "trailColor": "#E8EAF0",
         "strokeLinecap": "round",
         "customStyle": {
           "_mode": "code",

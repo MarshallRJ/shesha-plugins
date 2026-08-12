@@ -328,13 +328,11 @@ Common server normalizations to ignore (not bugs): re-ordered keys inside an obj
 
 ---
 
-## 12. Browser smoke via the playwright skill
+## 12. Browser smoke
 
-Step 9 of the skill. Invoke as:
-
-```
-Skill(skill="playwright", args="<directive>")
-```
+Step 9 of the skill. Drive whichever browser MCP the session exposes — `mcp__playwright__*`,
+`mcp__Claude_Browser__*` or `mcp__claude-in-chrome__*`; the directive below is tool-agnostic.
+(There is no `playwright` *skill*, despite what this section used to say.)
 
 ### Directive template
 

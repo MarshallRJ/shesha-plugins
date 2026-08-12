@@ -11,8 +11,41 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const [BLOCKS, STYLES, TOKENS] = process.argv.slice(2);
+/*
+ * Paths default relative to THIS SCRIPT, never the caller's cwd — matching
+ * validate-blocks.js. When they were bare positional args, running the documented
+ * command from the wrong directory silently created a whole second
+ * `plugins/shesha-design-system/` tree that nothing reads, and the overlays in it
+ * then diverged from the real ones. Positional args still work for overrides.
+ */
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const flagValues = new Set(
+  ['--only'].flatMap((f) => {
+    const i = process.argv.indexOf(f);
+    return i !== -1 && process.argv[i + 1] ? [process.argv[i + 1]] : [];
+  })
+);
+const args = positional.filter((a) => !flagValues.has(a));
+
+const BLOCKS = path.resolve(args[0] ?? path.join(SCRIPT_DIR, '..', 'assets', 'blocks'));
+const STYLES = path.resolve(
+  args[1] ?? path.join(SCRIPT_DIR, '..', '..', 'shesha-design-system', 'assets', 'block-styles')
+);
+const TOKENS = path.resolve(
+  args[2] ?? path.join(SCRIPT_DIR, '..', '..', 'shesha-design-system', 'assets', 'themes', 'shesha.tokens.json')
+);
+
+for (const [label, p] of [['blocks', BLOCKS], ['styles', STYLES], ['tokens', TOKENS]]) {
+  if (!fs.existsSync(p)) {
+    console.error(`bake-overlays: ${label} path does not exist: ${p}`);
+    console.error('  (paths default relative to the script; pass overrides positionally)');
+    process.exit(2);
+  }
+}
+
 const APPLY = process.argv.includes('--apply');
 const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null;
 

@@ -1,6 +1,6 @@
 {
   "$block": "page-shell",
-  "$archetype": "page",
+  "$scope": "page",
   "$styleOverlay": null,
   "$description": "The MANDATORY outermost wrapper for every page-level form. A borderless, heading-less card carrying the `sha-page` class. EVERY other component on the page goes inside its `content.components` — nothing sits beside it at root. Derived from the approved boxfusion.test/bookings-table revision 2.",
   "$slots": {
