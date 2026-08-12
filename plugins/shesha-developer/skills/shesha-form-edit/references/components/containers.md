@@ -26,6 +26,26 @@ Per-breakpoint settings live under `desktop` / `tablet` / `mobile` keys.
 
 Use containers as semantic divs for grouping related rows (consents block, action row, footer row). See [layout.md](layout.md) for the full house pattern.
 
+### Per-row / dynamic images — a container, not the `image` component
+
+**The `image` component cannot bind its `url` to data.** Its `ownProps` carry a static `url` string and no `propertyName` or entity binding, so there is no way to make it show a different picture per row or per record. Reaching for it first and discovering this is a 15–30 minute detour.
+
+For a datalist card thumbnail, a detail-page hero, or anything else where the image comes from data, use a plain `container` sized appropriately with a **code-mode `style`** prop:
+
+```js
+// container.style — code mode; `data` is the row/record in scope
+return {
+  backgroundImage: 'url(' + data.thumbnailUrl + ')',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundColor: '#f0f0f0'   // fallback while loading / when null
+};
+```
+
+Build the URL with **string concatenation, not template literals** — the whole thing has to survive `JSON.stringify` into the form markup ([scripts.md](scripts.md)).
+
+**Don't let this leak into your spacing.** The inline `style` prop wins over *all* structured style blocks, silently discarding any `desktop.background` / `border` / `shadow` you also set on that node. Use `style` **only** for the background-image itself; padding, margin and spacing on the same or sibling containers still belong in the structured `stylingBox` / `desktop.*` channels.
+
 ---
 
 ## card

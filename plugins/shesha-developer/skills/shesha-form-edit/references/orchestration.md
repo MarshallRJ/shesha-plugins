@@ -32,19 +32,36 @@ Exit criteria per stage: audit = every target has a verdict; pilot = assertions 
 
 ## Shared state between agents
 
-Authenticate ONCE; write the bearer token to a workspace file (e.g. `<workspace>/.token`) and pass the path in every dispatch prompt — agents `cat` it instead of re-authenticating. Put the audit spec / transform spec in a JSON file and pass its path too. Every dispatch prompt must include: the skill root path, backend URL, token-file path, module, the form(s), and the expected output contract.
+Authenticate ONCE; write the bearer token to **`$RUN_DIR/access-token`** (the run directory — see `shesha-claude-designer` SKILL.md Step 0) and pass that path in every dispatch prompt — agents `cat` it instead of re-authenticating. Put the audit spec / transform spec in a JSON file under `$RUN_DIR/` and pass its path too. Every dispatch prompt must include: `$RUN_DIR`, the skill root path, backend URL, token-file path, module, the form(s), and the expected output contract.
+
+**Stamp `fetchedAt` next to the token and check it before use.** A cached token that had gone five days stale — alongside a cached password that was also wrong — cost a live debugging round-trip before anyone thought to suspect the cache. A cache with no freshness check is a trap, not an optimisation; re-authenticate rather than guess.
 
 ## Dispatch prompt template — auditor fan-out
 
-> You are auditing one Shesha form. SKILL_ROOT: `<path>`. Backend: `<url>`, bearer token in `<token-file>`. Form: module `<module>`, name `<form>`. Audit spec: `<spec-file>` (run check families: `<families>`). Fetch via GetByName — `result.markup` is double-stringified (parse the envelope, then parse the markup string). Return ONLY the JSON verdict contract from your agent definition.
+> You are auditing one Shesha form. SKILL_ROOT: `<path>`. `$RUN_DIR`: `<path>`. Backend: `<url>`, bearer token in `$RUN_DIR/access-token`. Form: module `<module>`, name `<form>`. Audit spec: `<spec-file>` (run check families: `<families>`). Fetch via GetByName — `result.markup` is double-stringified (parse the envelope, then parse the markup string). Write any scratch under `$RUN_DIR/`. Return ONLY the JSON verdict contract from your agent definition, including its `coverage` block — a family that inspected nothing is not a pass.
 
 ## Dispatch prompt template — fleet transform
 
-> SKILL_ROOT: `<path>`. Backend `<url>`, token `<token-file>`. Targets: `<form list>`. Pilot: `<form>`. Approval mode: pilot-stop. Transform spec: `<spec-file>`. Assertions: `<list — e.g. field-set unchanged, component delta == N>`. Follow references/bulk-operations.md exactly.
+> SKILL_ROOT: `<path>`. `$RUN_DIR`: `<path>` (token at `$RUN_DIR/access-token`; write the transform script and all staged JSON under `$RUN_DIR/staged/`). Backend `<url>`. Targets: `<form list>`. Pilot: `<form>`. Approval mode: pilot-stop. Transform spec: `<spec-file>`. Assertions: `<list — e.g. field-set unchanged, component delta == N>`. Follow references/bulk-operations.md exactly.
+
+## Never accept an agent's word for an artifact — check the disk
+
+**MUST, after every `form-author` dispatch, before the returned verdict counts for anything:**
+
+```bash
+node <SKILL_ROOT>/shesha-form-edit/scripts/verify-artifact.mjs <outputPath> \
+  --backend <url> --token <token-file> --json
+```
+
+Exit `0` pass · `1` fail · `2` the artifact could not be read · `3` partial (something was not inspected — [verification.md §0](verification.md)).
+
+This is not belt-and-braces. Two build retrospectives recorded the same failure independently: once an agent spent 50 tool calls and **never wrote the file**, then reported completion; once it reported *"53 components... everything checks out"* for a form whose datalist pointed at a **row-template form that did not exist**, so the list would have rendered empty. Both were caught by a human reading JSON, neither by any gate. An agent's self-report is a claim; the file on disk is the evidence. `verify-artifact.mjs` resolves every referenced form against the backend, which is the specific check that would have caught the second case before the push.
+
+Treat exit `2` as "the dispatch did not complete" and re-dispatch with *"you stopped before writing the file — finish and write it now"*, rather than re-running the whole build.
 
 ## Synthesis
 
-One final agent (or do it inline): aggregate the verdicts; use ONLY the data provided — do not invent issues; report per-form pass/fail, the failure clusters, and what was NOT covered (no silent truncation).
+One final agent (or do it inline): aggregate the verdicts; use ONLY the data provided — do not invent issues; report per-form pass/fail, the failure clusters, and what was NOT covered (no silent truncation). A `partial` from any gate is reported as partial, never rolled up into a pass.
 
 ---
 

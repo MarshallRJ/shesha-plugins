@@ -42,6 +42,19 @@ if (a && a.<parentFk>) {
 
 This seeds the **display model only**. It does NOT make the value submit — see the hard rule below. Embedded-JS rules (async, try/catch, no console.log) are in [scripts.md](scripts.md).
 
+### When `formArguments` silently doesn't arrive
+
+The recipe above is the one that works **from a subtable's own top-level Add button**. It is not universal, and the failure is silent:
+
+- **From inside a `datalist` row-template card, `formArguments` does not deliver code-evaluated values at all.** Authored as a `{_mode,_code}` object the dialog opens with every field empty; authored as a bare code string the dialog **doesn't open at all** — no modal in the DOM, no console error, no network call (even `"return {};"` fails, so it's the string type breaking evaluation, not the expression). Full measurements: [data-tables.md](data-tables.md) "Card click-through". Use the `datalist`'s own `onListItemClick` with a `contexts.appContext` relay instead.
+- The safe general rule while this is unresolved: **treat `Show Dialog`'s `formArguments` as reliable only for static/literal values**, and relay anything dynamic through `contexts.appContext`.
+
+### `onDataLoaded` never fires on a dialog that loads no data
+
+A modal *feels* like a fresh page load, but it is still a form — and on `dataLoaderType: "none"` the `onDataLoaded` hook **never runs**. Nothing errors; your seeding code simply never executes. Detecting it takes a `window` flag set inside the handler.
+
+**Use `onAfterDataLoad` for dialog seeding**, or give the dialog a real loader. This bites even people who already know the generic rule, because the modal doesn't look like a no-loader form.
+
 ---
 
 ## Submission mechanics — THE HARD RULE

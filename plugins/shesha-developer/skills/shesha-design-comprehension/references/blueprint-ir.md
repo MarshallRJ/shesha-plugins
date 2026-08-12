@@ -1,6 +1,6 @@
 # Layout blueprint IR
 
-The intermediate representation that carries a screen's placement from design to build. One file per screen: `<workdir>/blueprints/<screen>.blueprint.md`.
+The intermediate representation that carries a screen's placement from design to build. One file per screen: `$RUN_DIR/blueprints/<screen>.blueprint.md`.
 
 ## Why hybrid Markdown (not pure JSON/YAML)
 

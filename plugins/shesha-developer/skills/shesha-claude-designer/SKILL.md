@@ -29,11 +29,40 @@ digraph { rankdir=LR;
 
 ## Steps
 
+### Step 0 — Pre-flight: create the run directory (once per run, before anything else)
+
+Everything this pipeline produces lands in **one** directory, `$RUN_DIR`, created now:
+
+```
+.claude/shesha/runs/<run-slug>/      ← $RUN_DIR, relative to the TARGET PROJECT root
+  manifest.json                      run state: screens, plan, per-screen status, gate verdicts
+  access-token                       BOM-free bearer token + fetchedAt
+  screen-inventory.json              Step 1 output
+  blueprints/<screen>.blueprint.md   Step 2 output
+  probes/<screen>.<stage>.layout.json        stage = design | built-r1 | built-r2 …
+  staged/<screen>.<stage>.form.json          stage = structure | styled | pushed
+  screenshots/<screen>.<viewport>.<scroll>.png
+  run-log.md                         one line per phase
+```
+
+Rules that make this worth doing:
+
+- **`$RUN_DIR` goes in every dispatch prompt.** A sub-skill or agent that has to invent its own scratch location writes somewhere nobody looks. Wherever older docs say `<workdir>`, they mean `$RUN_DIR`.
+- **Artifact names carry their own identity.** A screenshot called `screenshot-3.png` caused a wasted design-critic round-trip when the wrong scroll position was handed over; `<screen>.<viewport>.<scroll>.png` cannot make that mistake. Same for probes and staged markup — the stage is in the filename.
+- **Handoffs pass paths, not blobs.** Return `staged/x.styled.form.json`, not its contents. Large JSON crossing an agent boundary is context spent on transport.
+- **`manifest.json` is the run's memory.** The plan, build order and per-screen status live there, so a run survives compaction and can be resumed instead of re-derived. Update it at each phase boundary.
+- **Absolute path, forward slashes.** On Windows write `C:/Users/.../.claude/shesha/runs/<slug>`, never a git-bash `/c/...` path: native Python and Node cannot open those, and the resulting `FileNotFoundError` looks exactly like a missing file. If a tool insists on relative paths, `cd` into `$RUN_DIR` first and use bare filenames.
+- Add `.claude/shesha/runs/` to the project's `.gitignore`.
+
+**This is not the cache.** `.claude/cache/shesha-form-edit/` is durable, cross-run and TTL'd (entity metadata, seeds, doc distillates); `$RUN_DIR` is one run and disposable. Keep them separate.
+
+**Authenticate once** into `$RUN_DIR/access-token`, and stamp `fetchedAt` alongside it. Every reader checks the age before use and re-authenticates if stale — a token cached in a repo went five days out of date and cost a live debugging round-trip before anyone suspected it.
+
 ### Step 1 — Ingest the design
 Identify and read the design source; detect its **fidelity tier** (readable source / runnable app / screenshots). Extract the **token set** (palette, type, spacing, radius, shadow, status lifecycle) and the **screen list**. Normalise mixed docs with markitdown for content only. Details: [references/design-ingestion.md](references/design-ingestion.md). Do NOT parse a compiled/offline single-file bundle — serve+run it instead.
 
 ### Step 2 — Comprehend each screen into a layout blueprint  ← the placement spine
-**REQUIRED SUB-SKILL:** `shesha-developer:shesha-design-comprehension`. For each screen, it produces `<workdir>/blueprints/<screen>.blueprint.md` — a measured, annotated layout blueprint with explicit grid columns/spans, nesting, tab assignment, bindings, and a placement `assertions` block. This is what stops container placement from drifting; do not skip it and hand `shesha-form-edit` a prose brief.
+**REQUIRED SUB-SKILL:** `shesha-developer:shesha-design-comprehension`. For each screen, it produces `$RUN_DIR/blueprints/<screen>.blueprint.md` — a measured, annotated layout blueprint with explicit grid columns/spans, nesting, tab assignment, bindings, and a placement `assertions` block. This is what stops container placement from drifting; do not skip it and hand `shesha-form-edit` a prose brief.
 
 ### Step 3 — Establish the theme (once) + plan the screens
 **First decide the brand.** If the user names a brand, hands over brand tokens, or an app-specific `<brand>.tokens.json` already exists → use that. If the design carries a distinct palette/type → author a new `<brand>.tokens.json` (copy the default, swap values). Otherwise → use the shipped **default `shesha`** brand. The selection rule + the folder to drop a custom brand file into live in `shesha-developer:shesha-design-system` (SKILL.md Step 1). Then hand the token set to `shesha-developer:shesha-design-system` to ensure the brand theme file exists and the app-level theme (primary, font, radius) is set **once**. Then map each design screen to a Shesha form type + archetype (read the archetype straight from each blueprint — don't re-derive it), **resolve each blueprint region to a block-library block** (`shesha-form-edit/assets/blocks` — e.g. `flex-split-main-rail`, `page-header-band`, `rail-panel`) **+ its paired style overlay/recipe** (`shesha-design-system`), so the per-screen plan is `{archetype, blocks[], recipes[]}`; and sequence the build order (list → detail → create is typical). Present the plan + blueprints + cost; gate on user confirmation (unless headless).

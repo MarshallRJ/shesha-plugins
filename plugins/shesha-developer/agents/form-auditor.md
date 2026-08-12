@@ -46,8 +46,14 @@ Recurse ALL of: `components[]`, `content.components[]`, `header.components[]`, `
     { "check": "crud-wiring", "target": "<componentName or path>", "pass": false,
       "expected": "...", "actual": "...", "severity": "fail|warn|info", "issue": "one sentence" }
   ],
+  "coverage": [
+    { "check": "crud-wiring", "walked": 0, "checked": 0,
+      "uninspectable": [{ "target": "...", "reason": "why this could not be evaluated" }] }
+  ],
   "summary": "<= 2 sentences"
 }
 ```
 
-`pass` = no `fail`-severity results. Use ONLY evidence from the markup/spec you were given — do not invent issues, do not soften real ones.
+`pass` = no `fail`-severity results **and** no `uninspectable` entries. Use ONLY evidence from the markup/spec you were given — do not invent issues, do not soften real ones.
+
+**Report coverage, not just findings** ([verification.md §0](../skills/shesha-form-edit/references/verification.md)). Every check family declares how many nodes it walked, how many assertions it evaluated, and what it could not evaluate and why. A family that examined nothing reports `checked: 0` and is **not** a pass — "nothing was wrong" and "nothing was looked at" must never print the same. A sibling checker once passed a form having reported *"0 bindings, 0 reflists, 0 endpoints checked"*, because that form's constructs were invisible to its walker; the green light cost more than no check would have. If a construct is opaque to you — a code-mode expression, a runtime-only binding — name it in `uninspectable` and let a human read it.

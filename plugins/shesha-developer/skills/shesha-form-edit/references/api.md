@@ -94,7 +94,7 @@ If `result` is null, the form doesn't exist under that module/name. Stop and tel
 curl -s -G "$BASE_URL/api/services/Shesha/FormConfiguration/GetJson" \
   --data-urlencode "id=$FORM_ID" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -o /tmp/form-current.json
+  -o $RUN_DIR/staged/form-current.json
 ```
 
 This endpoint returns the **raw markup as a file download** (`application/json` with `Content-Disposition: attachment`). The file content **is** the form JSON (already parsed as an object — no string wrapping). Read it with `JSON.parse`.
@@ -123,18 +123,18 @@ Build the body via Node so the markup string is properly JSON-escaped. Don't try
 ```bash
 node -e "
 const fs = require('fs');
-const tree = JSON.parse(fs.readFileSync('/tmp/form-edited.json', 'utf8'));
+const tree = JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-edited.json', 'utf8'));
 const body = JSON.stringify({
   id: process.env.FORM_ID,
   markup: JSON.stringify(tree)
 });
-fs.writeFileSync('/tmp/update-markup-body.json', body);
+fs.writeFileSync('$RUN_DIR/staged/update-markup-body.json', body);
 " 
 
 curl -s -X PUT "$BASE_URL/api/services/Shesha/FormConfiguration/UpdateMarkup" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d @/tmp/update-markup-body.json
+  -d @$RUN_DIR/staged/update-markup-body.json
 ```
 
 Successful response: HTTP 200 with `{ "result": null, "success": true, ... }`. The endpoint returns `void`.
@@ -168,14 +168,14 @@ DTO (`ImportFormJsonInput`):
 ```
 
 ```bash
-# /tmp/form-edited.json contains the stringified-or-tree form JSON.
+# $RUN_DIR/staged/form-edited.json contains the stringified-or-tree form JSON.
 # If your edits are an object (parsed tree), stringify first; the API expects the file content
 # to be a JSON document representing the form markup.
 
 curl -s -X POST "$BASE_URL/api/services/Shesha/FormConfiguration/ImportJson" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -F "ItemId=$FORM_ID" \
-  -F "file=@/tmp/form-edited.json;type=application/json"
+  -F "file=@$RUN_DIR/staged/form-edited.json;type=application/json"
 ```
 
 Successful response: HTTP 200 with `{ "result": { ...FormConfigurationDto... }, "success": true }`. The DTO contains the updated form record.
@@ -311,14 +311,14 @@ Step 8 of the skill. Re-fetch the form just pushed and diff against the markup w
 curl -s -G "$BASE_URL/api/services/Shesha/FormConfiguration/GetJson" \
   --data-urlencode "id=$FORM_ID" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
-  > /tmp/form-after.json
+  > $RUN_DIR/staged/form-after.json
 ```
 
 Then in Node:
 
 ```js
-const sent = JSON.parse(fs.readFileSync('/tmp/form-sent.json', 'utf8'));
-const after = JSON.parse(JSON.parse(fs.readFileSync('/tmp/form-after.json', 'utf8')).result.markup);
+const sent = JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-sent.json', 'utf8'));
+const after = JSON.parse(JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-after.json', 'utf8')).result.markup);
 // Walk both trees in component-id order; surface any property whose value differs.
 ```
 

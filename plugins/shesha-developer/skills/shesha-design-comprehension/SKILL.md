@@ -21,7 +21,7 @@ This is the layer between "I have a design" and "build the form". It does **not*
 
 ## The three things this skill produces
 
-1. A **layout blueprint** per screen — `<workdir>/blueprints/<screen>.blueprint.md`. Format spec + worked example: [references/blueprint-ir.md](references/blueprint-ir.md).
+1. A **layout blueprint** per screen — `$RUN_DIR/blueprints/<screen>.blueprint.md`. Format spec + worked example: [references/blueprint-ir.md](references/blueprint-ir.md).
 2. A **capture** of the design's real layout — via one of three fidelity tiers (source / runnable / screenshot). How, and where markitdown fits: [references/capture-pipeline.md](references/capture-pipeline.md).
 3. A **placement verification** of the built form against the blueprint. Method + the routed-fix loop: [references/verification-loop.md](references/verification-loop.md).
 

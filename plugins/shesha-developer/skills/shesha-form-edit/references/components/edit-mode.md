@@ -16,6 +16,12 @@ There is no single correct value. Both blanket rules caused real production bugs
 
 Never blanket-stamp either value across a whole form. When validating an edit: walk the tree and assert each interactive component's `editMode` matches the **form-type rule above** — flag mismatches per form type, not against a single absolute.
 
+### Buttons: `"inherited"` renders `disabled`, with no visual cue
+
+Worth its own warning because nothing tells you. A `button` / `buttonGroup` item left on `editMode: "inherited"` inside a read-only display context (a `datalist` row template being the common case) is rendered with the DOM attribute **`disabled`** — there is no HTML `readonly` for `<button>`, so the framework substitutes `disabled`. The button looks completely normal, clicks do nothing, and no console message appears. Schema and guardrail validation both pass clean.
+
+Set `editMode: "editable"` explicitly on **both** the `buttonGroup` and the item, on any interactive control whose parent context you have not positively confirmed is editable. If the button is inside a datalist row template, fixing `editMode` only gets you as far as a button that is *enabled* — its action still won't fire from that scope, which is a separate problem with its own fix in [data-tables.md](data-tables.md) "Card click-through".
+
 ---
 
 ## Visibility / enabled — four properties

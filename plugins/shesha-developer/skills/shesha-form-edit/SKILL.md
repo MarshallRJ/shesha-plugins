@@ -74,7 +74,7 @@ If module + name only, resolve via `GetByName` ([api.md §3](references/api.md))
 
 ## Step 4 — Fetch the current markup
 
-`GET /api/services/Shesha/FormConfiguration/GetJson?id=$FORM_ID` ([api.md §4](references/api.md)). Save to `$env:TEMP\form-current.json`. The response body is a stringified form JSON; parse it. Resulting object has top-level `components` (nested tree) and `formSettings`.
+`GET /api/services/Shesha/FormConfiguration/GetJson?id=$FORM_ID` ([api.md §4](references/api.md)). Save to `$RUN_DIR/staged/<form>.current.json`. The response body is a stringified form JSON; parse it. Resulting object has top-level `components` (nested tree) and `formSettings`.
 
 ## Step 4.5 — Entity introspection (mandatory for entity-bound forms)
 
@@ -166,6 +166,16 @@ For every new or edited form, before writing a single component object:
 
 3. **Load the group file** for each component type (the index maps type → group file). Read the group file to get the full list of valid property names, their expected types, and descriptions. Only use properties listed there — anything else will be stripped by `clean-form-config` at Step 6.
 
+3b. **When a prop's exact shape is disputed or non-obvious, check the source-derived KB** at `assets/components-kb/` — 115 components extracted from `shesha-reactjs` `releases/0.45` (provenance in `_meta.json`). Per component it gives `ownProps` (the props that genuinely exist on that component), `resolvedProps`, the current `version` integer, and the `initModel` defaults.
+
+   **Read it lazily — never wholesale.** `_index.json` is 28 KB on its own and the folder is ~700 KB; grep for the type, then open only that one file:
+   ```bash
+   grep -A6 '"refListStatus"' assets/components-kb/_index.json   # → its file + version
+   ```
+   `_index.json` is also the authoritative source for each component's current `version` integer — prefer it over the hand-maintained 0.45.x list in Non-negotiables, which will drift.
+
+   This is the tie-break for "which shape is real". Two parallel authoring agents once produced two different, mutually incompatible shapes for the same `refListStatus` prop, each reasoning from a doc example; the KB's `ownProps` (`referenceListId`, `showIcon`, `solidBackground`, `showReflistName` — no flat `module`/`referenceListName` keys at all) settles it immediately. Ranking when sources disagree: **a live form that already renders** > the KB > `assets/groups/` > a doc example. `_gaps.json` lists the components whose settings could not be extracted — if your type is in there, the KB has no opinion and you must fall back.
+
 4. **Scan the group for alternatives.** While in the group file, check whether a better-fit component exists (e.g. `refListStatus` instead of `dropdown` for read-only status display). **For side-by-side / split layout use a flex `container` row — NEVER the `columns` component** (firm project rule): `display:"flex"` + `flexDirection:"row"` + `gap`, with each child sized via `desktop.dimensions.width` (a fixed-width rail = `width:"332px"`; a filling main column = `width:"calc(100% - <rail+gap>px)"`). Per-child `customStyle:{flex:…}` does NOT size the outer div — proven inert; use `dimensions.width`.
 
 5. **Update the plan** with corrected type names, valid properties, and any swapped alternatives — then write the JSON.
@@ -235,7 +245,7 @@ If validation surfaces a REAL issue, fix it before pushing. **Never push a confi
 
 Default: **UpdateMarkup** — `PUT $BASE_URL/api/services/Shesha/FormConfiguration/UpdateMarkup`, body `{ "id": "$FORM_ID", "markup": "<stringified form JSON>" }`. Build the body in Node to avoid escaping pain. See [api.md §5](references/api.md).
 
-**Scratch-script hygiene (avoids a recurring time-sink):** write build/push scripts and staged JSON into the **supplied working directory**, NOT `/tmp` — git-bash `/tmp` maps to `%TEMP%` (e.g. `C:\Users\…\AppData\Local\Temp`), which is a *different* path than Windows `C:\tmp` and from PowerShell `$env:TEMP`, so a file written by `bash` is frequently "not found" by `node`/PowerShell. Pass values into Node via **env vars** (`VAR=x node script.js`), not positional argv that the shell may not forward. Prefer **one combined fetch→mutate→push script** over many small probe commands (each round-trip is cost).
+**Scratch-script hygiene (avoids a recurring time-sink):** write build/push scripts and staged JSON into **`$RUN_DIR/staged/`** (the run directory — `.claude/shesha/runs/<slug>/`, created in `shesha-claude-designer` SKILL.md Step 0; when this skill runs standalone, create one the same way), NOT `/tmp` — git-bash `/tmp` maps to `%TEMP%` (e.g. `C:\Users\…\AppData\Local\Temp`), which is a *different* path than Windows `C:\tmp` and from PowerShell `$env:TEMP`, so a file written by `bash` is frequently "not found" by `node`/PowerShell. The same trap catches **native Windows Python**, which cannot open a git-bash `/c/...` path at all and reports a plain `FileNotFoundError` that looks exactly like a missing file — pass absolute Windows paths with forward slashes, or `cd` into the directory and use bare filenames. Pass values into Node via **env vars** (`VAR=x node script.js`), not positional argv that the shell may not forward. Prefer **one combined fetch→mutate→push script** over many small probe commands (each round-trip is cost).
 
 Alternative: **ImportJson** — multipart upload (`ItemId` + `file`). See [api.md §6](references/api.md). Both write `Markup` on the form configuration.
 
@@ -375,6 +385,8 @@ Project-scoped learning state. **Skill reads `.summary.md` by default; opens raw
 | >3 forms changed (Step 6) | `shesha-developer:form-auditor` fan-out | MUST before pushing |
 | Any bulk mutation | `shesha-developer:fleet-transformer` agent (exactly one) | MUST |
 | 2+ distinct new forms | `shesha-developer:form-author` per form | SHOULD (parallel) |
+| After ANY `form-author` dispatch, before trusting its verdict | `node scripts/verify-artifact.mjs <outputPath> --backend <url> --token $RUN_DIR/access-token` | MUST — the file on disk is the evidence, not the agent's report ([orchestration.md](references/orchestration.md)) |
+| Form renders and placement is settled, before reporting done | `shesha-developer:design-critic` agent | SHOULD — apply its ranked fixes or report the verdict verbatim; never overrule it silently |
 | Any runtime error / failed smoke (Step 8.5/9) | `superpowers:systematic-debugging` | MUST before proposing fixes |
 | Before claiming done (Step 10) | `superpowers:verification-before-completion` | MUST — evidence (re-fetch diff + smoke output) first |
 | Multi-form plan execution | `superpowers:subagent-driven-development` / `dispatching-parallel-agents` | SHOULD |
