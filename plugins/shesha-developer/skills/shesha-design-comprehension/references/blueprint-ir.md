@@ -37,7 +37,25 @@ Viewport captured:  <w>x<h>      Source:  <probe file / source path / screenshot
 
 The blueprint's `Archetype` must be one of `shesha-form-edit`'s archetypes, so the builder picks the right seed:
 `record-detail` · `hub` · `list-card` · `capture` · `dashboard` · `solution-map` · `wizard` · `inline-card`.
-(See `shesha-form-edit/references/archetypes.md` for each one's seed + structure.)
+(See `shesha-form-edit/references/archetypes.md` for each one's seed, blocks and default shape.)
+
+## Fidelity tiers — including "there is no design"
+
+| Tier | Source | Where the layout comes from |
+|---|---|---|
+| A | readable HTML/JSX/CSS | parsed source |
+| B | runnable prototype | probed DOM (`layout-probe.js`) |
+| C | screenshots / PDF | read images; content outline only, never placement |
+| **D** | **none — prose brief only** | **the archetype's default shape in `archetypes.md`, plus the resolved brand tokens** |
+
+**Tier D is a first-class path, not a degraded one.** A prose brief ("a bookings list, a create dialog, a details page") names three archetypes, and each carries a known-good structure — so the build is specified, just not *measured*. Write the blueprint exactly as for any other tier; the `layout-tree` comes from the archetype's default shape rather than from a probe.
+
+What Tier D must be honest about:
+
+- **Stamp `Fidelity tier: D (no design source; derived from archetype + <brand> tokens)` and `Confidence: derived`.** Never claim a tier you didn't have a source for.
+- **Its `assertions` are self-consistency checks, not evidence of matching anyone's design** — there is no design to match. They still earn their place: they catch the split collapsing, the rail landing under the main column, a tab losing its children. Mark the block `assertions (derived — archetype default, not a measured design)` so nobody reads a Tier D pass as "matches the mockup".
+- **`Source:` names the archetype and brand file**, e.g. `archetypes.md#record-detail + shesha.tokens.json`, so the provenance is inspectable.
+- If the user later supplies a real design, re-comprehend at Tier A/B — do not retrofit measurements onto a derived blueprint.
 
 ## `layout-tree` grammar
 

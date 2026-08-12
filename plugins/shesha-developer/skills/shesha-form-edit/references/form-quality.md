@@ -181,7 +181,7 @@ forward action (Save/Submit).
 **One layout grid.** `formSettings.layout` + `labelCol`/`wrapperCol` are set once at form
 level and stay consistent. Field-level `labelCol` is silently IGNORED by the renderer — to
 align a lone full-width field with a 2-column grid, place it in a 50% column instead (see
-[detail-page-pattern.md](detail-page-pattern.md)).
+[detail-page-pattern.md](components/detail-page-pattern.md)).
 
 **A title/header `text` carries explicit `fontSize` + `fontWeight`, sized to its role** — page
 title `text-2xl`/24/`600` (`700` if the design's title is bold), card header `text-base`/16/`600`,
@@ -195,7 +195,7 @@ squeezed container with `dimensions.minHeight: 'fit-content'` (runtime-verified;
 `minHeight` under `dimensions` is not enumerated in the groups index — clean-form-config
 may flag it; do NOT strip). `dimensions` is the only style channel reaching the container's
 outer div — a `style`-string `flexShrink:0` lands on the inner div and does nothing
-([style-channels.md](style-channels.md)). Verify geometry with `getBoundingClientRect`,
+([style-channels.md](../../shesha-design-system/references/style-channels.md)). Verify geometry with `getBoundingClientRect`,
 not screenshots, and clear the FE IndexedDB form cache from a static page (e.g.
 `/favicon.ico`) first or stale markup will lie to you ([verification.md](verification.md)).
 
@@ -239,7 +239,7 @@ RequirementsStudio (`Shesha.RequirementsStudio`) instances of the rules above:
   reflist value — never force a uniform color.
 - Subtable drill-down action column: `EyeOutlined`, `minWidth`/`maxWidth` 35, anchored
   left; toolbar alignment via the `sha-index-table-control` framework class
-  ([junction-subtables.md](junction-subtables.md)).
+  ([junction-subtables.md](components/junction-subtables.md)).
 - Detail grid: `formSettings.labelCol: 8` / `wrapperCol: 16`, `layout: "horizontal"` on
   every `*-details` form — the shared grid that makes labels line up across columns.
 
@@ -247,5 +247,5 @@ RequirementsStudio (`Shesha.RequirementsStudio`) instances of the rules above:
 
 Related: [components/by-datatype.md](components/by-datatype.md) ·
 [components/edit-mode.md](components/edit-mode.md) · [debug.md](debug.md) ·
-[verification.md](verification.md) · [detail-page-pattern.md](detail-page-pattern.md) ·
+[verification.md](verification.md) · [detail-page-pattern.md](components/detail-page-pattern.md) ·
 [navigation-menu.md](navigation-menu.md) · [bulk-operations.md](bulk-operations.md)

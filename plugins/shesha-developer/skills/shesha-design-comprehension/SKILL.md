@@ -1,6 +1,6 @@
 ---
 name: shesha-design-comprehension
-description: Use when a Shesha form must match a specific visual design and container/component placement keeps drifting — columns, nesting, tabs, or grouping landing in the wrong place versus the design. Also use to diagnose why an already-built form doesn't match its design. Turns a design source (readable HTML/JSX, a runnable prototype, or screenshots/PDF) into a measured, annotated layout blueprint, and verifies a built Shesha form against it by measurement. Invoked by shesha-claude-designer; pairs with shesha-form-edit (structure) and shesha-design-system (style).
+description: Use when a Shesha form must match a specific visual design and container/component placement keeps drifting — columns, nesting, tabs, or grouping landing in the wrong place. Also use to diagnose why an already-built form doesn't match its design. Turns a design source (readable HTML/JSX, a runnable prototype, or screenshots/PDF) into a measured, annotated layout blueprint — or, when there is no design source, derives the same blueprint from the screen's archetype and the resolved brand tokens (Tier D) — and verifies a built Shesha form against it by measurement. Invoked by shesha-claude-designer once per screen; pairs with shesha-form-edit (structure) and shesha-design-system (style).
 ---
 
 # Shesha Design Comprehension
@@ -15,9 +15,9 @@ This is the layer between "I have a design" and "build the form". It does **not*
 
 - Before building a Shesha form/page from any concrete design (the design source can be readable HTML/JSX source, a runnable prototype/app, or just screenshots/a PDF).
 - When a built form "doesn't line up with the design" — wrong columns, panels in the wrong place, a rail that collapsed, tabs merged, fields stacked that should be side-by-side.
-- Whenever `shesha-claude-designer` is realising a multi-screen design — it calls this skill once per screen to produce blueprints before delegating the build.
+- Whenever `shesha-claude-designer` is realising a multi-screen build — it calls this skill once per screen to produce blueprints before delegating the build. **This includes runs with no design source**, where the blueprint is derived from the screen's archetype and the brand tokens (**Tier D**, see [blueprint-ir.md](references/blueprint-ir.md)) rather than measured. The blueprint is worth writing either way: it is the specification the builder works from and the contract the verification loop re-measures, and with no design to compare against, structural drift is *harder* to spot, not easier.
 
-**Do NOT use** to author component structure/CRUD (that is `shesha-form-edit`), to apply colours/theme (that is `shesha-design-system`), or for a form with no design source to match (go straight to `shesha-form-edit`).
+**Do NOT use** to author component structure/CRUD (that is `shesha-form-edit`), to apply colours/theme (that is `shesha-design-system`), or for a **single** form with no design intent at all ("add a sector dropdown") — that goes straight to `shesha-form-edit`.
 
 ## The three things this skill produces
 

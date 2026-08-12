@@ -140,5 +140,6 @@ shesha-design-system/              ── APPEARANCE ──
 ## When to use which skill directly
 
 - A **design exists** and you want it realised in Shesha across one or more screens → start at **`shesha-claude-designer`**.
-- A **single isolated form, no design source** → go straight to **`shesha-form-edit`**.
+- **Several screens described only in prose**, with design intent ("a 3-page booking system, make it look properly designed") → also start at **`shesha-claude-designer`**. It runs the same pipeline, deriving each blueprint from the screen's archetype and the default `shesha` brand (Tier D) instead of measuring a source.
+- A **single form with no design intent** ("add a sector dropdown") → go straight to **`shesha-form-edit`**.
 - **Style an already-working form** → go straight to **`shesha-design-system`**.

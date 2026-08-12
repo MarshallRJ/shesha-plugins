@@ -100,7 +100,7 @@ getComputedStyle(document.querySelector('.sha-page-content')).padding === '0px';
 ```
 
 Example assertions that have caught real regressions:
-- KIB column height `===` band height (stretch + border-left divider pattern — see [detail-page-pattern.md](detail-page-pattern.md)).
+- KIB column height `===` band height (stretch + border-left divider pattern — see [detail-page-pattern.md](components/detail-page-pattern.md)).
 - `border-left: 1px solid rgb(217,217,217)` on KIB columns 2+.
 - `.sha-page-content` padding `12px → 0px` after appending the `no-padding` class.
 - Toolbar↔table left alignment via the `sha-index-table-control` class: measure the quick-search box's x-offset relative to the datatable edge (a −8px overhang means the class is missing).
