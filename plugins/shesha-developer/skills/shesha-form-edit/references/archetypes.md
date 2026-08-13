@@ -39,6 +39,7 @@ Seed sizes are given because several are very large — **open them with `Grep`/
 One record in depth. **Seed:** `rs-detail-with-header.json` (755 KB) or `employee-detail-without-child-tables.json` (395 KB) when there are no child collections.
 **Blocks:** `page-header-band` → `meta-strip` → `flex-split-main-rail` (`rail-panel`, `rail-label-value-row`, `card-with-header-strip`, `status-pill`).
 **Default shape:** header band (breadcrumb, title, status chip, Edit/Save/Cancel right-aligned) → key-info strip of 4–6 equal cells → body as a flex row: fill column for the primary content, fixed 332 px rail for attributes and related panels. `editMode: "inherited"`, lifecycle buttons per [components/actions.md](components/actions.md).
+**Every content group in that body is a `card`** — headed where it needs a title, `hideHeading: true` where it doesn't — with `container`s only *inside* cards for layout. This sentence used to be missing, and a real run built the whole screen from 56 containers and no cards. Surfaces rule: [components/detail-page-pattern.md](components/detail-page-pattern.md).
 
 ### `list-card`
 Many records. Two variants — **build the one the user's noun names** ("table"/"grid" vs "list"/"cards"); see [components/data-tables.md](components/data-tables.md).

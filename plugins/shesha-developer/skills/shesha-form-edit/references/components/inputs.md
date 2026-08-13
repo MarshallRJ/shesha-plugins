@@ -5,6 +5,36 @@ For autocomplete / entityPicker → [selectors.md](selectors.md).
 
 `editMode` per the form-type rule (detail forms `"inherited"`, dialogs/action pages `"editable"`) — see [edit-mode.md](edit-mode.md).
 
+## Styling an input REMOVES AntD's own border — you must supply one
+
+Measured, and counter-intuitive enough to cost a review cycle. Per the capability matrix
+([capability-matrix.md](../../../shesha-design-system/references/capability-matrix.md)):
+
+| component | what a v7 style block does |
+|---|---|
+| `dropdown` (v11) | `.ant-select` **goes borderless**; the wrapper carries your style |
+| `autocomplete` (v8) | same — `.ant-select` wrapper carries the style |
+| `textField` (v6) | lands on `.ant-input-affix-wrapper` |
+
+So the moment you style a select **at all** — even just to set a font or a width — AntD's default
+border disappears and is replaced by whatever your block specifies. Set a border explicitly or the
+control renders edgeless:
+
+```jsonc
+"border": { "hideBorder": false, "radiusType": "all", "borderType": "all",
+  "border": { "all": { "width": "1px", "style": "solid", "color": "#D0D5E0" }, "top": {}, "bottom": {}, "left": {}, "right": {} },
+  "radius": { "all": 6 } }
+```
+
+Mirror it across `desktop`/`tablet`/`mobile` — a block set only on desktop leaves the other
+breakpoints on the base node, which is how half-styled controls happen.
+
+**And check the version.** A too-low `version` discards the entire style block silently, so a
+correct border on a stale component is invisible with no error — `dropdown` is **11**, not 7
+([component-cheatsheet.md](../component-cheatsheet.md)). Verify by computed style, never by
+eyeballing a screenshot ([verification.md §4](../verification.md)): read
+`getComputedStyle($0).borderColor` on the rendered control.
+
 ## `defaultValue` is a mustache-TEMPLATE STRING, never a literal non-string
 
 Applies to **every** input type, which is why it lives here rather than under one component.

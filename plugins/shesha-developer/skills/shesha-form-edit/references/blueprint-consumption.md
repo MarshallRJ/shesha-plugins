@@ -11,10 +11,36 @@ A blueprint has, per screen: a header (entity modelType, form identity, **Archet
 | `Archetype:` (one of the 8) | which seed to copy from `assets/examples/` (record-detail → `rs-detail-with-header.json`; list/table → `rs-table.json`; create dialog → `rs-create-dialog.json`; link-add → `rs-link-add-dialog.json`) |
 | `layout-tree` `row=[…]` / `flex=[…]` | a flex **`container` row** (`display:"flex"` + `flexDirection:"row"` + `gap`) — **never the `columns` component**; size each child via `desktop.dimensions.width` (fill = `"calc(100% - <others>px)"`, fixed rail = `"332px"`). `native=[…px]` flags a fixed-width child |
 | `layout-tree` nesting (indentation) | the container nesting + every component's `parentId` |
-| `layout-tree` `kind` (card/tabs/datatable/datalist/field/buttonGroup/chip) | the component `type` to use |
+| `layout-tree` `kind` (card/tabs/datatable/datalist/field/buttonGroup/chip) | the component `type` to use — **exactly**, see below |
 | `bindings` table | each input's `propertyName` + component `type` (validate every propertyName against the entity metadata, Step 4.5) |
 | region `recipe:` annotations | passed through to `shesha-design-system` for styling (not your concern — build structure only) |
 | `assertions` block | what gate 5a.5 will re-measure: column membership, row grouping, nesting depth, tab assignment |
+
+## A `kind` is a contract, not a suggestion — substituting one is a defect
+
+**If the blueprint says `card`, build a `card`.** Never substitute a `container` because it is
+easier to emit. This is not hypothetical: a real run produced a detail screen with **56 containers
+and zero cards** from a blueprint that named `card` three times, cited
+`card-with-header-strip` by name, and wrote assertions about those cards (*"the Passenger card AND
+the Payment card are BOTH in the LEFT column"*). The build script's helper had ten component types
+and `card` was not one of them, so every card silently became a container and the page shipped
+flat.
+
+Two things follow:
+
+1. **Before writing a build script, give it an emitter for every `kind` the blueprint uses.** For
+   `card` that means handling `content.components` / `header.components` rather than `components` —
+   the asymmetry that makes card the one component a generic helper skips
+   ([detail-page-pattern.md](components/detail-page-pattern.md)).
+2. **A substituted `kind` is a failure to report, not a degradation to accept.** If you genuinely
+   cannot build the specified component, say so as a blocker with the node named. Shipping a
+   different component than the spec asked for, silently, is the same class of defect as an agent
+   reporting done for a file it never wrote.
+
+Gate 5a.5 re-measures the blueprint's `assertions` against the built form and would catch this —
+assertions that name cards fail against a page of containers. On the run above that gate never ran
+(`manifest.json` recorded `gate5a5: null`), so nothing caught it. Do not rely on the gate in place
+of building to spec; rely on it to prove you did.
 
 ## Building to the placement (the part that drifts)
 
