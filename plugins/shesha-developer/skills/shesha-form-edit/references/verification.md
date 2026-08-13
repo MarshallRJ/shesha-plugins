@@ -26,6 +26,16 @@ The rules that follow from it:
 
 `scripts/verify-artifact.mjs` implements this contract and is the reference shape for anything added later; its suite in `tests/verify-artifact.test.mjs` pins each rule above to a test.
 
+**`scripts/check-references.mjs` applies the same contract to the docs themselves.** Run it after editing any skill file:
+
+```bash
+node scripts/check-references.mjs
+```
+
+It proves that every pointer resolves — markdown links, backticked file paths, `Skill(...)` ids, dispatched agent names, `$role:` tokens (in **every** shipped brand, not just the default), block `$styleOverlay` files, component versions quoted in docs vs `components-kb/_index.json`, and the component index's type→group routing. Exit `0` pass · `1` failures · `3` partial.
+
+It exists because this bug class kept recurring invisibly: 12 dead links, an `archetypes.md` eight files referenced that did not exist, `$role` tokens defined in no theme, six sites invoking a playwright *skill* that nobody ships, and four hand-maintained version lists that had drifted three ways — one telling you to use `numberField` v3, which silently discards a component's whole style block. Three careful manual passes still missed five of these; the script found them in one run. `tests/check-references.negative.mjs` injects one bug per family into a throwaway copy and asserts each is caught, so the gate is proven to fail when it should.
+
 ---
 
 ## 1. API-first verification

@@ -273,7 +273,7 @@ Full catalog (~40 rows, grouped): [references/debug.md](references/debug.md).
 
 Load the form in a browser, screenshot it, and capture console + network errors that JSON validation can't catch (editMode regressions, runtime script failures, broken layout). Recipe in [api.md §12](references/api.md).
 
-**Use whichever browser MCP this session exposes** — `mcp__playwright__*`, `mcp__Claude_Browser__*` or `mcp__claude-in-chrome__*`. The steps are the same in all three: navigate → clear the IndexedDB form cache from `/favicon.ico` → reload → screenshot → read console + network. There is no `playwright` *skill*; this step used to say `Skill(skill="playwright")`, which resolves to nothing and made the whole gate unrunnable. If no browser tool is available, skip and report "built but NOT visually verified" — never "done".
+**Use whichever browser MCP this session exposes** — `mcp__playwright__*`, `mcp__Claude_Browser__*` or `mcp__claude-in-chrome__*`. The steps are the same in all three: navigate → clear the IndexedDB form cache from `/favicon.ico` → reload → screenshot → read console + network. There is no playwright *skill*; this step used to invoke one by that name, which resolves to nothing and made the whole gate unrunnable. If no browser tool is available, skip and report "built but NOT visually verified" — never "done".
 
 Frontend URL: `adminportal/` (auth forms) or `publicportal/` (anonymous) — read the dev port from `<app>/.env*` or `<app>/package.json`. If neither front-end is running, skip the smoke step and warn the user.
 
@@ -368,7 +368,7 @@ whole reason for the split.
 (Skills via the Skill tool; agents via the Task tool. In headless runs, ASK-strength items are skipped, MUST items still run.)
 
 **Every skill named above ships in this marketplace.** Four rows used to cite `superpowers:*` —
-two of them **MUST** — and one cited `shesha-utils:harden-permissions`; neither plugin exists, so
+two of them **MUST** — and one cited harden-permissions under a shesha-utils namespace; neither plugin exists, so
 those were hard blockers no agent could satisfy. `harden-permissions` lives in
 `shesha-developer-0-43`. If you add a row for an external skill, declare the dependency in
 `.claude-plugin/plugin.json` first, and never mark it MUST.

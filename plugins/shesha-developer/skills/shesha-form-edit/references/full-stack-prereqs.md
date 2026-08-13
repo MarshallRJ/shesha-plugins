@@ -99,7 +99,7 @@ Backend rules that constrain what the form/table layer can rely on:
 
 **Backend cause:** Shesha endpoints **inherit permission restrictions from their parent service**. If the parent app service is hardened (e.g. `access_lkp=4` with a specific permission), child endpoints inherit that restriction. Check the **parent** service's access level and permission tags in **permissioned-objects** — not the child.
 
-**Handoff (hardening / fixing permissioned-objects):** `Skill(skill="shesha-utils:harden-permissions")`
+**Handoff (hardening / fixing permissioned-objects):** `Skill(skill="shesha-developer-0-43:harden-permissions")`
 
 ---
 
