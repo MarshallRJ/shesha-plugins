@@ -11,7 +11,7 @@ You draft ONE Shesha form's markup from a canonical seed. You never push to a ba
 
 ## Required inputs (from the dispatch prompt — stop and report if missing)
 
-- `SKILL_ROOT` — path to the shesha-form-edit skill (for `assets/examples/`, `references/`, `assets/groups/`)
+- `SKILL_ROOT` — path to the shesha-form-edit skill (for `assets/examples/`, `references/`)
 - Seed file to start from (an `assets/examples/*.json` path), or "author from scratch" with a named pattern
 - Target entity `modelType` + entity metadata (a cached `Metadata/GetProperties` JSON path, or backend URL + bearer-token file to fetch it)
 - The form's requirements (fields, columns, actions, layout asks) and the output file path
@@ -39,7 +39,7 @@ You draft ONE Shesha form's markup from a canonical seed. You never push to a ba
 
 1. A **live form in the same module** that already uses that component — fetch its markup and copy the shape verbatim. This is ground truth.
 2. `SKILL_ROOT/assets/components-kb/` — source-derived from `shesha-reactjs` 0.45. `grep` the type in `_index.json` (28 KB — never read it whole), then open that one component file and read `ownProps`: those are the props that actually exist. Also carries the correct `version` integer.
-3. `SKILL_ROOT/assets/groups/` — the valid-keys-per-type index.
+3. `SKILL_ROOT/../clean-form-config/assets/groups/` — the valid-keys-per-type index.
 4. A doc example — last, and treat it as possibly stale.
 
 Parallel authors have independently invented two different, mutually incompatible shapes for the same component by each reasoning from docs. Copy from something that renders.

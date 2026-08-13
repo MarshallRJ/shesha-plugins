@@ -46,7 +46,7 @@ Authenticate ONCE; write the bearer token to **`$RUN_DIR/access-token`** (the ru
 
 ## `SKILL_ROOT` means the shesha-form-edit skill directory
 
-Everything an agent reads hangs off it — `SKILL_ROOT/scripts/…`, `SKILL_ROOT/assets/groups/…`,
+Everything an agent reads hangs off it — `SKILL_ROOT/scripts/…`, `SKILL_ROOT/../clean-form-config/assets/groups/…`,
 `SKILL_ROOT/references/…`. It is **not** the `skills/` directory. Three docs briefly used the
 other reading, which silently pointed the mandatory disk-verification gate at a path that does
 not exist; if you add a new dispatch site, match the agents.

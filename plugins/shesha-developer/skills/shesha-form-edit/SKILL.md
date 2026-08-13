@@ -150,7 +150,7 @@ For every new or edited form, before writing a single component object:
 
 1. **List every component `type` you plan to use.** (e.g. for a table form: `container`, `text`, `button`, `dataContext`, `datatable`; for a list form: `container`, `dataContext`, `datalist`, `datatable.pager`)
 
-2. **Confirm each type exists** in the component index at `assets/groups/index.json` (bundled in this skill's assets folder). If a type is missing, you have the wrong name. The index is the authoritative source for the exact `type` string used in form JSON (e.g. `dataContext` for the table/list data wrapper; `datatable` not `dataTable`).
+2. **Confirm each type exists** in the component index at `../clean-form-config/assets/groups/index.json` (bundled in this skill's assets folder). If a type is missing, you have the wrong name. The index is the authoritative source for the exact `type` string used in form JSON (e.g. `dataContext` for the table/list data wrapper; `datatable` not `dataTable`).
 
 3. **Load the group file** for each component type (the index maps type → group file). Read the group file to get the full list of valid property names, their expected types, and descriptions. Only use properties listed there — anything else will be stripped by `clean-form-config` at Step 6.
 
@@ -162,7 +162,7 @@ For every new or edited form, before writing a single component object:
    ```
    `_index.json` is also the authoritative source for each component's current `version` integer — prefer it over the hand-maintained 0.45.x list in Non-negotiables, which will drift.
 
-   This is the tie-break for "which shape is real". Two parallel authoring agents once produced two different, mutually incompatible shapes for the same `refListStatus` prop, each reasoning from a doc example; the KB's `ownProps` (`referenceListId`, `showIcon`, `solidBackground`, `showReflistName` — no flat `module`/`referenceListName` keys at all) settles it immediately. Ranking when sources disagree: **a live form that already renders** > the KB > `assets/groups/` > a doc example. `_gaps.json` lists the components whose settings could not be extracted — if your type is in there, the KB has no opinion and you must fall back.
+   This is the tie-break for "which shape is real". Two parallel authoring agents once produced two different, mutually incompatible shapes for the same `refListStatus` prop, each reasoning from a doc example; the KB's `ownProps` (`referenceListId`, `showIcon`, `solidBackground`, `showReflistName` — no flat `module`/`referenceListName` keys at all) settles it immediately. Ranking when sources disagree: **a live form that already renders** > the KB > `../clean-form-config/assets/groups/` > a doc example. `_gaps.json` lists the components whose settings could not be extracted — if your type is in there, the KB has no opinion and you must fall back.
 
 4. **Scan the group for alternatives.** While in the group file, check whether a better-fit component exists (e.g. `refListStatus` instead of `dropdown` for read-only status display). **For side-by-side / split layout use a flex `container` row — NEVER the `columns` component** (firm project rule): `display:"flex"` + `flexDirection:"row"` + `gap`, with each child sized via `desktop.dimensions.width` (a fixed-width rail = `width:"332px"`; a filling main column = `width:"calc(100% - <rail+gap>px)"`). Per-child `customStyle:{flex:…}` does NOT size the outer div — proven inert; use `dimensions.width`.
 
@@ -209,7 +209,7 @@ Common causes of failure: template literals (`` `${x}` ``) inside `dynamicEndpoi
 
 ## Step 6 — Validate
 
-Walk tree (unique ids, valid types, valid parent chain); dead-prop check: look up each component's group in `assets/groups/index.json`, then validate its props against that group file; runtime-type checks (booleans not `"true"`, numbers not `"42"`); dropdown `values` shape (`{ id, label, value }`); `node --check` each script string. Then run the **[form-quality checklist](references/form-quality.md)** — validationErrors present, human-readable labels, dropdown sources complete, primary action visible, consistent layout.
+Walk tree (unique ids, valid types, valid parent chain); dead-prop check: look up each component's group in `../clean-form-config/assets/groups/index.json`, then validate its props against that group file; runtime-type checks (booleans not `"true"`, numbers not `"42"`); dropdown `values` shape (`{ id, label, value }`); `node --check` each script string. Then run the **[form-quality checklist](references/form-quality.md)** — validationErrors present, human-readable labels, dropdown sources complete, primary action visible, consistent layout.
 
 **Migration-safety checks (mandatory — each of these silently passed review yet crashed the live form):**
 - **Every component has an integer `version`.** A versionless component re-runs the whole legacy migration chain at render and can throw `e.match` / `reading 'migrator'` / `reading 'version'`. Flag any component object missing `version` (except pure layout slots).

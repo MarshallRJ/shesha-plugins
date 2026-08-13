@@ -97,7 +97,28 @@
                 "tablet": {},
                 "mobile": {}
               }
-            ]
+            ],
+            "desktop": {
+              "dimensions": {
+                "width": "100%"
+              },
+              "stylingBox": "{\"marginBottom\":\"8\"}",
+              "border": {},
+              "background": {},
+              "shadow": {}
+            },
+            "tablet": {
+              "stylingBox": "{\"marginBottom\":\"8\"}",
+              "border": {},
+              "background": {},
+              "shadow": {}
+            },
+            "mobile": {
+              "stylingBox": "{\"marginBottom\":\"8\"}",
+              "border": {},
+              "background": {},
+              "shadow": {}
+            }
           },
           {
             "type": "datalist",
@@ -122,7 +143,30 @@
           }
         ]
       }
-    ]
+    ],
+    "desktop": {
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content"
+      },
+      "stylingBox": "{}",
+      "border": {},
+      "background": {},
+      "shadow": {}
+    },
+    "tablet": {
+      "stylingBox": "{}",
+      "border": {},
+      "background": {},
+      "shadow": {}
+    },
+    "mobile": {
+      "stylingBox": "{}",
+      "border": {},
+      "background": {},
+      "shadow": {}
+    }
   },
   "$rowTemplate": {
     "$publishAs": {
@@ -289,7 +333,88 @@
                   "module": "$binding:rowTypeReflistModule"
                 },
                 "solidBackground": true,
-                "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };"
+                "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };",
+                "desktop": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "tablet": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "mobile": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                }
               },
               {
                 "type": "refListStatus",
@@ -304,7 +429,88 @@
                   "module": "$binding:rowStatusReflistModule"
                 },
                 "solidBackground": true,
-                "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };"
+                "style": "return { display: 'inline-flex', alignItems: 'center', height: '26px', overflow: 'visible', whiteSpace: 'nowrap' };",
+                "desktop": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "tablet": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "mobile": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                }
               }
             ],
             "tablet": {
