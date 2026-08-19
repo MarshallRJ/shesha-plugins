@@ -161,12 +161,16 @@ For every component where **`type === 'dropdown'`** and **`dataSourceType === 'v
 
 1. Skip if `values` is absent, `null`, or not an array.
 2. For each item in the array, check:
-   - **Required keys present**: `label` (string), `value` (string).
-   - **Known keys**: `label`, `value`, `color` (string), `icon` (string), `id` (string). Any other key is an **unknown key**.
+   - **Required keys present**: `id`, `label`, `value` — the `{ id, label, value }` contract that
+     `shesha-form-edit` authors to ([dropdowns.md](../shesha-form-edit/references/components/dropdowns.md)).
+   - **Known optional keys**: `color` (string), `icon` (string). Any other key is an **unknown key**.
    - **Type check**: `label` and `value` must be strings. `color` and `icon`, if present, must be strings.
 3. Classify each issue:
-   - Missing `label` or `value` → **[MANUAL REVIEW]**
-   - Missing `color` → **[AUTO-FIXABLE]** — add `"color": ""`
+   - Missing `id`, `label` or `value` → **[MANUAL REVIEW]**
+   - Missing `color` → **not an issue.** `color` is optional; do not report it and **do not inject
+     `"color": ""`**. This skill runs as a blocking step immediately before `shesha-form-edit`
+     pushes, so injecting a key mutates markup the caller deliberately authored — the two skills
+     were disagreeing about the same contract, and the caller's is the one that renders.
    - Wrong type for `label`, `value`, `color`, or `icon` → **[MANUAL REVIEW]**
    - Unknown extra key on an item → **[MANUAL REVIEW]**
 4. Report issues grouped by component under "Step 5d". Track auto-fixable vs manual.
@@ -616,9 +620,8 @@ Adjust to omit whichever counts are zero. If there is nothing to clean, tell the
    - `"123"` → `parseFloat("123")` for number properties.
    - If the value was wrapped (`_mode: 'value'`), fix `_value` rather than the outer key.
    - Do **not** modify `[MANUAL REVIEW]` items.
-6. Apply auto-fixable values shape fixes:
-   - For each item flagged with missing `color` → add `"color": ""` to the item.
-   - Do **not** modify items flagged `[MANUAL REVIEW]`.
+6. Values shape: **nothing is auto-fixable here.** A missing `color` is legal and must be left
+   alone; everything else in `values` is `[MANUAL REVIEW]`. Do not mutate items.
 7. Apply auto-fixable layout fixes (L2 span fixes only):
    - For each `[AUTO-FIXABLE]` L2 issue: set the absent/null span to `24 − knownSpan` on the same object (`formSettings`, `component.labelCol`, or `component.wrapperCol`).
    - Do **not** modify `[MANUAL REVIEW]` layout items.

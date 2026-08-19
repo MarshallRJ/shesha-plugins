@@ -1,6 +1,6 @@
 {
   "$block": "dashed-add-button",
-  "$archetype": "fragment",
+  "$scope": "fragment",
   "$styleOverlay": "dashed-add-button",
   "_note": "The '+ Add X' dashed button that sits at the bottom of a rail-card list. A full-width wrapper container carries the dashed per-side hairline (borderType:'custom', all four sides 1.5px dashed) + centred content; the inner buttonGroup holds a single 'link' button (PlusOutlined + Show Dialog opening the create dialog at modalWidth 60%, formMode edit). The dashed box is structural-neutral and lives on the wrapper; the button text is brand (a $role placeholder) — link buttons take colour from the app theme, so never hardcode a hex. Pattern generalised from the live VDD 'Add Endpoint'/'Add Role' rail buttons.",
   "$slots": {
@@ -87,7 +87,7 @@
             "hidden": false,
             "size": "small",
             "buttonAction": null,
-            "color": "$role:addButtonText",
+            "color": "#003BB2",
             "actionConfiguration": {
               "_type": "action-config",
               "actionName": "Show Dialog",
@@ -122,8 +122,155 @@
         "mobile": {}
       }
     ],
-    "desktop": {},
-    "tablet": {},
-    "mobile": {}
+    "desktop": {
+      "display": "flex",
+      "flexDirection": "row",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "none"
+      },
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    },
+    "tablet": {
+      "display": "flex",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    },
+    "mobile": {
+      "display": "flex",
+      "alignItems": "center",
+      "justifyContent": "center",
+      "flexWrap": "nowrap",
+      "gap": "0px",
+      "border": {
+        "hideBorder": false,
+        "radiusType": "all",
+        "borderType": "custom",
+        "border": {
+          "all": {
+            "width": "1px",
+            "style": "none",
+            "color": "#E8EAF0"
+          },
+          "top": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "bottom": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "left": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          },
+          "right": {
+            "width": "1.5px",
+            "style": "dashed",
+            "color": "#E8EAF0"
+          }
+        },
+        "radius": {
+          "all": 6
+        }
+      },
+      "background": {
+        "type": "color",
+        "color": "#ffffff"
+      },
+      "stylingBox": "{\"paddingTop\":\"8\",\"paddingBottom\":\"8\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\",\"marginTop\":\"8\"}"
+    }
   }
 }

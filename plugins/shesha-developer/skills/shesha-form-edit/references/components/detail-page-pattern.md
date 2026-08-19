@@ -6,6 +6,28 @@ The canonical `<entity>-details` page layout. Read before building or normalizin
 
 ---
 
+## Surfaces: every content group is a CARD, not a container
+
+Stated first because this file previously never mentioned `card` once, and the result was a
+detail page built from **56 containers and zero cards** — flat, borderless groups where the
+design clearly wanted surfaces.
+
+- **A group of fields the user reads as a unit is a `card`.** Passenger details, Payment,
+  Itinerary, each tab's content — cards. Compose [`card-with-header-strip`](../block-library.md).
+- **Heading when the group needs a title, headless when it doesn't.** `hideHeading: true` turns a
+  card into a plain surface (background, hairline, radius) with no title row — that is the whole
+  trick, and it is what makes a headless card strictly better than a bare container.
+- **`container` belongs INSIDE a card**, for layout only — flex rows, two-cell field rows, spacing.
+  A container is not a surface: it has no background, border or radius by convention.
+- **The page shell is also a card** ([containers.md](containers.md) "page shell").
+
+**The trap that causes containers-everywhere:** a card's children go in **`content.components`**
+(and `header.components`), while every other grouping component uses `components`. A generic
+`mk(type, props, children)` builder that pushes children into `components` therefore cannot emit a
+card without a special case — so the component with the irregular shape becomes the one that gets
+skipped, and the whole page degrades to containers. If you are writing a build script, give it a
+card emitter **before** you start, not after you notice the page looks flat.
+
 ## Canonical anatomy
 
 ```text

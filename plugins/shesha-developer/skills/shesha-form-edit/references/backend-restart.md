@@ -76,7 +76,7 @@ ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS="$BASE" dotnet "$DLL"   # run
 ```
 
 Launch step 3 with `run_in_background: true` (it's a long-lived server) and then poll in a separate
-call. Write any scratch scripts into `<workingDir>`, **not `/tmp`** (git-bash `/tmp` ≠ Windows paths).
+call. Write any scratch scripts into `$RUN_DIR/staged/`, **not `/tmp`** (git-bash `/tmp` ≠ Windows paths).
 
 ### The 2-boot lag (new entities only) — handle it deterministically
 
@@ -93,6 +93,21 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" 
 
 For a brand-new entity, just **plan for two boots** up front (build once, then boot → boot) rather than
 discovering the 404 and reacting.
+
+**Two is the floor, not the ceiling — budget 2–3.** Recovering a badly broken or from-scratch
+registration has needed a third boot in practice. Three layers recover *independently*, so "still 404"
+does not mean "the last boot did nothing" — check each one rather than re-booting blindly:
+
+| Layer | How to check | Typically recovers |
+|---|---|---|
+| `EntityConfig` metadata | `Entities/GetAll`, `EntityConfig/GetMainDataList` | boot 1 |
+| GraphQL projection | the entity's projection endpoint stops 500ing | boot 1 |
+| Dedicated `<Entity>Crud` controller | `/api/dynamic/<module>/<Entity>/Crud/GetAll` returns 200 | boot 2, sometimes 3 |
+
+There is no one-liner for "is the dedicated CRUD swagger doc populated yet". The manual route is to read
+the service list embedded in `swagger/index.html`, then fetch
+`swagger/service:<Entity>Crud/swagger.json` and confirm `paths` is non-empty — worth knowing before you
+spend time rediscovering the URL scheme by grepping rendered HTML.
 
 ---
 

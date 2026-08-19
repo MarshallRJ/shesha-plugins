@@ -8,8 +8,17 @@ Which v7 style channel actually **renders** on which component, measured against
 
 ## ⚠️ Read first — two cross-cutting rules
 
-1. **Component VERSION must match the live framework, or the style block silently no-ops.** `numberField` at `version 3` ignored its entire `desktop` block (a total no-op); at `version 5` (the live form's value) `dimensions.width` applied. **Always copy component `version`s from the running app's forms** (grep a form dump) — a stale version re-runs the migration chain and drops styling with NO error. Current 0.45.x versions: container 7 · text 5 · textField 6 · numberField **5** · dateField 7 · dropdown 11 · autocomplete 8 · checkbox 5 · card 3 · datalist 11 · dataContext 7 · refListStatus 6 · progress 3 · buttonGroup 15 · alert 2 · validationErrors 1.
-2. **A flex container MUST set `display:"flex"`** or `flexDirection`/`gap` are inert. Size flex-split children via `desktop.dimensions.width` (reaches the outer div); `customStyle:{flex}` is inert on the outer div.
+1. **Component VERSION must match the live framework, or the style block silently no-ops.** `numberField` at `version 3` ignored its entire `desktop` block (a total no-op); at `version 5` `dimensions.width` applied. A stale version re-runs the migration chain and drops styling with NO error. **Versions live in one place: `shesha-form-edit/assets/components-kb/_index.json`**, mirrored in [`component-cheatsheet.md`](../../shesha-form-edit/references/component-cheatsheet.md). A hand-maintained list used to sit on this line and had drifted (`dataContext` 7, actually 8) — don't reintroduce one.
+
+<a id="flex-split"></a>
+2. **The flex-split idiom — the canonical statement. Link here; don't restate it.**
+   - Splits are flex `container` rows. **Never the `columns` component** (legacy; `validate-blocks.js` fails any block containing one).
+   - A flex container **MUST** set `display:"flex"`, or `flexDirection` and `gap` are inert and children stack full-width — the single most common placement failure.
+   - Size each child via **`desktop.dimensions.width`** (calc / % / px). It is the only lever that reaches the child's outer div.
+   - Per-child **`customStyle:{flex:…}` is inert** for outer sizing — it lands on the inner div.
+   - Canonical main+rail body: fixed rail `332px`, filling main `calc(100% - 348px)` (332 + 16 gap).
+
+   This paragraph was duplicated near-verbatim across ~15 files, which is why it drifted. The machine-readable form is `crossCuttingRules` in [`../assets/capability-matrix.json`](../assets/capability-matrix.json).
 
 **Measuring live (two gotchas that will fool you):**
 - In **Live mode**, `text`/`refListStatus` components do **not** carry `data-sha-c-name` (only containers do). Querying by component name finds only containers — read a **container's `innerText`** to verify the text inside. (Edit mode stamps the attr on text, which misleads.)

@@ -5,7 +5,7 @@ Per-component v7 style blocks — the second styling layer. Copy a recipe, fill 
 Recipe names match the `recipe:` annotations the comprehension layer puts on blueprint regions, so a blueprint region maps 1:1 to a recipe here.
 
 **Two rules every recipe obeys** (proven against the live app — see [capability-matrix.md](capability-matrix.md)):
-1. **Splits are flex `container` rows, never the `columns` component** (firm project rule). A row is `display:"flex"` + `flexDirection:"row"` + `gap`; size each child via `desktop.dimensions.width` (calc/%/px) — this is the only lever that reaches the child's outer div. Per-child `customStyle:{flex:…}` is **inert** for sizing (lands on the inner div).
+1. **Splits follow the flex-split idiom** — [capability-matrix.md §flex-split](capability-matrix.md#flex-split).
 2. **Every flex container sets `display:"flex"` explicitly** — omit it and `flexDirection`/`gap` are ignored and children stack full-width.
 
 ## surface-layering  (the depth system every screen builds on)

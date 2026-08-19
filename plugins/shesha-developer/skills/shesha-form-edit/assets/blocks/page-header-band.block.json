@@ -1,6 +1,6 @@
 {
   "$block": "page-header-band",
-  "$archetype": "record-detail",
+  "$scope": "region",
   "$styleOverlay": "page-header-band",
   "$note": "In-page detail title band (NOT the global header form). The global header form must always keep headerAppControl — that is OUT OF SCOPE here and lives in a separate form.",
   "$slots": {
@@ -14,13 +14,34 @@
     "actionItems": "subtree.components.1.components.1.items"
   },
   "$bindings": [
-    { "path": "subtree.components.0.content._code", "fill": "JS returning the breadcrumb string (e.g. join module / section / record name with '  /  ')" },
-    { "path": "subtree.components.1.components.0.components.0.content", "fill": "the record title, usually \"{{data.<titleProperty>}}\" (e.g. \"{{data.name}}\")" },
-    { "path": "subtree.components.1.components.0.components.1.propertyName", "fill": "the status reference-list property on the bound entity (e.g. \"status\")" },
-    { "path": "subtree.components.1.components.0.components.1.referenceListId.module", "fill": "the reference list's module (e.g. \"Shesha.RequirementsStudio\")" },
-    { "path": "subtree.components.1.components.0.components.1.referenceListId.name", "fill": "the reference list's name (e.g. \"Shesha.RequirementsStudio.RsStatus\")" },
-    { "path": "subtree.components.1.components.0.desktop.dimensions.width", "fill": "calc(100% - <actionsPx>px) where <actionsPx> = measured pixel width of the action buttonGroup incl. its left gap (the band's titleRow gap is 16px). Default \"calc(100% - 220px)\"." },
-    { "path": "subtree.components.1.components.1.items", "fill": "the action buttons (e.g. Edit/Save/Cancel). buttonType:'primary' takes the APP-THEME primary fill — never hardcode a button hex." }
+    {
+      "path": "subtree.components.0.content._code",
+      "fill": "JS returning the breadcrumb string (e.g. join module / section / record name with '  /  ')"
+    },
+    {
+      "path": "subtree.components.1.components.0.components.0.content",
+      "fill": "the record title, usually \"{{data.<titleProperty>}}\" (e.g. \"{{data.name}}\")"
+    },
+    {
+      "path": "subtree.components.1.components.0.components.1.propertyName",
+      "fill": "the status reference-list property on the bound entity (e.g. \"status\")"
+    },
+    {
+      "path": "subtree.components.1.components.0.components.1.referenceListId.module",
+      "fill": "the reference list's module (e.g. \"Shesha.RequirementsStudio\")"
+    },
+    {
+      "path": "subtree.components.1.components.0.components.1.referenceListId.name",
+      "fill": "the reference list's name (e.g. \"Shesha.RequirementsStudio.RsStatus\")"
+    },
+    {
+      "path": "subtree.components.1.components.0.desktop.dimensions.width",
+      "fill": "calc(100% - <actionsPx>px) where <actionsPx> = measured pixel width of the action buttonGroup incl. its left gap (the band's titleRow gap is 16px). Default \"calc(100% - 220px)\"."
+    },
+    {
+      "path": "subtree.components.1.components.1.items",
+      "fill": "the action buttons (e.g. Edit/Save/Cancel). buttonType:'primary' takes the APP-THEME primary fill — never hardcode a button hex."
+    }
   ],
   "$validatedAgainst": [
     "container:background.color",
@@ -59,7 +80,37 @@
         "dataType": "string",
         "fontSize": "text-sm",
         "fontWeight": "400",
-        "prefixIcon": "AppstoreOutlined"
+        "prefixIcon": "AppstoreOutlined",
+        "desktop": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 12,
+            "weight": "400",
+            "align": "left",
+            "color": "#9BA3B8"
+          },
+          "stylingBox": "{\"marginBottom\":\"6\"}"
+        },
+        "tablet": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 12,
+            "weight": "400",
+            "align": "left",
+            "color": "#9BA3B8"
+          },
+          "stylingBox": "{\"marginBottom\":\"6\"}"
+        },
+        "mobile": {
+          "font": {
+            "type": "Segoe UI",
+            "size": 12,
+            "weight": "400",
+            "align": "left",
+            "color": "#9BA3B8"
+          },
+          "stylingBox": "{\"marginBottom\":\"6\"}"
+        }
       },
       {
         "type": "container",
@@ -104,7 +155,43 @@
                 "strong": true,
                 "fontSize": "text-2xl",
                 "fontWeight": "600",
-                "enableStyleOnReadonly": false
+                "enableStyleOnReadonly": false,
+                "desktop": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 24,
+                    "weight": "600",
+                    "align": "left",
+                    "color": "#181818"
+                  },
+                  "dimensions": {
+                    "width": "auto",
+                    "height": "auto",
+                    "minHeight": "fit-content",
+                    "maxWidth": "100%"
+                  },
+                  "stylingBox": "{\"marginBottom\":\"2\"}"
+                },
+                "mobile": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 20,
+                    "weight": "600",
+                    "align": "left",
+                    "color": "#181818"
+                  },
+                  "stylingBox": "{\"marginBottom\":\"2\"}"
+                },
+                "tablet": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 24,
+                    "weight": "600",
+                    "align": "left",
+                    "color": "#181818"
+                  },
+                  "stylingBox": "{\"marginBottom\":\"2\"}"
+                }
               },
               {
                 "type": "refListStatus",
@@ -125,9 +212,132 @@
                 "customStyle": {
                   "_mode": "code",
                   "_code": "return { display: 'inline-flex', alignItems: 'center', lineHeight: '1.8', overflow: 'visible', textTransform: 'uppercase', letterSpacing: '0.04em' };"
+                },
+                "desktop": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "tablet": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
+                },
+                "mobile": {
+                  "font": {
+                    "type": "Segoe UI",
+                    "size": 11,
+                    "weight": "600",
+                    "align": "center"
+                  },
+                  "border": {
+                    "hideBorder": false,
+                    "radiusType": "all",
+                    "borderType": "all",
+                    "border": {
+                      "all": {
+                        "width": 0,
+                        "style": "none"
+                      },
+                      "top": {},
+                      "bottom": {},
+                      "left": {},
+                      "right": {}
+                    },
+                    "radius": {
+                      "all": 12
+                    }
+                  },
+                  "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}"
                 }
               }
-            ]
+            ],
+            "desktop": {
+              "display": "flex",
+              "flexDirection": "row",
+              "justifyContent": "flex-start",
+              "alignItems": "center",
+              "flexWrap": "nowrap",
+              "gap": "12",
+              "dimensions": {
+                "width": "calc(100% - 216px)",
+                "height": "auto",
+                "minHeight": "fit-content",
+                "minWidth": "0px",
+                "maxWidth": "auto"
+              },
+              "stylingBox": "{}"
+            },
+            "tablet": {
+              "dimensions": {
+                "width": "calc(100% - 216px)",
+                "height": "auto",
+                "minHeight": "fit-content"
+              },
+              "display": "flex",
+              "justifyContent": "flex-start",
+              "alignItems": "center",
+              "flexWrap": "nowrap",
+              "gap": "12",
+              "stylingBox": "{}"
+            },
+            "mobile": {
+              "dimensions": {
+                "width": "100%",
+                "height": "auto",
+                "minHeight": "fit-content"
+              },
+              "display": "flex",
+              "justifyContent": "flex-start",
+              "alignItems": "center",
+              "flexWrap": "nowrap",
+              "gap": "12",
+              "stylingBox": "{}"
+            }
           },
           {
             "type": "buttonGroup",
@@ -210,10 +420,129 @@
                   "_code": "return !(() => { return form.formMode === 'edit' || form.formMode === 'designer'; })();"
                 }
               }
-            ]
+            ],
+            "desktop": {
+              "dimensions": {
+                "width": "200px",
+                "height": "auto",
+                "minHeight": "fit-content",
+                "minWidth": "0px",
+                "maxWidth": "auto"
+              },
+              "stylingBox": "{}"
+            },
+            "tablet": {
+              "dimensions": {
+                "width": "200px",
+                "height": "auto",
+                "minHeight": "fit-content"
+              },
+              "stylingBox": "{}"
+            },
+            "mobile": {
+              "dimensions": {
+                "width": "100%",
+                "height": "auto",
+                "minHeight": "fit-content"
+              },
+              "stylingBox": "{}"
+            }
           }
-        ]
+        ],
+        "desktop": {
+          "display": "flex",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "flexWrap": "nowrap",
+          "gap": "16",
+          "dimensions": {
+            "width": "100%",
+            "height": "auto",
+            "minHeight": "fit-content",
+            "maxHeight": "auto",
+            "minWidth": "0px",
+            "maxWidth": "auto"
+          },
+          "stylingBox": "{}"
+        },
+        "tablet": {
+          "dimensions": {
+            "width": "100%",
+            "height": "auto",
+            "minHeight": "fit-content"
+          },
+          "display": "flex",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "flexWrap": "nowrap",
+          "gap": "16",
+          "stylingBox": "{}"
+        },
+        "mobile": {
+          "flexDirection": "column",
+          "alignItems": "flex-start",
+          "gap": "12",
+          "dimensions": {
+            "width": "100%",
+            "height": "auto",
+            "minHeight": "fit-content"
+          },
+          "display": "flex",
+          "justifyContent": "space-between",
+          "flexWrap": "nowrap",
+          "stylingBox": "{}"
+        }
       }
-    ]
+    ],
+    "desktop": {
+      "display": "flex",
+      "flexDirection": "column",
+      "justifyContent": "flex-start",
+      "alignItems": "stretch",
+      "flexWrap": "nowrap",
+      "gap": "4",
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "auto"
+      },
+      "stylingBox": "{\"paddingTop\":\"4\",\"paddingBottom\":\"18\"}"
+    },
+    "tablet": {
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "auto"
+      },
+      "display": "flex",
+      "justifyContent": "flex-start",
+      "alignItems": "stretch",
+      "flexWrap": "nowrap",
+      "gap": "4",
+      "stylingBox": "{\"paddingTop\":\"4\",\"paddingBottom\":\"18\"}"
+    },
+    "mobile": {
+      "dimensions": {
+        "width": "100%",
+        "height": "auto",
+        "minHeight": "fit-content",
+        "maxHeight": "auto",
+        "minWidth": "0px",
+        "maxWidth": "auto"
+      },
+      "display": "flex",
+      "justifyContent": "flex-start",
+      "alignItems": "stretch",
+      "flexWrap": "nowrap",
+      "gap": "4",
+      "stylingBox": "{\"paddingTop\":\"4\",\"paddingBottom\":\"18\"}"
+    }
   }
 }

@@ -181,6 +181,35 @@ A `datatable` auto-expands the nested properties **its columns name** (the colum
 - **Bind name-mode text by the nested PATH:** in the card form a `text` with `contentDisplay: "name"` reads **`data[propertyName]`**, so `propertyName` must be the full data path (`"otherRequirement.name"`), NOT a label — the `{{mustache}}` `content` is ignored for value resolution (it renders empty if `propertyName` is wrong). `refListStatus` chips bind the same nested-path way (`propertyName: "otherRequirement.status"`, `editMode: "readOnly"`).
 - **Lean rail panels:** a small count-badged related panel (a blueprint `datalist panel`) drops `datatable.quickSearch` + `datatable.pager` — keep only the Add affordance + the `datalist`. Full search/pager chrome in a narrow rail is the cramped-toolbar defect.
 
+### Card click-through — open a detail dialog when a card is clicked (runtime-verified)
+
+**Never put an action-carrying `button`/`buttonGroup` inside a datalist row-template card.** No action type fires reliably from that scope. This is the single most expensive thing in this file: one build spent roughly 60% of its total session time rediscovering it, across three failed approaches.
+
+What was measured, so nobody repeats it:
+
+| Attempt (inside the row template) | Result |
+|---|---|
+| `Show Dialog` + `formArguments` as `{_mode:"code",_code:"return { x: data };"}` | Dialog opens, **every field empty** |
+| Same, `formArguments` as a bare code **string** | Dialog **never opens at all** — no `.ant-modal`, no console error, no network call. Even `"return {};"` failed, so the string type itself breaks it before evaluation |
+| `Execute Script` (standalone `button` *and* `buttonGroup` item) | **Never fires** — a `message.info` toast and a `window.__marker` flag inside the script both confirmed it never ran |
+
+The cause is scope. Reading the bundled `@shesha-io/reactjs` source, the datalist's own click handler runs in the **datalist's top-level scope** (the page form), not inside the row-template sub-form, and it builds its own evaluation context:
+
+```js
+// argumentsEvaluationContext, from the bundled datalist source
+{ ...parentContext, data: t, index: e, selectedItem: t, selectedIndex: e }
+```
+
+**Use the datalist's own `onListItemClick`** — a real registered configurable-action property (alongside `onListItemHover`, `onListItemSelect`, `dblClickActionConfiguration`). Worked first try:
+
+1. `datalist.onListItemClick` → **`Execute Script`**: stash the row — `contexts.appContext.selectedThing = data;`
+2. `onSuccess` → **`Show Dialog`** with **static** `actionArguments` only (no `formArguments`).
+3. The dialog form's **`onAfterDataLoad`** reads `contexts.appContext.selectedThing`.
+
+Row-specificity (different card → different data) was confirmed across three separate records.
+
+**Related limitation:** `Show Dialog`'s `formArguments` does not reliably deliver code-evaluated dynamic values on this build, in either authoring shape — only static/literal values survive onto the opened form. Some golden fixtures do show `formArguments` as a working bare code string; those fire from a *different* scope (e.g. a subtable's own top-level Add button), so the narrower rule may be "code evaluation only works from certain scopes". Until that is isolated, prefer the `contexts.appContext` relay everywhere. See [add-dialogs.md](add-dialogs.md).
+
 ### Full-width list rows vs a card grid — `orientation` + text overflow (runtime-verified)
 
 `orientation` is the lever, and it interacts with the card's text:

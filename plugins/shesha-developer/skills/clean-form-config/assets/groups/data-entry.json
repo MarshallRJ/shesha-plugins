@@ -260,6 +260,22 @@
         "required": false,
         "JsReturnType": "string",
         "desc": "Ant Design icon name (e.g. \"SearchOutlined\")."
+      },
+      {
+        "name": "hideBorder",
+        "source": "components-kb"
+      },
+      {
+        "name": "min",
+        "source": "components-kb"
+      },
+      {
+        "name": "max",
+        "source": "components-kb"
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
       }
     ]
   },
@@ -321,6 +337,26 @@
           "tel"
         ],
         "desc": "Input type: 'text', 'password', 'email', 'url', etc."
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "initialValue",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
+      },
+      {
+        "name": "mobile",
+        "source": "components-kb"
+      },
+      {
+        "name": "tablet",
+        "source": "components-kb"
       }
     ]
   },
@@ -360,6 +396,18 @@
         "required": false,
         "JsReturnType": "boolean",
         "desc": "Enable browser spell-checking in this field."
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "initialValue",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
       }
     ]
   },
@@ -524,7 +572,16 @@
     ]
   },
   "switch": {
-    "props": []
+    "props": [
+      {
+        "name": "value",
+        "source": "components-kb"
+      },
+      {
+        "name": "defaultChecked",
+        "source": "components-kb"
+      }
+    ]
   },
   "dateField": {
     "props": [
@@ -697,6 +754,30 @@
         "required": false,
         "JsReturnType": "string",
         "desc": "Moment.js year format string (e.g. \"YYYY\")."
+      },
+      {
+        "name": "value",
+        "source": "components-kb"
+      },
+      {
+        "name": "hideBorder",
+        "source": "components-kb"
+      },
+      {
+        "name": "showToday",
+        "source": "components-kb"
+      },
+      {
+        "name": "disablePastDates",
+        "source": "components-kb"
+      },
+      {
+        "name": "onChange",
+        "source": "components-kb"
+      },
+      {
+        "name": "additionalStyles",
+        "source": "components-kb"
       }
     ]
   },
@@ -796,6 +877,30 @@
         "required": false,
         "JsReturnType": "string",
         "desc": "Ant Design icon name (e.g. \"SearchOutlined\")."
+      },
+      {
+        "name": "value",
+        "source": "components-kb"
+      },
+      {
+        "name": "allowClear",
+        "source": "components-kb"
+      },
+      {
+        "name": "allowHalf",
+        "source": "components-kb"
+      },
+      {
+        "name": "tooltips",
+        "source": "components-kb"
+      },
+      {
+        "name": "onChange",
+        "source": "components-kb"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
       }
     ]
   }

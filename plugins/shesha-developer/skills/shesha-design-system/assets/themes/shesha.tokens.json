@@ -112,6 +112,8 @@
     "mutedText": "palette.ink.soft",
     "navBg": "palette.accent.navy",
     "headerBandBg": "palette.brand.primary",
+    "progressAccent": "palette.brand.primary",
+    "addButtonText": "palette.brand.primary",
     "selectedBg": "palette.brand.tint",
     "hoverBg": "palette.brand.tintSoft",
     "baseRadius": "radius.md",

@@ -2,6 +2,16 @@
 
 The first of the two styling layers. Set the brand primary, base font and base radius (plus semantic + neutral colours) at the **application theme** so the whole portal inherits them — then per-component blocks only handle what the global theme can't express.
 
+## Set expectations first: the app theme moves very little on a configured form
+
+Measured reality, and the reason "we set the theme and it looked the same" keeps recurring: **the app theme supplies AntD defaults, and a per-component breakpoint block overrides them per key** ([style-channels.md](style-channels.md) — breakpoint objects beat base props, and a legacy `style` string beats everything). Every component an authored form ships carries explicit `desktop`/`tablet`/`mobile` values, so the theme is the *lowest*-precedence input on the page.
+
+What the app theme actually reaches: primary-button fill, link colour, active tab ink-bar, focus ring, page canvas, base input radius. That is chrome.
+
+What it does **not** reach, and what fidelity is actually made of: type scale, spacing rhythm, surface treatment (card background, hairline border, radius, shadow), table chrome, status-chip styling, page shell. All of that lives in per-component blocks.
+
+**So: set the app theme once for chrome, then stop.** Do not spend a session tuning theme tokens expecting the page to transform — it won't, and that time is the single most reliably wasted hour in this pipeline. High fidelity comes from composing the pre-styled blocks in `shesha-form-edit/assets/blocks/`, whose values are baked in from `../assets/block-styles/` + the brand tokens.
+
 ## Mechanism (Shesha)
 
 The app theme is the `Shesha.ThemeSettings` setting (Ant Design `ConfigProvider` tokens). Set it via **Configuration Studio → Settings → Default UI → Frontend → Theme settings**, or via the settings API. It is **client-specific** — when writing via API, send the `sha-frontend-application: default-app` header and supply the value as an OBJECT (not a JSON string). Map the brand tokens onto AntD 6.x token names per [shesha-design-standards.md](shesha-design-standards.md) (colorPrimary/…/semantic/neutral/type/shape).

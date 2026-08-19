@@ -19,6 +19,30 @@
         "desc": "Hide the card entirely when it has no visible child components.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
+      },
+      {
+        "name": "content",
+        "source": "components-kb"
+      },
+      {
+        "name": "header",
+        "source": "components-kb"
+      },
+      {
+        "name": "border",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
       }
     ]
   },
@@ -110,6 +134,58 @@
         "desc": "Use a simplified flat panel style without borders or shadows.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "content",
+        "source": "components-kb"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
+      },
+      {
+        "name": "marginBottom",
+        "source": "components-kb"
+      },
+      {
+        "name": "marginTop",
+        "source": "components-kb"
+      },
+      {
+        "name": "headerColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "bodyColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "noMargin",
+        "source": "components-kb"
+      },
+      {
+        "name": "customHeader",
+        "source": "components-kb"
+      },
+      {
+        "name": "panelHeadType",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
+      },
+      {
+        "name": "mobile",
+        "source": "components-kb"
+      },
+      {
+        "name": "tablet",
+        "source": "components-kb"
       }
     ]
   },
@@ -135,6 +211,14 @@
         "desc": "Vertical gutter (spacing) between column rows in pixels.",
         "required": false,
         "JsReturnType": "number"
+      },
+      {
+        "name": "style",
+        "source": "components-kb"
+      },
+      {
+        "name": "customVisibility",
+        "source": "components-kb"
       }
     ]
   },
@@ -270,6 +354,66 @@
         "desc": "Remove all default padding and background from the container.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "backgroundCover",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundRepeat",
+        "source": "components-kb"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
+      },
+      {
+        "name": "wrapperStyle",
+        "source": "components-kb"
+      },
+      {
+        "name": "components",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundType",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundDataSource",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundUrl",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundBase64",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundStoredFileId",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
+      },
+      {
+        "name": "tablet",
+        "source": "components-kb"
+      },
+      {
+        "name": "mobile",
+        "source": "components-kb"
+      },
+      {
+        "name": "showAdvanced",
+        "source": "components-kb"
       }
     ]
   },
@@ -373,6 +517,74 @@
         "desc": "Show the drawer header bar with the title.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "showOkayBtn",
+        "source": "components-kb"
+      },
+      {
+        "name": "showCancelBtn",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "hideBorder",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
+      },
+      {
+        "name": "tablet",
+        "source": "components-kb"
+      },
+      {
+        "name": "mobile",
+        "source": "components-kb"
+      },
+      {
+        "name": "components",
+        "source": "components-kb"
       }
     ]
   },
@@ -458,6 +670,30 @@
         "desc": "Direction the info cells are laid out.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "readOnly",
+        "source": "components-kb"
+      },
+      {
+        "name": "style",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
       }
     ]
   },
@@ -520,6 +756,26 @@
         "desc": "Inline CSS applied to the section title text.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "containerStyle",
+        "source": "components-kb"
+      },
+      {
+        "name": "lineFont",
+        "source": "components-kb"
+      },
+      {
+        "name": "font",
+        "source": "components-kb"
+      },
+      {
+        "name": "titleStylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "containerStylingBox",
+        "source": "components-kb"
       }
     ]
   },
@@ -648,6 +904,38 @@
         "desc": "Visual style of the tab strip.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "size",
+        "source": "components-kb"
+      },
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "ghost",
+        "source": "components-kb"
+      },
+      {
+        "name": "customVisibility",
+        "source": "components-kb"
+      },
+      {
+        "name": "card",
+        "source": "components-kb"
+      },
+      {
+        "name": "desktop",
+        "source": "components-kb"
+      },
+      {
+        "name": "mobile",
+        "source": "components-kb"
+      },
+      {
+        "name": "tablet",
+        "source": "components-kb"
       }
     ]
   },
@@ -725,6 +1013,42 @@
         "desc": "'default' shows a progress stepper; 'navigation' shows a navigable step bar.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "form",
+        "source": "components-kb"
+      },
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "customVisibility",
+        "source": "components-kb"
+      },
+      {
+        "name": "defaultActiveValue",
+        "source": "components-kb"
+      },
+      {
+        "name": "sequence",
+        "source": "components-kb"
+      },
+      {
+        "name": "primaryTextColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "primaryBgColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "secondaryBgColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "secondaryTextColor",
+        "source": "components-kb"
       }
     ]
   },
@@ -924,6 +1248,26 @@
         "desc": "Inline CSS expression applied to sub-menu containers.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "containerStyle",
+        "source": "components-kb"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "menuItemShadow",
+        "source": "components-kb"
       }
     ]
   }
