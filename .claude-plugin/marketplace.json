@@ -17,7 +17,7 @@
         {
             "name": "shesha-developer-0-43",
             "source": "./plugins/shesha-developer-0-43",
-            "description": "Version-pinned skill set for the v0.43 release of the Shesha framework. Mirrors the full historical toolkit — domain modeling, application layer, configuration items, workflow, document generation, reference numbers, notifications, integration testing, project setup, permission hardening, form cleanup, and analyzers — to support maintenance of legacy v0.43 projects."
+            "description": "Version-pinned skill set for the v0.43 release of the Shesha framework. Mirrors the full historical toolkit — domain modeling, application layer, configuration items, workflow, document generation, reference numbers, notifications, integration testing, project setup, permission hardening, form cleanup, and analyzers — plus the design pipeline (shesha-claude-designer, shesha-design-comprehension, shesha-form-edit, shesha-design-system, clean-form-config) rewritten for the 0.43 versioned-ConfigurationItem form lifecycle. Supports building and maintaining legacy v0.43 projects."
         }
     ]
 }
