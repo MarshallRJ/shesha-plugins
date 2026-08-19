@@ -4,6 +4,40 @@ Workflow for proving a push actually landed and smoke-testing it in the browser.
 
 ---
 
+## 0. What a gate result is allowed to mean
+
+Two failures cost real build time and both were caused by trusting a report instead of the thing it described. A binding checker passed a form having reported **"0 bindings, 0 reflists, 0 endpoints checked"** — not zero failures, zero *coverage*, because that form's constructs were invisible to its walker. A guardrail checker hard-FAILed on values that were byte-identical to the metadata it compared against. Between them they cost a session's confidence: *"the pipeline's own quality gates were not trustworthy for this build; manual reading did most of the real verification work."*
+
+So every gate in this skill — script or human — reports three numbers per check family, and the reader is entitled to all three:
+
+| | meaning |
+|---|---|
+| **walked** | nodes the family actually visited |
+| **checked** | assertions it was able to evaluate |
+| **uninspectable** | nodes it saw but structurally *could not* evaluate — each with a named reason |
+
+The rules that follow from it:
+
+- **Zero coverage is never a pass.** A family that checked nothing reports `no-coverage`, not success. "Nothing was wrong" and "nothing was examined" are different results and must never print the same.
+- **Any uninspectable node downgrades the verdict to `partial`.** A partial is not a pass. Say so when reporting: name what was not covered and hand it to a human to read.
+- **A gate names what it cannot see.** "Skipped 12 code-mode `text` components" is useful; silence is what produced the false green.
+- **Don't assert what the codebase hasn't settled.** Ids are the standing example: `SKILL.md` says UUID, but shipped seeds and exported forms are full of nanoid (`8jJ1tFFwhdXB8tGQn7xbB2cwTvcPLe`) and truncated hex that render fine. Reporting those as defects yields ~110 confident findings against a canonical seed that is not wrong — and a gate that cries wolf gets ignored, which is how the previous validators lost trust. Report the count as coverage, not as a failure.
+- **Transport failures are uninspectable, not passes.** A timeout, a 401, or an unreachable backend means the check did not run.
+
+`scripts/verify-artifact.mjs` implements this contract and is the reference shape for anything added later; its suite in `tests/verify-artifact.test.mjs` pins each rule above to a test.
+
+**`scripts/check-references.mjs` applies the same contract to the docs themselves.** Run it after editing any skill file:
+
+```bash
+node scripts/check-references.mjs
+```
+
+It proves that every pointer resolves — markdown links, backticked file paths, `Skill(...)` ids, dispatched agent names, `$role:` tokens (in **every** shipped brand, not just the default), block `$styleOverlay` files, component versions quoted in docs vs `components-kb/_index.json`, and the component index's type→group routing. Exit `0` pass · `1` failures · `3` partial.
+
+It exists because this bug class kept recurring invisibly: 12 dead links, an `archetypes.md` eight files referenced that did not exist, `$role` tokens defined in no theme, six sites invoking a playwright *skill* that nobody ships, and four hand-maintained version lists that had drifted three ways — one telling you to use `numberField` v3, which silently discards a component's whole style block. Three careful manual passes still missed five of these; the script found them in one run. `tests/check-references.negative.mjs` injects one bug per family into a throwaway copy and asserts each is caught, so the gate is proven to fail when it should.
+
+---
+
 ## 1. API-first verification
 
 `UpdateMarkup` (`PUT /api/services/Shesha/FormConfiguration/UpdateMarkup`) is a **void endpoint**: it returns `success: true` with an **EMPTY/null `result`**. That is normal — it is NOT evidence your markup persisted.
@@ -76,13 +110,31 @@ getComputedStyle(document.querySelector('.sha-page-content')).padding === '0px';
 ```
 
 Example assertions that have caught real regressions:
-- KIB column height `===` band height (stretch + border-left divider pattern — see [detail-page-pattern.md](detail-page-pattern.md)).
+- KIB column height `===` band height (stretch + border-left divider pattern — see [detail-page-pattern.md](components/detail-page-pattern.md)).
 - `border-left: 1px solid rgb(217,217,217)` on KIB columns 2+.
 - `.sha-page-content` padding `12px → 0px` after appending the `no-padding` class.
 - Toolbar↔table left alignment via the `sha-index-table-control` class: measure the quick-search box's x-offset relative to the datatable edge (a −8px overhang means the class is missing).
 - Squeezed/scrolling header containers: fix is `dimensions.minHeight: 'fit-content'` (runtime-verified; not in the groups index — clean-form-config may flag it; do NOT strip) — `dimensions` is the only channel reaching the container's outer div; see `style-channels.md` (in `shesha-design-system`).
 
 For pixel-parity work ("match the reference form"), compare **computed** styles in-browser AND do a bidirectional full-key JSON diff — identical-looking designer props can render differently because of one extra key (e.g. a stray `font.color`).
+
+### Clicking dynamically-loading content — one atomic script, not coordinates
+
+A coordinate captured by one `getBoundingClientRect()` call and clicked by a *separate* `computer.left_click` call has real network and render time between the two round-trips. If images or lazy content are still reflowing, the element moves and the click lands on nothing — **silently**, with no error and nothing to see.
+
+For automated verification, find and click in a **single** `javascript_exec`, so there is no gap:
+
+```js
+document.querySelector('<selector>').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+```
+
+Reserve coordinate-based clicking for the rare case that genuinely needs a trusted OS-level click. This is a different failure from stale element refs (re-find before clicking); the fix for coordinate staleness is atomicity, not re-finding.
+
+### Screenshot / evaluate timeouts are usually not a frozen page
+
+`Page.captureScreenshot` and `Runtime.evaluate` time out at 30–45s with "the renderer may be frozen or unresponsive" around **any large or animated repaint** — modal open/close, many concurrent external image loads, and the already-documented zoom/screenshot sequences. In every observed case the renderer was fine: a 3–10s wait and a trivial `1+1` eval confirmed it, and subsequent calls worked.
+
+Treat these as expected and recoverable. Wait briefly, probe with a trivial expression, and only then conclude something is actually broken — a session hit this 6–8 times, and each premature diagnosis costs a full round-trip.
 
 ---
 

@@ -6,13 +6,18 @@ All curl recipes assume `$BASE_URL` and `$ACCESS_TOKEN` are set. On Windows, sub
 
 ## 1. Resolve base URL
 
-Order of precedence:
+Order of precedence — **the full list is in SKILL.md Step 1; don't shortcut it.** This section
+previously started at step 3, omitting the two highest-precedence sources, which is exactly what
+broke sandboxed and headless runs:
 
-1. `src/PBF.MembershipManagement.Web.Host/Properties/launchSettings.json` → `profiles.Project.applicationUrl`
-2. `src/PBF.MembershipManagement.Web.Host/appsettings.json` → `Kestrel:Endpoints:Http:Url`
-3. Fallback: `http://localhost:21021`
+1. **A backend URL supplied in the task/dispatch context** — always wins.
+2. **`$SHESHA_BACKEND_URL`**.
+3. `src/*.Web.Host/Properties/launchSettings.json` → `profiles.Project.applicationUrl`
+4. `src/*.Web.Host/appsettings.json` → `Kestrel:Endpoints:Http:Url`
+5. Fallback: `http://localhost:21021`
 
-Strip trailing slash.
+Strip trailing slash. Glob the `.Web.Host` project rather than assuming a project name — the
+examples below use a placeholder app (`PBF.MembershipManagement`) purely for illustration.
 
 ---
 
@@ -94,12 +99,20 @@ If `result` is null, the form doesn't exist under that module/name. Stop and tel
 curl -s -G "$BASE_URL/api/services/Shesha/FormConfiguration/GetJson" \
   --data-urlencode "id=$FORM_ID" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -o /tmp/form-current.json
+  -o $RUN_DIR/staged/form-current.json
 ```
 
-This endpoint returns the **raw markup as a file download** (`application/json` with `Content-Disposition: attachment`). The file content **is** the form JSON (already parsed as an object — no string wrapping). Read it with `JSON.parse`.
+**How many times to parse — the two endpoints differ, and conflating them is a real time-sink:**
 
-If you need the wrapping DTO (with id, name, modelType etc.) instead, use `Get` — `GET /api/services/Shesha/FormConfiguration/Get?id=$FORM_ID` — which returns the ABP envelope.
+| Endpoint | Body | Parses |
+|---|---|---|
+| `GetJson?id=` | the raw markup as a file download (`Content-Disposition: attachment`) | **once** — `JSON.parse(body)` gives you `{ components, formSettings }` |
+| `Get?id=` / `GetByName` | the ABP envelope, with the markup as a **string** inside it | **twice** — `JSON.parse(JSON.parse(body).result.markup)` |
+
+Use `GetJson` when you want the markup; use `Get`/`GetByName` when you also need the wrapping DTO
+(id, name, modelType, versionStatus). This paragraph previously said the `GetJson` content was
+"already parsed as an object — no string wrapping" **and** to "read it with `JSON.parse`" in the
+same breath.
 
 ---
 
@@ -123,18 +136,18 @@ Build the body via Node so the markup string is properly JSON-escaped. Don't try
 ```bash
 node -e "
 const fs = require('fs');
-const tree = JSON.parse(fs.readFileSync('/tmp/form-edited.json', 'utf8'));
+const tree = JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-edited.json', 'utf8'));
 const body = JSON.stringify({
   id: process.env.FORM_ID,
   markup: JSON.stringify(tree)
 });
-fs.writeFileSync('/tmp/update-markup-body.json', body);
+fs.writeFileSync('$RUN_DIR/staged/update-markup-body.json', body);
 " 
 
 curl -s -X PUT "$BASE_URL/api/services/Shesha/FormConfiguration/UpdateMarkup" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d @/tmp/update-markup-body.json
+  -d @$RUN_DIR/staged/update-markup-body.json
 ```
 
 Successful response: HTTP 200 with `{ "result": null, "success": true, ... }`. The endpoint returns `void`.
@@ -168,14 +181,14 @@ DTO (`ImportFormJsonInput`):
 ```
 
 ```bash
-# /tmp/form-edited.json contains the stringified-or-tree form JSON.
+# $RUN_DIR/staged/form-edited.json contains the stringified-or-tree form JSON.
 # If your edits are an object (parsed tree), stringify first; the API expects the file content
 # to be a JSON document representing the form markup.
 
 curl -s -X POST "$BASE_URL/api/services/Shesha/FormConfiguration/ImportJson" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -F "ItemId=$FORM_ID" \
-  -F "file=@/tmp/form-edited.json;type=application/json"
+  -F "file=@$RUN_DIR/staged/form-edited.json;type=application/json"
 ```
 
 Successful response: HTTP 200 with `{ "result": { ...FormConfigurationDto... }, "success": true }`. The DTO contains the updated form record.
@@ -215,7 +228,7 @@ curl -s -X POST "$BASE_URL/api/services/Shesha/FormConfiguration/Create" \
   }'
 ```
 
-To resolve `moduleId`, query `GET /api/services/Shesha/Module/GetAll` with bearer token and pick the module by `name`.
+To resolve `moduleId`, query `GET /api/services/app/Module/GetAll` with bearer token and pick the module by `name`. **Note the `app` namespace** — `Shesha/Module/GetAll` returns 404 (this line said `Shesha` until 2026-08-12).
 
 ---
 
@@ -250,7 +263,7 @@ Returns `result.items[]` with `{ id, name, label, module: {...} }`.
 
 ## 10. Fetch entity metadata (`/Metadata/Get`)
 
-Used by Step 1.5 of the skill to validate `propertyName` references against the actual entity. Try the `app` namespace first; fall back to `Shesha` if it 404s:
+Used by Step 4.5 of the skill to validate `propertyName` references against the actual entity. Try the `app` namespace first; fall back to `Shesha` if it 404s:
 
 ```bash
 # Primary
@@ -311,14 +324,14 @@ Step 8 of the skill. Re-fetch the form just pushed and diff against the markup w
 curl -s -G "$BASE_URL/api/services/Shesha/FormConfiguration/GetJson" \
   --data-urlencode "id=$FORM_ID" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
-  > /tmp/form-after.json
+  > $RUN_DIR/staged/form-after.json
 ```
 
 Then in Node:
 
 ```js
-const sent = JSON.parse(fs.readFileSync('/tmp/form-sent.json', 'utf8'));
-const after = JSON.parse(JSON.parse(fs.readFileSync('/tmp/form-after.json', 'utf8')).result.markup);
+const sent = JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-sent.json', 'utf8'));
+const after = JSON.parse(JSON.parse(fs.readFileSync('$RUN_DIR/staged/form-after.json', 'utf8')).result.markup);
 // Walk both trees in component-id order; surface any property whose value differs.
 ```
 
@@ -328,13 +341,11 @@ Common server normalizations to ignore (not bugs): re-ordered keys inside an obj
 
 ---
 
-## 12. Browser smoke via the playwright skill
+## 12. Browser smoke
 
-Step 9 of the skill. Invoke as:
-
-```
-Skill(skill="playwright", args="<directive>")
-```
+Step 9 of the skill. Drive whichever browser MCP the session exposes — `mcp__playwright__*`,
+`mcp__Claude_Browser__*` or `mcp__claude-in-chrome__*`; the directive below is tool-agnostic.
+(There is no `playwright` *skill*, despite what this section used to say.)
 
 ### Directive template
 
@@ -347,7 +358,7 @@ Skill(skill="playwright", args="<directive>")
 
 ### Frontend URL detection
 
-The PBF project has two front-end apps:
+A Shesha project typically has two front-end apps:
 - `adminportal/` — typical dev port `http://localhost:3000`
 - `publicportal/` — typical dev port `http://localhost:3001`
 

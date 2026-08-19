@@ -19,12 +19,17 @@ Strip any trailing slash from the resolved URL. Store as `BASE_URL`.
 
 ## 2. Authenticate
 
-Ask the user:
+**Do not ask the user for credentials.** This skill is a mandatory blocking step inside
+`shesha-form-edit`'s push path, which is frequently headless — an interactive prompt here
+dead-ends the entire run.
 
-> Please enter your Shesha username (or email) and password to fetch the form via the API.
-> Leave blank to provide a local file path instead.
+Resolve in this order, matching `shesha-form-edit/SKILL.md` Step 2 (the canonical recipe — follow
+[its api.md §§1–2](../shesha-form-edit/references/api.md) rather than duplicating it here):
 
-If the user leaves credentials blank → skip to Option B in Step 2 of `SKILL.md`.
+1. A token or credentials supplied in the dispatch context / already held by the caller.
+2. `SHESHA_BACKEND_URL` + the local-dev default `admin` / `123qwe`.
+3. If neither resolves, fall back to Option B in Step 2 of `SKILL.md` (operate on a local file)
+   and say so in the report — do not block.
 
 If credentials are provided, run:
 
@@ -104,18 +109,18 @@ Used by Step 9 of the `clean-form-config` skill. `FORM_ID` and `ACCESS_TOKEN` mu
 Write the cleaned config to a temp file and build the request body via Node to avoid shell-escaping issues:
 
 ```bash
-# Write cleaned JSON to temp file first (replace /tmp/cleaned-form.json with the actual output path)
+# Write cleaned JSON to temp file first (replace $RUN_DIR/staged/cleaned-form.json with the actual output path)
 node -e "
 const fs = require('fs');
-const markup = fs.readFileSync('/tmp/cleaned-form.json', 'utf8');
+const markup = fs.readFileSync('$RUN_DIR/staged/cleaned-form.json', 'utf8');
 const body = JSON.stringify({ itemId: '{FORM_ID}', markup });
-fs.writeFileSync('/tmp/import-body.json', body);
+fs.writeFileSync('$RUN_DIR/staged/import-body.json', body);
 "
 
 curl -s -X POST "{BASE_URL}/api/services/Shesha/FormConfiguration/ImportJson" \
   -H "Authorization: Bearer {ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d @/tmp/import-body.json
+  -d @$RUN_DIR/staged/import-body.json
 ```
 
 A successful response looks like:

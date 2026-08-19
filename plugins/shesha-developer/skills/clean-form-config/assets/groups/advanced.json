@@ -89,6 +89,18 @@
           "contexts",
           "globalState"
         ]
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "onFocusCustom",
+        "source": "components-kb"
+      },
+      {
+        "name": "onBlurCustom",
+        "source": "components-kb"
       }
     ]
   },
@@ -360,6 +372,66 @@
         "desc": "Shape of the value stored when an item is selected.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "minWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "maxWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderType",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontWeight",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "font",
+        "source": "components-kb"
+      },
+      {
+        "name": "dimensions",
+        "source": "components-kb"
       }
     ]
   },
@@ -392,6 +464,14 @@
         "desc": "Label text shown above the color swatch.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "tooltip",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
       }
     ]
   },
@@ -417,6 +497,42 @@
         "desc": "Ant Design icon name shown when no value is selected (e.g. 'QuestionOutlined').",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "readOnly",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "color",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "textAlign",
+        "source": "components-kb"
       }
     ]
   },
@@ -516,6 +632,50 @@
         "desc": "Image URL (used when dataSource is 'url').",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "ownerType",
+        "source": "components-kb"
+      },
+      {
+        "name": "ownerId",
+        "source": "components-kb"
+      },
+      {
+        "name": "fileCategory",
+        "source": "components-kb"
+      },
+      {
+        "name": "sepia",
+        "source": "components-kb"
+      },
+      {
+        "name": "grayscale",
+        "source": "components-kb"
+      },
+      {
+        "name": "blur",
+        "source": "components-kb"
+      },
+      {
+        "name": "brightness",
+        "source": "components-kb"
+      },
+      {
+        "name": "contrast",
+        "source": "components-kb"
+      },
+      {
+        "name": "saturate",
+        "source": "components-kb"
+      },
+      {
+        "name": "hueRotate",
+        "source": "components-kb"
+      },
+      {
+        "name": "invert",
+        "source": "components-kb"
       }
     ]
   },
@@ -739,6 +899,30 @@
         "desc": "Enable the find-and-replace functionality.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "minHeight",
+        "source": "components-kb"
+      },
+      {
+        "name": "maxHeight",
+        "source": "components-kb"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "minWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "maxWidth",
+        "source": "components-kb"
       }
     ]
   },
@@ -764,6 +948,38 @@
         "desc": "List of remark plugin names to extend the markdown parser.",
         "required": false,
         "JsReturnType": "array"
+      },
+      {
+        "name": "textColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "style",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
       }
     ]
   },
@@ -895,6 +1111,14 @@
         "desc": "Color of the unfilled portion of the progress track.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "allStyles",
+        "source": "components-kb"
       }
     ]
   },
@@ -1025,6 +1249,18 @@
         "desc": "Display icons from the reference list items.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "font",
+        "source": "components-kb"
       }
     ]
   },
@@ -1155,6 +1391,22 @@
         "desc": "Display icons from the reference list in column headers.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "readonly",
+        "source": "components-kb"
+      },
+      {
+        "name": "componentName",
+        "source": "components-kb"
+      },
+      {
+        "name": "columnStyles",
+        "source": "components-kb"
       }
     ]
   },
@@ -1242,6 +1494,10 @@
         "desc": "ISO 8601 date string for the calendar's start boundary.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "styles",
+        "source": "components-kb"
       }
     ]
   }

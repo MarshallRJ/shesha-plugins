@@ -22,7 +22,7 @@ You verify that the backend can support planned form work. You diagnose only —
 3. **Dynamic CRUD up** — `GET /api/dynamic/<module>/<Entity>/Crud/GetAll?maxResultCount=1`. HTTP 400 → GQL not enabled on the entity (`shesha-developer:domain-model`); 500 with `Invalid object name` → migrations not run.
 4. **Reference lists** — for each reflist property, the metadata `referenceListName` is non-null AND the reflist has items (probe via the reflist items endpoint or an existing form's dropdown). Empty → `shesha-developer:domain-model` (backend `[ReferenceList]` attribute / items).
 5. **Junction DTO typing** — for M:M work, spot-check the junction's `Crud/GetAll` response: Guid FKs surfacing as numbers/booleans → junction extends `Entity<Guid>`; fix = promote to `FullAuditedEntity<Guid>` + migration (`shesha-developer:domain-model`).
-6. **Permissions** — the operations the form will perform (Create/Update/Delete) return something other than 401/403 for the supplied identity. Unexpected 401 on a child endpoint → parent service hardened (`shesha-utils:harden-permissions` to review).
+6. **Permissions** — the operations the form will perform (Create/Update/Delete) return something other than 401/403 for the supplied identity. Unexpected 401 on a child endpoint → parent service hardened (`shesha-developer-0-43:harden-permissions` to review).
 
 Optionally dispatch deep diagnosis through `shesha-developer:test-entity-crud-api` with `--no-fix` when multiple entities fail.
 

@@ -147,6 +147,42 @@
           "custom"
         ],
         "desc": "Shape of the stored value when an entity is selected."
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "hideBorder",
+        "source": "components-kb"
+      },
+      {
+        "name": "title",
+        "source": "components-kb"
+      },
+      {
+        "name": "showModalFooter",
+        "source": "components-kb"
+      },
+      {
+        "name": "customWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "widthUnits",
+        "source": "components-kb"
+      },
+      {
+        "name": "dividerWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "dividerStyle",
+        "source": "components-kb"
+      },
+      {
+        "name": "dividerColor",
+        "source": "components-kb"
       }
     ]
   },
@@ -327,6 +363,10 @@
         "desc": "Custom text shown when displayType is 'textTitle'.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "icon",
+        "source": "components-kb"
       }
     ]
   },
@@ -394,6 +434,22 @@
         "required": false,
         "JsReturnType": "boolean",
         "desc": "Upload files synchronously rather than in the background."
+      },
+      {
+        "name": "listType",
+        "source": "components-kb"
+      },
+      {
+        "name": "thumbnailWidth",
+        "source": "components-kb"
+      },
+      {
+        "name": "thumbnailHeight",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
       }
     ]
   },
@@ -604,6 +660,18 @@
         "desc": "Thumbnail width (e.g. '80px'). Used when listType is 'thumbnail'.",
         "required": false,
         "JsReturnType": "string"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "container",
+        "source": "components-kb"
+      },
+      {
+        "name": "downloadedFileStyles",
+        "source": "components-kb"
       }
     ]
   },

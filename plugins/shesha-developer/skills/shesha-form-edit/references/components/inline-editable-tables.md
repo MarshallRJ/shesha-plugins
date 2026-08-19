@@ -83,7 +83,7 @@ number→`numberField`, date→`dateField`, reference-list-item→`dropdown` (re
 
 ```json
 "editComponent": { "type": "dropdown", "settings": {
-  "type": "dropdown", "version": 7, "editMode": "inherited", "hideLabel": true, "label": "",
+  "type": "dropdown", "version": 11, "editMode": "inherited", "hideLabel": true, "label": "",
   "dataSourceType": "referenceList",
   "referenceListId": { "module": "<module>", "name": "<ReflistName>" },
   "valueFormat": "simple", "useRawValues": false, "mode": "single", "validate": {}

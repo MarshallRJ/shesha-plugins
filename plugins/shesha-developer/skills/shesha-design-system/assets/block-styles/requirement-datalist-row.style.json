@@ -53,6 +53,23 @@
       "$note": "Apply to each meta text component the form adds inside rowMeta (e.g. 'Release · …'). Muted 12px.",
       "desktop": { "font": { "type": "Segoe UI", "size": 12, "weight": "400", "align": "left", "color": "#9BA3B8" }, "border": {}, "background": {}, "shadow": {}, "stylingBox": "{}" },
       "tablet": {}, "mobile": {}
+    },
+    "requirementsListWrap": {
+      "$note": "Recovered 2026-08-12 from a divergent copy in the unregistered plugins/shesha-design-system/ folder. These four targets existed only there, so the nodes rendered unstyled in every build.",
+      "desktop": { "dimensions": { "width": "100%", "height": "auto", "minHeight": "fit-content" }, "stylingBox": "{}", "border": {}, "background": {}, "shadow": {} },
+      "tablet": {}, "mobile": {}
+    },
+    "requirementsToolbar": {
+      "desktop": { "dimensions": { "width": "100%" }, "stylingBox": "{\"marginBottom\":\"8\"}", "border": {}, "background": {}, "shadow": {} },
+      "tablet": {}, "mobile": {}
+    },
+    "rowTypeBadge": {
+      "desktop": { "font": { "type": "Segoe UI", "size": 11, "weight": "600", "align": "center" }, "border": { "hideBorder": false, "radiusType": "all", "borderType": "all", "border": { "all": { "width": 0, "style": "none" }, "top": {}, "bottom": {}, "left": {}, "right": {} }, "radius": { "all": 12 } }, "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}" },
+      "tablet": {}, "mobile": {}
+    },
+    "rowStatusPill": {
+      "desktop": { "font": { "type": "Segoe UI", "size": 11, "weight": "600", "align": "center" }, "border": { "hideBorder": false, "radiusType": "all", "borderType": "all", "border": { "all": { "width": 0, "style": "none" }, "top": {}, "bottom": {}, "left": {}, "right": {} }, "radius": { "all": 12 } }, "stylingBox": "{\"paddingTop\":\"2\",\"paddingBottom\":\"2\",\"paddingLeft\":\"12\",\"paddingRight\":\"12\"}" },
+      "tablet": {}, "mobile": {}
     }
   }
 }

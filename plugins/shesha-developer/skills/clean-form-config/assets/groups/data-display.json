@@ -60,6 +60,10 @@
         "required": false,
         "JsReturnType": "string",
         "desc": "Alert message text."
+      },
+      {
+        "name": "description",
+        "source": "components-kb"
       }
     ]
   },
@@ -203,6 +207,26 @@
           "unset"
         ],
         "desc": "CSS justify-items for the link flex container."
+      },
+      {
+        "name": "propertyName",
+        "source": "components-kb"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
+      },
+      {
+        "name": "icon",
+        "source": "components-kb"
+      },
+      {
+        "name": "font",
+        "source": "components-kb"
+      },
+      {
+        "name": "components",
+        "source": "components-kb"
       }
     ]
   },
@@ -284,6 +308,34 @@
         "required": false,
         "JsReturnType": "string",
         "desc": "Inline CSS style string applied to the value."
+      },
+      {
+        "name": "placeholder",
+        "source": "components-kb"
+      },
+      {
+        "name": "onClick",
+        "source": "components-kb"
+      },
+      {
+        "name": "onDoubleClick",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderType",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
       }
     ]
   },
@@ -465,22 +517,159 @@
         "required": false,
         "JsReturnType": "boolean",
         "desc": "Underline the text."
+      },
+      {
+        "name": "color",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "fontSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "padding",
+        "source": "components-kb"
+      },
+      {
+        "name": "textAlign",
+        "source": "components-kb"
+      },
+      {
+        "name": "styles",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
       }
     ]
   },
   "validationErrors": {
-    "props": []
+    "props": [
+      {
+        "name": "className",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderSize",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderRadius",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderType",
+        "source": "components-kb"
+      },
+      {
+        "name": "borderColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "stylingBox",
+        "source": "components-kb"
+      },
+      {
+        "name": "height",
+        "source": "components-kb"
+      },
+      {
+        "name": "width",
+        "source": "components-kb"
+      },
+      {
+        "name": "backgroundColor",
+        "source": "components-kb"
+      },
+      {
+        "name": "hideBorder",
+        "source": "components-kb"
+      }
+    ]
   },
   "barChart": {
-    "props": []
+    "props": [
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "border",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
+      }
+    ]
   },
   "lineChart": {
-    "props": []
+    "props": [
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "border",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
+      }
+    ]
   },
   "pieChart": {
-    "props": []
+    "props": [
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "border",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
+      }
+    ]
   },
   "polarAreaChart": {
-    "props": []
+    "props": [
+      {
+        "name": "hidden",
+        "source": "components-kb"
+      },
+      {
+        "name": "border",
+        "source": "components-kb"
+      },
+      {
+        "name": "shadow",
+        "source": "components-kb"
+      },
+      {
+        "name": "background",
+        "source": "components-kb"
+      }
+    ]
   }
 }

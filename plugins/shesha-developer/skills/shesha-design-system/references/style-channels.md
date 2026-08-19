@@ -90,7 +90,7 @@ Run in order; stop at the first hit:
 4. **Channel→div mapping** — is the prop landing on the inner div when the constraint is on the outer flex item? (sizing fixes must go through `dimensions`)
 5. **enableStyleOnReadonly** — readonly/Live mode with `enableStyleOnReadonly: false`?
 6. Verify with `getBoundingClientRect`/`getComputedStyle` in-browser, **not screenshots** — scaled screenshots fake 10–15px offsets that are really 0.
-7. Before re-testing, clear the FE form cache: forms are cached in **IndexedDB** (`form`/`form_lookup`); `indexedDB.deleteDatabase` from inside the app silently blocks — clear from a static page (e.g. `/favicon.ico`), or stale markup keeps rendering. See [verification.md](../verification.md).
+7. Before re-testing, clear the FE form cache: forms are cached in **IndexedDB** (`form`/`form_lookup`); `indexedDB.deleteDatabase` from inside the app silently blocks — clear from a static page (e.g. `/favicon.ico`), or stale markup keeps rendering. See [verification.md](../../shesha-form-edit/references/verification.md).
 
 ---
 
