@@ -7,9 +7,14 @@ bottom) and trust that.
 
 > Every component must carry its integer `version` (a versionless component re-runs the whole
 > legacy migration chain at render and can throw `e.match` / `reading 'migrator'` / `reading 'version'`).
-> `parentId` is mandatory on every node (root-level → `"root"`). `id` must be a real UUID.
+> `parentId` is mandatory on every node (root-level → `"root"`). `id` must be unique, opaque and
+> stable — mint with `crypto.randomUUID()`; short sequential placeholders (`btn1`) render blank.
 
 ## Versions (0.45.x)
+
+**Mirrored from `assets/components-kb/_index.json`, which is the authority.** This table is a
+convenience copy so you don't open a file for one integer; `scripts/check-references.mjs` fails
+if it drifts. For anything not listed: `grep -A2 '"<type>"' assets/components-kb/_index.json`.
 
 | type | version | type | version |
 |---|---|---|---|
@@ -18,22 +23,30 @@ bottom) and trust that.
 | `text` | 5 | `datalist` | 11 |
 | `textField` | 6 | `datatable.pager` | 4 |
 | `textArea` | 5 | `datatable.quickSearch` | 3 |
-| `numberField` | 3 | `tableViewSelector` | 2 |
+| `numberField` | 5 | `tableViewSelector` | 2 |
 | `dateField` | 7 | `button` | 9 |
-| `dropdown` | 7 | `buttonGroup` | 15 |
+| `dropdown` | 11 | `buttonGroup` | 15 |
 | `autocomplete` | 8 | `alert` | 2 |
-| `checkbox` | 5 | `collapsiblePanel` | 7 |
-| `checkboxGroup` | 5 | `refListStatus` | 3 |
+| `checkbox` | 5 | `collapsiblePanel` | 9 |
+| `checkboxGroup` | 5 | `refListStatus` | 6 |
+| `card` | 3 | `progress` | 3 |
+| `sectionSeparator` | 5 | `notes` | 4 |
+
+> Four of these were wrong until 2026-08-12 (`numberField` 3→5, `dropdown` 7→11,
+> `refListStatus` 3→6, `collapsiblePanel` 7→9). A too-low version doesn't just risk a migration
+> throw — it **silently drops the component's entire `desktop` style block** (`numberField` at v3
+> ignored its style block; at v5 the same block applied). This file is the one you're told to read
+> first, so the stale numbers were producing exactly the unstyled forms the pipeline exists to fix.
 
 ## Minimal shapes (omit styling — the renderer applies defaults)
 
 ```jsonc
-// input (string). number→numberField(v3), date→dateField(v7); same skeleton.
+// input (string). number→numberField(v5), date→dateField(v7); same skeleton.
 { "id": "<uuid>", "type": "textField", "version": 6, "parentId": "<pid>",
   "propertyName": "name", "componentName": "name", "label": "Name", "editMode": "inherited", "textType": "text" }
 
 // reference-list dropdown
-{ "id": "<uuid>", "type": "dropdown", "version": 7, "parentId": "<pid>", "propertyName": "status", "label": "Status",
+{ "id": "<uuid>", "type": "dropdown", "version": 11, "parentId": "<pid>", "propertyName": "status", "label": "Status",
   "editMode": "inherited", "dataSourceType": "referenceList",
   "referenceListId": { "module": "<mod>", "name": "<ReflistName>" }, "valueFormat": "simple", "mode": "single" }
 

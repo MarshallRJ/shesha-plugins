@@ -39,7 +39,7 @@ Keep each fix to: the failing assertion id, the measured fact (with numbers), th
 
 ## RED → GREEN (how this skill is validated)
 
-Per `superpowers:writing-skills`, the skill is proven by watching the failure first:
+The skill is proven by watching the failure first:
 
 - **RED:** build the pilot from a *prose* brief only (no blueprint) → probe → record ≥1 failing assertion with numbers (e.g. panels collapse into one column; KIB flattens). This reproduces the drift, measured.
 - **GREEN:** build the same screen from the blueprint → probe → iterate routed fixes until the *same* assertions all pass.

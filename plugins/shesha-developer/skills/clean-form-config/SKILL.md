@@ -56,19 +56,22 @@ Layout checks are defined in [layout-checks.md](layout-checks.md) — new checks
 
 ---
 
-## Step 9: Push cleaned config back to the API (optional)
+## Step 9: Hand the cleaned config back — do NOT push it
 
-After producing the cleaned JSON, ask the user:
+**Return the cleaned JSON to the caller. This skill never pushes.**
 
-> The form has been cleaned. Would you like to push the updated config back to the Shesha backend via the API? (yes / no)
+`shesha-form-edit` invokes this skill as a **mandatory blocking step immediately before its own
+push** (its SKILL.md Step 6). A second push path here would bypass that skill's re-fetch diff and
+browser smoke, and it contradicts the pipeline's "one push path — all writes go through
+`shesha-form-edit`" rule ([handoff-contract.md](../shesha-claude-designer/references/handoff-contract.md)).
 
-**If no** → skip this step, work is done.
+- **Invoked as a sub-skill (the normal case):** return the cleaned JSON and the change list. The
+  caller pushes and verifies.
+- **Invoked standalone by a user on a local file:** report the cleaned JSON and tell them to push
+  it with `shesha-form-edit`.
 
-**If yes** → follow Section 5 of [api.md](api.md) to call `ImportJson`.
-
-- If the form was loaded via the API (Step 2 Option A), `FORM_ID` and `ACCESS_TOKEN` are already available — use them directly.
-- If the form was loaded from a local file (Step 2 Option B), or `FORM_ID` / `ACCESS_TOKEN` are not available, first follow [api.md](api.md) sections 1–2 to resolve the base URL and authenticate, then ask the user:
-  > Please enter the form's `itemId` (the UUID of the form configuration record):
+**Never call `AskUserQuestion` from this skill.** It runs inside a blocking step of a pipeline that
+is frequently headless, where an interactive prompt dead-ends the whole run.
 
 ---
 

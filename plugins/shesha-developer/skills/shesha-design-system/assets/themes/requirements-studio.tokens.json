@@ -89,7 +89,20 @@
     "sectionHeading": "palette.brand.primary",
     "bodyText": "palette.ink.primary",
     "helperText": "palette.ink.soft",
+    "appPrimaryActive": "palette.brand.primaryActive",
+    "divider": "palette.lines.divider",
+    "bodyInk": "palette.ink.primary",
+    "secondaryText": "palette.ink.muted",
+    "placeholderText": "palette.ink.soft",
+    "mutedText": "palette.ink.soft",
+    "navBg": "palette.brand.primary",
+    "headerBandBg": "palette.brand.primary",
+    "progressAccent": "palette.brand.primary",
+    "addButtonText": "palette.brand.primary",
+    "selectedBg": "palette.brand.tint",
+    "hoverBg": "palette.brand.tintSoft",
     "baseRadius": "radius.md",
-    "cardRadius": "radius.lg"
+    "cardRadius": "radius.lg",
+    "$note": "A brand file MUST define every role the default `shesha` brand defines — the block overlays reference roles by name and `bake-overlays.mjs` hard-fails on an unresolvable one. This brand was missing 12 of them (including `bodyInk`, referenced 3x by meta-strip.style.json), so re-baking under it aborted. `navBg` is the one substitution rather than a mirror: this palette has no navy, so nav chrome takes the brand green."
   }
 }

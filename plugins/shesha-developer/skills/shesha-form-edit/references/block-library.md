@@ -1,12 +1,44 @@
 # Block library
 
 Authored layout **blocks** — small, parented, version-stamped component subtrees that you
-**compose** into a form. A block is structure only; the matching **style overlay** lives in
-`shesha-design-system` and is applied after composition. Never hand-copy a 25K-line seed —
-map each blueprint node to a block, insert its subtree into a named `$slot`, re-stamp ids,
-fill `$bindings`, then hand off to the design-system overlay.
+**compose** into a form. Never hand-copy a 25K-line seed — map each blueprint node to a block,
+insert its subtree into a named `$slot`, re-stamp ids, fill `$bindings`.
 
-Blocks live in `assets/blocks/*.block.json`. Every block file carries: `$block`, `$archetype`,
+## Blocks now ship pre-styled — there is no separate overlay pass
+
+Every block's paired overlay has been **baked into its subtree as literal values** (44 targets
+across 10 blocks, `scripts/bake-overlays.mjs`). Composing a block now yields a styled result
+**by construction**. Do not apply the overlay again afterwards; it is already in there.
+
+Why the change: the overlay used to be a second pass applied after composition, and a second
+pass is one that gets skipped — which is how forms kept shipping as raw AntD. The app theme
+cannot cover for it either: a breakpoint block overrides theme defaults per key, so the AntD
+theme only reaches chrome ([app-theme.md](../../shesha-design-system/references/app-theme.md)).
+
+Three silent defects surfaced while baking, all pre-existing:
+
+- **`page-header-band` had no overlay file at all** despite declaring one, so its 7 nodes — the
+  title band of every detail page — carried zero styling and always rendered as AntD defaults.
+  The overlay is now written.
+- **`$role:progressAccent` and `$role:addButtonText`** were referenced by `completeness-bar` and
+  `dashed-add-button` but defined nowhere, so the renderer received the literal string
+  `"$role:…"` as a colour and fell back. Both roles are now defined and resolved to `#003BB2`.
+- `requirement-datalist-row`'s `rowMetaText` target matches no node **by design** — its `$note`
+  says it applies to text components the *form* adds at compose time. Advisory targets like this
+  stay overlay-only and cannot be baked.
+
+The overlays remain on disk as the record of what a block's styling *means*, and as the input to
+the transform. They are no longer needed at build time. Re-run the transform after editing one:
+
+```bash
+node scripts/bake-overlays.mjs assets/blocks ../shesha-design-system/assets/block-styles ../shesha-design-system/assets/themes/shesha.tokens.json --apply
+```
+
+It is idempotent, refuses to write unless every target resolves and node counts are unchanged,
+and fails loudly on an unresolvable `$role`. Literal hexes in blocks make `validate-blocks.js`
+emit colour WARNs — that is the recorded trade, not a defect to re-tokenise.
+
+Blocks live in `assets/blocks/*.block.json`. Every block file carries: `$block`, `$scope`,
 `$styleOverlay` (the paired overlay name in shesha-design-system), `$slots`, `$bindings`,
 `$validatedAgainst` (matrix rows the structure relies on), and a `subtree` (the literal markup).
 Some also carry a `$rowTemplate` (a separately-published Table-type row form).
@@ -15,6 +47,7 @@ Some also carry a `$rowTemplate` (a separately-published Table-type row form).
 
 | Block | Archetype | Builds | Key `$slots` | Key `$bindings` |
 |---|---|---|---|---|
+| `page-shell` | page | **MANDATORY outermost wrapper on every page-level form** — a borderless, heading-less `card` carrying `className: "sha-page"`. Every other component goes in its `content`; nothing else sits at root. Not for dialogs or row-template cards. | `content` | none (pure chrome) |
 | `flex-split-main-rail` | record-detail | The body split: one flex `container` (row, gap 16) with a fill `main` column + a fixed 332px `rail` column. The clean fixed/`calc` idiom — never `columns`. | `main`, `rail` | none (pure structure) |
 | `page-header-band` | record-detail | In-page detail title band: breadcrumb + title row (title text + status chip on the left, Edit/Save/Cancel buttonGroup on the right). NOT the global header form. | `titleText`, `statusChip`, `actionItems`, `breadcrumbContent` | title content, status `propertyName` + reflist id, actions width `calc` |
 | `meta-strip` | fragment | A horizontal strip of label/value meta cells (MODULE / RELEASE / VIEW TYPE …) under a header. | `cells`, `cell.label.text`, `cell.value.text` | each cell value `propertyName`/content |
@@ -36,7 +69,13 @@ Some also carry a `$rowTemplate` (a separately-published Table-type row form).
 
 Compose from blocks — **never** copy a 25K-line seed and edit it down.
 
-1. **Map** each blueprint `layout-tree` node to a block (use `$archetype` + the catalogue above).
+1. **Map** each blueprint `layout-tree` node to a block **by the catalogue above** — match what the
+   node *is* (a header band → `page-header-band`, a body split → `flex-split-main-rail`). Do **not**
+   try to match on screen archetype: `$scope` (`page` / `region` / `fragment`) describes how big a
+   block is, deliberately a different axis from the eight screen archetypes in
+   [archetypes.md](archetypes.md). This field was called `$archetype` and carried values
+   (`page`, `fragment`, `list`) that appear in no archetype list, so the documented join key never
+   resolved for any non-`record-detail` screen.
    Body split → `flex-split-main-rail`; title band → `page-header-band`; each rail collection →
    `rail-panel` (+ `dashed-add-button`); attribute rows → `rail-label-value-row`; the wide list →
    `requirement-datalist-row` (host + row template).
@@ -51,23 +90,28 @@ Compose from blocks — **never** copy a 25K-line seed and edit it down.
    entity `propertyName`s (validate every one against entity metadata), reflist `{module,name}`,
    labels, count/body content expressions, dataContext endpoints, dialog `formId`s, and the
    `onSuccess.actionOwner` that must equal the owning dataContext/datalist id.
-5. **Resolve + stamp the style overlay**: take `$styleOverlay`, fetch that overlay from
-   `shesha-design-system`, resolve its `$role:` tokens against the active brand token file, and
-   stamp the resolved `desktop`/`tablet`/`mobile` style blocks onto the matching components.
-   **form-edit composes structure; design-system owns the overlays** — do not invent hexes,
-   fonts, or per-component colours in the block subtree.
-6. **Validate**: run `scripts/validate-blocks.js` (skeleton JSON parses, every `$validatedAgainst`
-   row is `renders`/`gotcha` in the capability matrix, no `columns`, no stray hex, no flex row
-   missing `display:flex`). Then validate the assembled form against the component-properties index.
-7. **Push** via the form-edit API (Create / UpdateMarkup / ImportJson) and publish any
+5. **Validate**: run `scripts/validate-blocks.js` (skeleton JSON parses, every `$validatedAgainst`
+   row is `renders`/`gotcha` in the capability matrix, no `columns`, no flex row missing
+   `display:flex`). Then validate the assembled form against the component-properties index.
+6. **Push** via the form-edit API (Create / UpdateMarkup / ImportJson) and publish any
    `$rowTemplate` as its own Table-type form. Expect the gate-5a.5 placement re-measure.
 
-## The styling boundary (read this twice)
+> There is no "stamp the overlay" step. It used to be step 5 here — 80 lines below a section
+> stating the opposite — so a builder either skipped it or double-stamped. The overlays are baked
+> in (see the top of this file).
 
-A block's `subtree` is **structure** — containers, flex direction/gap, nesting, parentIds,
-component types/versions, bindings. The few style values present in a subtree (radius, hairline
-colours on `card-with-header-strip`, pill `customStyle`) are structural defaults that the overlay
-overrides. **All brand styling — colour, type scale, spacing rhythm, shadow, status lifecycle —
-comes from the paired overlay in `shesha-design-system`**, addressed by `$styleOverlay` and
-resolved through `$role:` tokens. If you find yourself typing a hex into a block subtree, stop:
-that value belongs in the overlay. form-edit composes; design-system styles.
+## The styling boundary
+
+**form-edit may not *author* style values; it *inserts* pre-baked block subtrees.** That is the
+whole rule, and it replaces an earlier boundary that said all brand styling "comes from the paired
+overlay" — true before the bake, false now, and the source of a three-way contradiction across
+this file, `SKILL.md` and the designer.
+
+- **Composing a block?** Its style is already in the subtree. Insert it and move on.
+- **Need a value a block doesn't carry?** That is a change to the block's overlay in
+  `shesha-design-system/assets/block-styles/`, followed by a re-bake — not a hex typed into a form.
+- **Restyling a form this library did not produce** (a hand-composed or live legacy form) is
+  `shesha-design-system`'s job, and its output still goes back through form-edit's single push path.
+
+So "if you find yourself typing a hex" still holds — but the destination is the overlay plus a
+re-bake, not a separate styling pass over the built form.

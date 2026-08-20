@@ -26,7 +26,48 @@ Per-breakpoint settings live under `desktop` / `tablet` / `mobile` keys.
 
 Use containers as semantic divs for grouping related rows (consents block, action row, footer row). See [layout.md](layout.md) for the full house pattern.
 
+### Per-row / dynamic images — a container, not the `image` component
+
+**The `image` component cannot bind its `url` to data.** Its `ownProps` carry a static `url` string and no `propertyName` or entity binding, so there is no way to make it show a different picture per row or per record. Reaching for it first and discovering this is a 15–30 minute detour.
+
+For a datalist card thumbnail, a detail-page hero, or anything else where the image comes from data, use a plain `container` sized appropriately with a **code-mode `style`** prop:
+
+```js
+// container.style — code mode; `data` is the row/record in scope
+return {
+  backgroundImage: 'url(' + data.thumbnailUrl + ')',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundColor: '#f0f0f0'   // fallback while loading / when null
+};
+```
+
+Build the URL with **string concatenation, not template literals** — the whole thing has to survive `JSON.stringify` into the form markup ([scripts.md](scripts.md)).
+
+**Don't let this leak into your spacing.** The inline `style` prop wins over *all* structured style blocks, silently discarding any `desktop.background` / `border` / `shadow` you also set on that node. Use `style` **only** for the background-image itself; padding, margin and spacing on the same or sibling containers still belong in the structured `stylingBox` / `desktop.*` channels.
+
 ---
+
+## page shell — the mandatory outer card on EVERY page-level form
+
+**Every page-level form is wrapped in one `card`, and every other component on that page goes inside its `content.components`.** Nothing else sits at `root`. The shell is invisible chrome, configured exactly three ways:
+
+| Property | Value | Why |
+|---|---|---|
+| `hideHeading` | `true` | suppresses the card's own title row — the page's real title is a `text` inside |
+| `className` | `"sha-page"` | the app-level page class the portal styles against |
+| border | `style: "none"` on **base and all three breakpoints** | the shell frames the page; a visible box around everything reads as a stray panel |
+
+Plus `background #fff`, `radius 8`, no shadow, `width 100%`, `height auto` + `minHeight fit-content`, `stylingBox {"marginBottom":"5"}`.
+
+Ready to compose: **[`assets/blocks/page-shell.block.json`](../../assets/blocks/page-shell.block.json)** — insert the page body into its `content` slot. Derived from the approved `boxfusion.test/bookings-table` revision 2.
+
+**Two traps that revision itself contains**, so don't copy a live page blindly:
+
+- The border was cleared on `desktop` only; `tablet`, `mobile` and the base were left `style: "solid" #d9d9d9`. Breakpoint blocks override base *per key*, so tablet and mobile still draw a 1px box. Clear it in all four places.
+- `height` was a fixed `"30px"` on all breakpoints. On a wrapper holding an entire page that is wrong — use `auto` with `minHeight: "fit-content"`.
+
+Typical body order inside the shell: title band (title + subtitle) → `dataContext` → toolbar → table/content → pager. Spacing and type come baked into the blocks — see [block-library.md](../block-library.md).
 
 ## card
 
@@ -58,7 +99,13 @@ The card's outer width defaults to its parent's width. To constrain it, set `des
 
 ---
 
-## columns
+## columns — LEGACY, do not author
+
+> **You will see `columns` in existing forms and in the captured seeds; do not add new ones.**
+> Splits are flex `container` rows sized via `desktop.dimensions.width` — the rule is canonical in
+> [`capability-matrix.md`](../../../shesha-design-system/references/capability-matrix.md)
+> (`crossCuttingRules`) and `validate-blocks.js` fails any block containing a `columns`. This
+> section stays so you can read and migrate legacy markup.
 
 Two-up / three-up layouts. `columns` array has child slots:
 

@@ -137,6 +137,10 @@
         "desc": "Sort direction when sortMode is 'strict': 0 = ascending, 1 = descending.",
         "required": false,
         "JsReturnType": "number"
+      },
+      {
+        "name": "components",
+        "source": "components-kb"
       }
     ]
   },
@@ -658,6 +662,10 @@
         "desc": "Show a visual separator between the search input and adjacent toolbar items.",
         "required": false,
         "JsReturnType": "boolean"
+      },
+      {
+        "name": "dimensions",
+        "source": "components-kb"
       }
     ]
   },
@@ -710,6 +718,45 @@
         "desc": "Ant Design icon name shown on the filter button.",
         "required": false,
         "JsReturnType": "string"
+      }
+    ]
+  },
+  "datatable.selectColumnsButton": {
+    "props": []
+  },
+  "childTable": {
+    "props": [
+      {
+        "name": "collapsedByDefault",
+        "source": "components-kb"
+      },
+      {
+        "name": "expandIconPosition",
+        "source": "components-kb"
+      },
+      {
+        "name": "header",
+        "source": "components-kb"
+      },
+      {
+        "name": "content",
+        "source": "components-kb"
+      },
+      {
+        "name": "collapsible",
+        "source": "components-kb"
+      },
+      {
+        "name": "ghost",
+        "source": "components-kb"
+      },
+      {
+        "name": "hideWhenEmpty",
+        "source": "components-kb"
+      },
+      {
+        "name": "className",
+        "source": "components-kb"
       }
     ]
   }

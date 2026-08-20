@@ -55,7 +55,7 @@ The project's house pattern for full-page forms (auth pages, registration, singl
 
 3. **Sub-containers as semantic divs** — wrap related rows in their own `container` (consents block, action row, footer row). Each sub-container can carry its own `desktop.flexDirection`, `justifyContent`, `alignItems` for horizontal layout where needed.
 
-4. **`columns`** is for true grid rows (firstName + lastName, two-button rows, label + value). "Total `flex` must be 24 across direct columns." For a simple inline text + link row, prefer a sub-`container` with `flexDirection: "row"` and `alignItems: "baseline"` — wraps cleaner on narrow viewports.
+4. **`columns` is LEGACY — don't author it.** You'll meet it in existing forms (a grid row of firstName + lastName, two buttons, label + value; "total `flex` must be 24"). New splits are flex `container` rows sized via `desktop.dimensions.width` — see [containers.md](containers.md). For a simple inline text + link row, prefer a sub-`container` with `flexDirection: "row"` and `alignItems: "baseline"` — wraps cleaner on narrow viewports.
 
 5. **`link` for inline anchors** — "for 'Sign in' / 'Forgot password' / 'Create one' links inline with text, use the `link` component" (see [actions.md](actions.md)), not a button styled as link. Buttons in a flex row don't align well with surrounding text.
 

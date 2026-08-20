@@ -1,3 +1,6 @@
 .claude/settings.local.json
 .vscode/settings.json
 
+
+# Shesha design-pipeline run scratch (shesha-claude-designer)
+.claude/shesha/runs/

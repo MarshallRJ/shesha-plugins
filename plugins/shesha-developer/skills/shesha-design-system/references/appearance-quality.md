@@ -12,7 +12,7 @@ The appearance companion to `shesha-form-edit`'s `form-quality.md`. **Clear spli
 - **Weight by role:** 400 body/values · 500 micro-labels + table-cell emphasis · 600 field labels + card/section headers · 700 only a genuinely-bold title. Use the brand `type.weights`; don't invent a weight.
 
 ## Splits, rhythm & shape
-- **Splits are flex `container` rows** sized via `desktop.dimensions.width` — never the `columns` component, never `customStyle:{flex}` (inert). Fixed rail = `332px`, filling main = `calc(100% - 348px)`. Every flex container sets `display:"flex"`.
+- **Splits follow the flex-split idiom** — [capability-matrix.md §flex-split](capability-matrix.md#flex-split).
 - 4px spacing grid (4/8/12/16/20/24/32/40/48); field gap 16; section gap 24; card padding 16 (compact) / 24 (default).
 - Radius by role: `radius.pill` status badges · `radius.md` (6) controls · `radius.lg` (8 in the Shesha default; up to 12 in other brands) cards · `radius.sm` (4) chips/legacy inputs.
 

@@ -20,5 +20,5 @@ markitdown (`mcp__markitdown__convert_to_markdown`) normalises mixed inputs (a P
 ## Output of this step
 
 - A token set persisted as a `shesha-design-system` theme file (`assets/themes/<brand>.tokens.json`).
-- A screen inventory (names + types + entities) used by Step 3 planning.
+- A screen inventory (names + types + entities) written to **`$RUN_DIR/screen-inventory.json`** and used by Step 3 planning. Persist it rather than carrying it in context: it is the input to the per-screen fan-out, and a run that loses it has to re-ingest the whole design.
 - **For the layout blueprint that drives placement, REQUIRED: `shesha-developer:shesha-design-comprehension`** — run it per screen (Step 2) on the same source.
